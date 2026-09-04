@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f3ee" />
+  <title>Compra confirmada · CajaModa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#0a0a0a}
+    body{background:#f4eee7 url("/assets/order-confirmation-boutique.png") center/cover fixed no-repeat}
+    body::before{content:"";position:fixed;inset:0;background:rgba(255,255,255,.18);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);z-index:-1}
+    button,a{font:inherit}
+    .page{width:min(100%,900px);margin:auto;padding:max(18px,env(safe-area-inset-top)) 18px max(36px,env(safe-area-inset-bottom))}
+    .header{position:relative;min-height:120px;display:grid;place-items:center}
+    .brandLockup{width:190px;display:flex;flex-direction:column;align-items:center;pointer-events:none;user-select:none}
+    .brandMonogram{position:relative;width:100px;height:57px;font-family:"Bodoni Moda",Didot,serif}
+    .brandC{position:absolute;left:7px;top:-12px;font-size:74px;line-height:1;font-weight:400;letter-spacing:-8px;transform:scaleX(.89)}
+    .brandM{position:absolute;left:43px;top:8px;font-size:52px;line-height:1;font-weight:400;letter-spacing:-5px;transform:scaleX(.90)}
+    .brandWord{margin-top:-2px;padding-left:6px;font-family:"Bodoni Moda",Didot,serif;font-size:11px;line-height:1;font-weight:500;letter-spacing:5.4px}
+    .brandCountryRow{width:145px;margin-top:7px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+    .brandCountryLine{height:1px;background:rgba(0,0,0,.42)}
+    .brandCountry{padding-left:3px;font-size:6px;line-height:1;font-weight:600;letter-spacing:3.1px}
+    .categoryRail{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 22px}
+    .category{position:relative;overflow:hidden;aspect-ratio:.66;border-radius:18px;background:#eee;box-shadow:0 12px 32px rgba(0,0,0,.08)}
+    .category img{width:100%;height:100%;display:block;object-fit:cover}.category::after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.56))}.category span{position:absolute;z-index:1;left:7px;right:7px;bottom:10px;text-align:center;color:white;font-size:clamp(8px,2.3vw,14px);font-weight:800;line-height:1.05;text-transform:uppercase}
+    .glass{border:1px solid rgba(255,255,255,.82);border-radius:36px;background:linear-gradient(145deg,rgba(255,255,255,.62),rgba(255,255,255,.20));box-shadow:0 0 0 1px rgba(0,0,0,.035),inset 0 1px 0 rgba(255,255,255,.95),0 26px 70px rgba(0,0,0,.14);backdrop-filter:blur(31px) saturate(175%);-webkit-backdrop-filter:blur(31px) saturate(175%)}
+    .confirmation{padding:28px 24px;text-align:center}.check{width:62px;height:62px;margin:0 auto 20px;border:1.8px solid #111;border-radius:50%;display:grid;place-items:center}.check svg{width:30px}
+    .eyebrow{font-size:clamp(19px,5vw,28px);font-weight:600;letter-spacing:.2em}.thanks{margin:8px 0 22px;font-size:17px}.rule{height:1px;background:rgba(0,0,0,.14);margin:0 auto 22px;max-width:470px}.orderNumber{font-size:19px}.payment{margin:7px 0 20px;font-size:19px;font-weight:750}
+    .summary{max-width:540px;margin:auto;border:1px solid rgba(0,0,0,.08);border-radius:22px;overflow:hidden;background:rgba(255,255,255,.25)}.summaryRow{min-height:68px;padding:14px 16px;display:flex;align-items:center;gap:13px;text-align:left}.summaryRow+.summaryRow{border-top:1px solid rgba(0,0,0,.08)}.icon{width:40px;height:40px;flex:0 0 40px;border:1px solid rgba(0,0,0,.14);border-radius:50%;display:grid;place-items:center}.icon svg{width:22px}.summaryText{font-size:14px;line-height:1.35}
+    .shipmentCards{max-width:540px;margin:14px auto 0;display:grid;gap:10px;text-align:left}.shipmentCard{padding:16px;border:1px solid rgba(0,0,0,.09);border-radius:20px;background:rgba(255,255,255,.3)}.shipmentHeading{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.shipmentTitle{font-weight:800}.shipmentStatus{font-size:12px;font-weight:750}.shipmentMessage{margin:8px 0 0;font-size:13px;line-height:1.45;color:#444}.shipmentTracking{margin-top:9px;font-size:13px}.shipmentTracking a{color:#111;font-weight:700}
+    .referral{max-width:540px;margin:24px auto 0;padding-top:24px;border-top:1px solid rgba(0,0,0,.14)}.gift{width:46px;height:46px;margin:auto;display:grid;place-items:center;border:1px solid rgba(0,0,0,.15);border-radius:50%}.gift svg{width:24px}.referralTitle{margin:14px 0 6px;font-size:19px;font-weight:750;letter-spacing:.15em}.referralLead{font-size:17px}.referralNote{margin:5px 0 16px;color:#555;font-size:13px}
+    .shareIcons{display:flex;justify-content:center;gap:18px;margin:15px 0}.shareIcons[hidden]{display:none}.shareIcon{width:46px;height:46px;padding:0;border:1px solid rgba(0,0,0,.14);border-radius:50%;background:rgba(255,255,255,.36);display:grid;place-items:center;color:#080808;cursor:pointer;transition:transform .18s ease,background .18s ease}.shareIcon:hover{transform:translateY(-2px);background:rgba(255,255,255,.62)}.shareIcon:disabled{opacity:.45;cursor:wait;transform:none}.shareIcon svg{width:23px;height:23px;fill:currentColor}.referralCode{width:max-content;max-width:100%;margin:4px auto 0;padding:8px 13px;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.36);font-size:12px;font-weight:750}.status{min-height:18px;margin-top:9px;font-size:12px;color:#555}.status.error{color:#9f1e2c}.continue{width:100%;min-height:58px;margin-top:10px;border-radius:18px;background:#090909;color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;font-weight:750}
+    @media(max-width:480px){.page{padding-left:12px;padding-right:12px}.header{min-height:108px}.categoryRail{gap:7px}.category{border-radius:14px}.confirmation{padding:25px 16px;border-radius:30px}.eyebrow{letter-spacing:.14em}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="header" aria-label="CajaModa Colombia">
+      <div class="brandLockup">
+        <div class="brandMonogram"><span class="brandC">C</span><span class="brandM">M</span></div>
+        <div class="brandWord">CAJAMODA</div>
+        <div class="brandCountryRow"><span class="brandCountryLine"></span><span class="brandCountry">COLOMBIA</span><span class="brandCountryLine"></span></div>
+      </div>
+    </header>
+    <nav class="categoryRail" aria-label="Categorías CajaModa">
+      <a class="category" href="/?category=late"><img src="/assets/category-noches.svg" alt=""/><span>Noches Largas</span></a>
+      <a class="category" href="/?category=quiet"><img src="/assets/category-dias.svg" alt=""/><span>Días Tranquilos</span></a>
+      <a class="category" href="/?category=fast"><img src="/assets/category-rapido.svg" alt=""/><span>Rápido y Fácil</span></a>
+      <a class="category" href="/?category=sun"><img src="/assets/category-sol.svg" alt=""/><span>Baño de Sol</span></a>
+    </nav>
+    <section class="confirmation glass" aria-live="polite">
+      <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 12 4.2 4.2L19 6.5"/></svg></div>
+      <div class="eyebrow" id="confirmationTitle">VERIFICANDO COMPRA</div>
+      <p class="thanks">Gracias por tu compra</p><div class="rule"></div>
+      <div class="orderNumber" id="orderNumber">Pedido</div><div class="payment" id="paymentStatus">Confirmando con Wix…</div>
+      <div class="summary">
+        <div class="summaryRow"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 21s7-5.2 7-12A7 7 0 1 0 5 9c0 6.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg></span><span class="summaryText" id="deliveryMethod">Método de entrega confirmado en tu pedido.</span></div>
+        <div class="summaryRow"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/><path d="M10 21h4"/></svg></span><span class="summaryText" id="deliveryMessage">Te enviaremos actualizaciones sobre tu pedido.</span></div>
+      </div>
+      <div class="shipmentCards" id="shipmentCards" hidden></div>
+      <div class="referral">
+        <div class="gift"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 10h16v10H4zM3 6h18v4H3zM12 6v14"/><path d="M12 6H8.5a2.5 2.5 0 1 1 2.5-2.5L12 6Zm0 0h3.5A2.5 2.5 0 1 0 13 3.5L12 6Z"/></svg></div>
+        <div class="referralTitle">COMPARTE EL ESTILO</div><div class="referralLead">Regala 10% a una amiga</div><div class="referralNote">Tu amiga recibe un código único para su primera compra.</div>
+        <div class="shareIcons" id="shareIcons" hidden aria-label="Compartir descuento">
+          <button class="shareIcon" type="button" data-share-channel="whatsapp" aria-label="Compartir por WhatsApp" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2a9.84 9.84 0 0 0-8.42 14.92L2 22l5.22-1.58A9.92 9.92 0 1 0 12.04 2Zm0 17.97a8.04 8.04 0 0 1-4.1-1.12l-.3-.18-3.1.94.98-3.02-.2-.31a8.1 8.1 0 1 1 6.72 3.69Zm4.44-6.08c-.24-.12-1.44-.71-1.66-.79-.22-.08-.38-.12-.54.12-.16.24-.62.79-.76.95-.14.16-.28.18-.52.06-.24-.12-1.02-.38-1.94-1.2-.72-.64-1.2-1.43-1.34-1.67-.14-.24-.02-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.47-.39-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.69 2.58 4.1 3.62.57.25 1.02.4 1.37.51.58.18 1.1.16 1.51.1.46-.07 1.44-.59 1.64-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28Z"/></svg>
+          </button>
+          <button class="shareIcon" type="button" data-share-channel="instagram" aria-label="Compartir por Instagram" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+          </button>
+          <button class="shareIcon" type="button" data-share-channel="tiktok" aria-label="Compartir por TikTok" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2h3.05c.23 1.14.86 2.58 1.98 4.02A6.1 6.1 0 0 0 22 7.86v3.08a9.4 9.4 0 0 1-5-1.5V17a6 6 0 1 1-6-6c.25 0 .49.01.73.04v3.08A3 3 0 1 0 14 17V2Z"/></svg>
+          </button>
+        </div>
+        <div class="referralCode" id="referralCode" hidden></div>
+        <div class="status" id="statusText"></div>
+        <a class="continue" href="/">Seguir comprando</a>
+      </div>
+    </section>
+  </main>
+  <script src="/analytics/client.js"></script>
+  <script type="module" src="/src/order-confirmation.js"></script>
+</body>
+</html>

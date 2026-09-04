@@ -1,0 +1,4549 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Finalizar compra | CajaModa</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/dahlia/stripe.js"></script>
+
+<style>
+:root{
+  --ink:#080808;
+  --muted:#737373;
+  --line:rgba(0,0,0,.09);
+  --glass:rgba(255,255,255,.68);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:#fff;
+  color:var(--ink);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  -webkit-font-smoothing:antialiased
+}
+body{overflow-x:hidden}
+button,input{font:inherit;color:inherit}
+button{
+  border:0;
+  background:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent
+}
+img{display:block;max-width:100%}
+
+.checkoutApp{
+  width:100%;
+  max-width:520px;
+  min-height:100dvh;
+  margin:0 auto;
+  padding-bottom:calc(98px + var(--safe-bottom));
+  background:#fff
+}
+
+.checkoutHeader{
+  position:sticky;
+  z-index:50;
+  top:0;
+  height:calc(116px + var(--safe-top));
+  padding:var(--safe-top) 20px 0;
+  display:grid;
+  grid-template-columns:44px 1fr 44px;
+  align-items:center;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(22px) saturate(145%);
+  -webkit-backdrop-filter:blur(22px) saturate(145%)
+}
+
+.headerButton{
+  position:relative;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  transition:transform .18s var(--ease),background .18s ease
+}
+.headerButton:last-child{justify-self:end}
+.headerButton:active{
+  transform:scale(.9);
+  background:rgba(0,0,0,.04)
+}
+.headerButton svg{
+  width:23px;
+  height:23px;
+  stroke-width:1.45
+}
+
+.headerBagBadge{
+  position:absolute;
+  top:0;
+  right:-2px;
+  min-width:18px;
+  height:18px;
+  padding:0 4px;
+  border-radius:999px;
+  display:grid;
+  place-items:center;
+  background:#080808;
+  color:#fff;
+  border:2px solid #fff;
+  font-size:8px;
+  font-weight:800
+}
+
+.brandLockup{
+  justify-self:center;
+  width:190px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  color:#080808;
+  user-select:none;
+  pointer-events:none
+}
+.brandMonogram{
+  position:relative;
+  width:100px;
+  height:57px;
+  font-family:"Bodoni Moda",Didot,serif
+}
+.brandC{
+  position:absolute;
+  left:7px;
+  top:-12px;
+  font-size:74px;
+  line-height:1;
+  font-weight:400;
+  letter-spacing:-8px;
+  transform:scaleX(.89)
+}
+.brandM{
+  position:absolute;
+  left:43px;
+  top:8px;
+  font-size:52px;
+  line-height:1;
+  font-weight:400;
+  letter-spacing:-5px;
+  transform:scaleX(.90)
+}
+.brandWord{
+  margin-top:-2px;
+  padding-left:6px;
+  font-family:"Bodoni Moda",Didot,serif;
+  font-size:11px;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:5.4px
+}
+.brandCountryRow{
+  width:145px;
+  margin-top:7px;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:8px
+}
+.brandCountryLine{
+  height:1px;
+  background:rgba(0,0,0,.42)
+}
+.brandCountry{
+  padding-left:3px;
+  font-size:6px;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:3.1px
+}
+
+.checkoutIntro{
+  padding:32px 28px 18px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px
+}
+.checkoutIntro h1{
+  margin:0;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:52px;
+  line-height:.9;
+  font-weight:500;
+  letter-spacing:-2px
+}
+.checkoutIntro p{
+  margin:14px 0 0;
+  max-width:330px;
+  color:#555;
+  font-size:10px;
+  line-height:1.6
+}
+.introTotal{
+  display:block;
+  flex:0 0 auto;
+  text-align:right
+}
+.introTotalLabel{
+  color:#777;
+  font-size:7px
+}
+.introTotalValue{
+  margin-top:4px;
+  font-size:11px;
+  font-weight:700
+}
+
+.stepNav{
+  position:sticky;
+  z-index:40;
+  top:calc(116px + var(--safe-top));
+  display:grid;
+  grid-template-columns:1fr;
+  margin:0 28px;
+  background:rgba(255,255,255,.9);
+  border-bottom:1px solid rgba(0,0,0,.09);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px)
+}
+
+.checkoutApp.isPayment .checkoutIntro{
+  display:none
+}
+
+.paymentIntro{margin-bottom:28px}
+.paymentIntro h2{
+  margin:0;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:44px;
+  line-height:1;
+  font-weight:500;
+  letter-spacing:-1.4px
+}
+.paymentIntro p{
+  margin:12px 0 0;
+  max-width:390px;
+  color:#626262;
+  font-size:9px;
+  line-height:1.65
+}
+
+.stepTab{
+  position:relative;
+  height:54px;
+  color:#777;
+  font-size:10px;
+  transition:color .2s ease,transform .18s var(--ease)
+}
+.stepTab::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:-1px;
+  height:2px;
+  background:#080808;
+  transform:scaleX(0);
+  transform-origin:center;
+  transition:transform .42s var(--ease)
+}
+.stepTab.isActive{
+  color:#080808;
+  font-weight:650
+}
+.stepTab.isActive::after{transform:scaleX(1)}
+.stepTab:active{transform:scale(.96)}
+
+.stepViewport{
+  overflow:hidden;
+  transition:height .48s var(--ease)
+}
+.stepTrack{
+  display:block;
+  width:100%;
+  transform:none!important
+}
+.stepPanel{
+  display:none;
+  width:100%;
+  padding:34px 28px 26px;
+  opacity:1;
+  transform:none;
+  pointer-events:auto
+}
+.stepPanel.isActive{
+  display:block
+}
+
+.panelHeading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:18px
+}
+.panelTitle{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:23px;
+  font-weight:600
+}
+.panelMeta{
+  color:#777;
+  font-size:9px
+}
+
+.glassCard,
+.glassField,
+.deliverySelector,
+.reviewItem{
+  background:linear-gradient(
+    145deg,
+    rgba(255,255,255,.84),
+    rgba(255,255,255,.54)
+  );
+  border:1px solid rgba(0,0,0,.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    0 12px 34px rgba(0,0,0,.07);
+  backdrop-filter:blur(28px) saturate(150%);
+  -webkit-backdrop-filter:blur(28px) saturate(150%)
+}
+
+.cartList{
+  display:flex;
+  flex-direction:column;
+  gap:20px
+}
+.cartItem{
+  display:grid;
+  grid-template-columns:96px 1fr;
+  gap:14px;
+  min-height:150px;
+  padding:12px;
+  border-radius:22px;
+  background:linear-gradient(
+    145deg,
+    rgba(255,255,255,.82),
+    rgba(255,255,255,.52)
+  );
+  border:1px solid rgba(0,0,0,.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    0 15px 40px rgba(0,0,0,.075);
+  backdrop-filter:blur(30px) saturate(155%);
+  -webkit-backdrop-filter:blur(30px) saturate(155%)
+}
+.cartImage{
+  width:96px;
+  height:126px;
+  overflow:hidden;
+  border-radius:16px;
+  background:#f2f2f2
+}
+.cartImage img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center top
+}
+.cartImagePlaceholder{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:18px;
+  letter-spacing:3px
+}
+.cartInfo{
+  min-width:0;
+  display:flex;
+  flex-direction:column
+}
+.cartTop{
+  display:flex;
+  justify-content:space-between;
+  gap:10px
+}
+.cartName{
+  overflow:hidden;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.3;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical
+}
+.cartDescription{margin-top:5px;color:#333;font-size:8px;line-height:1.4}
+.cartRating{margin-top:7px;color:#666;font-size:8px;font-weight:650}
+.cartTopActions{display:flex;align-items:center;gap:4px}
+.cartHeart{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;color:#111;background:linear-gradient(145deg,rgba(255,255,255,.83),rgba(255,255,255,.36));border:1px solid rgba(255,255,255,.96);box-shadow:0 0 0 1px rgba(0,0,0,.026),inset 0 1px 0 #fff,0 8px 24px rgba(0,0,0,.055);backdrop-filter:blur(25px) saturate(165%);-webkit-backdrop-filter:blur(25px) saturate(165%)}
+.cartHeart svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.5}
+.cartHeart.active svg{fill:#d9344d;stroke:#d9344d}
+.cartHeart.active{color:#d9344d;animation:cajaHeartBeat 2.4s ease-in-out infinite;transform-origin:center}
+@keyframes cajaHeartBeat{0%,42%,100%{transform:scale(1)}7%{transform:scale(1.13)}14%{transform:scale(1)}21%{transform:scale(1.09)}29%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.cartHeart.active{animation:none}}
+.removeButton{
+  flex:0 0 auto;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  transition:transform .16s var(--ease),background .16s ease
+}
+.removeButton:active{
+  transform:scale(.88);
+  background:rgba(0,0,0,.05)
+}
+.removeButton svg{
+  width:16px;
+  height:16px;
+  stroke-width:1.35
+}
+.cartOptions{
+  margin-top:8px;
+  color:#555;
+  font-size:9px;
+  line-height:1.55
+}
+.cartOptionLine{display:block}
+.cartPromise{font-weight:700;color:#111}
+.cartDeliveryChoices{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cartDeliveryLabel{margin-right:2px;color:#555;font-size:9px;font-weight:700}
+.cartDeliveryChoice{min-width:29px;height:29px;padding:0 9px;border:1px solid rgba(0,0,0,.12);border-radius:999px;background:rgba(255,255,255,.62);font-size:9px;font-weight:800}
+.cartDeliveryChoice.selected{border-color:#111;background:#111;color:#fff}
+.cartOptionControls{
+  margin-top:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px
+}
+.cartOptionSelect{
+  max-width:112px;
+  height:32px;
+  padding:0 24px 0 10px;
+  border:1px solid rgba(0,0,0,.11);
+  border-radius:999px;
+  background:rgba(255,255,255,.58);
+  color:#333;
+  font-size:9px
+}
+.cartSizeChoices{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cartSizeChoice{min-width:29px;height:29px;padding:0 8px;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.48);font-size:9px}
+.cartSizeChoice.selected{background:#111;color:#fff;border-color:#111}
+.cartSizeChoice:disabled{opacity:.28;cursor:not-allowed;text-decoration:line-through}
+.cartColorChoices{display:flex;align-items:center;gap:7px}.cartColorChoice{width:25px;height:25px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.18);background:var(--swatch,#ddd)}.cartColorChoice.selected{box-shadow:0 0 0 2px #111}
+.cartImageLink,
+.reviewImageLink{
+  display:block;
+  border-radius:inherit;
+  overflow:hidden
+}
+.cartBottom{
+  margin-top:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:10px
+}
+.cartPrice{
+  font-size:14px;
+  font-weight:750
+}
+
+.quantityControl{
+  height:38px;
+  display:grid;
+  grid-template-columns:38px 34px 38px;
+  align-items:center;
+  border:1px solid rgba(0,0,0,.11);
+  border-radius:999px;
+  background:rgba(255,255,255,.54);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95);
+  overflow:hidden
+}
+.quantityButton{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  font-size:17px;
+  transition:transform .14s var(--ease),background .14s ease
+}
+.quantityButton:active{
+  transform:scale(.84);
+  background:rgba(0,0,0,.05)
+}
+.quantityValue{
+  text-align:center;
+  font-size:10px;
+  font-weight:700
+}
+
+.summaryCard{
+  margin-top:22px;
+  padding:18px 20px;
+  border-radius:20px
+}
+.summaryLine{
+  min-height:31px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+  font-size:10px
+}
+.summaryLine span:first-child{color:#666}
+.summaryValue{font-weight:650}
+.summaryDivider{
+  height:1px;
+  margin:7px 0;
+  background:rgba(0,0,0,.10)
+}
+.summaryTotal{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px
+}
+.summaryTotalLabel{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:18px;
+  font-weight:600
+}
+.deliverySummaryTitle{display:flex;align-items:center;gap:8px}
+.bagDeliveryInfoButton{width:22px;height:22px;border:1px solid rgba(0,0,0,.35);border-radius:50%;display:grid;place-items:center;font-family:Georgia,serif;font-size:11px;line-height:1}
+.summaryTotalValue{
+  font-size:15px;
+  font-weight:800
+}
+.deliverySummaryHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.deliveryGarmentCount{padding:5px 9px;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.58);font-size:8px;font-weight:700}
+.deliveryGroupCount{min-width:24px;height:24px;padding:0 7px;display:grid;place-items:center;border:1px solid rgba(0,0,0,.10);border-radius:999px;background:rgba(255,255,255,.58);color:#111;font-size:8px;font-weight:800}
+.deliveryGroupName{display:flex;align-items:center;gap:8px}
+.deliverySeparateNote{margin-top:8px;color:#737373;font-size:8px;line-height:1.45}
+
+.deliveryIntro{margin-bottom:22px}
+.deliveryIntro h2{
+  margin:0;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:26px;
+  font-weight:600
+}
+.deliveryIntro p{
+  margin:8px 0 0;
+  max-width:390px;
+  color:#777;
+  font-size:9px;
+  line-height:1.55
+}
+.fieldGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px
+}
+.glassField{
+  position:relative;
+  min-height:70px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  padding:10px 16px;
+  transition:
+    transform .2s var(--ease),
+    box-shadow .2s ease,
+    border-color .2s ease
+}
+.glassField:focus-within{
+  transform:translateY(-2px);
+  border-color:rgba(0,0,0,.18);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    0 18px 40px rgba(0,0,0,.09)
+}
+.glassField svg{
+  flex:0 0 auto;
+  width:20px;
+  height:20px;
+  margin-right:13px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.4
+}
+.glassField input{
+  width:100%;
+  height:42px;
+  padding:0;
+  outline:0;
+  border:0;
+  background:transparent;
+  font-size:11px
+}
+.glassField input::placeholder{color:#929292}
+
+.deliverySelector{
+  margin-top:20px;
+  min-height:78px;
+  padding:16px 18px;
+  border-radius:19px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px
+}
+.deliverySelectorMain{
+  display:flex;
+  align-items:center;
+  gap:13px
+}
+.deliverySelector svg{
+  width:21px;
+  height:21px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.35
+}
+.deliveryName{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:17px;
+  font-weight:600
+}
+.deliveryDescription{
+  margin-top:4px;
+  color:#777;
+  font-size:8px;
+  line-height:1.4
+}
+.deliveryPrice{
+  color:#555;
+  font-size:8px;
+  font-weight:650
+}
+
+.reviewEmailCard{
+  padding:19px 20px;
+  border-radius:20px;
+  margin-bottom:20px
+}
+.reviewCardTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px
+}
+.reviewCardTitle{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:18px;
+  font-weight:600
+}
+.editDelivery{
+  text-decoration:underline;
+  font-size:9px
+}
+.reviewEmail{
+  margin-top:12px;
+  color:#555;
+  font-size:10px
+}
+.reviewList{
+  display:flex;
+  flex-direction:column;
+  gap:16px
+}
+.reviewItem{
+  display:grid;
+  grid-template-columns:78px 1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:12px;
+  border-radius:19px
+}
+.reviewImage{
+  width:78px;
+  height:94px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#f2f2f2
+}
+.reviewImage img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top
+}
+.reviewInfo{min-width:0}
+.reviewName{
+  font-size:10px;
+  font-weight:700;
+  line-height:1.3
+}
+.reviewOptions{
+  margin-top:7px;
+  color:#777;
+  font-size:8px;
+  line-height:1.5
+}
+.reviewNumbers{text-align:right}
+.reviewQuantity{
+  color:#777;
+  font-size:8px
+}
+.reviewPrice{
+  margin-top:17px;
+  font-size:11px;
+  font-weight:700
+}
+
+.panelActions{
+  margin-top:24px;
+  display:grid;
+  gap:12px
+}
+.primaryButton,
+.secondaryButton{
+  width:100%;
+  height:58px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:11px;
+  font-size:12px;
+  transition:
+    transform .16s var(--ease),
+    box-shadow .16s ease,
+    opacity .16s ease
+}
+.primaryButton{
+  background:linear-gradient(
+    145deg,
+    rgba(8,8,8,.97),
+    rgba(8,8,8,.88)
+  );
+  color:#fff;
+  border:1px solid rgba(255,255,255,.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 16px 34px rgba(0,0,0,.22);
+  font-weight:650
+}
+.secondaryButton{
+  border:1px solid rgba(0,0,0,.48);
+  background:rgba(255,255,255,.48)
+}
+.primaryButton:active,
+.secondaryButton:active{
+  transform:scale(.975)
+}
+.primaryButton:disabled{
+  opacity:.35;
+  cursor:not-allowed
+}
+.primaryButton svg,
+.secondaryButton svg{
+  width:17px;
+  height:17px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.5
+}
+
+.trustLine{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  color:#666;
+  font-size:8px
+}
+.trustLine svg{
+  width:13px;
+  height:13px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.5
+}
+
+.emptyCart{
+  padding:42px 22px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  text-align:center
+}
+.emptyBagIcon{
+  width:48px;
+  height:48px;
+  margin:0 auto 13px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#f5f5f5
+}
+.emptyBagIcon svg{
+  width:22px;
+  height:22px;
+  stroke-width:1.4
+}
+.emptyCartTitle{
+  font-size:13px;
+  font-weight:700
+}
+.emptyCartText{
+  margin-top:7px;
+  color:#777;
+  font-size:9px
+}
+.continueShopping{
+  margin-top:16px;
+  min-width:150px;
+  height:42px;
+  padding:0 18px;
+  border-radius:999px;
+  background:#080808;
+  color:#fff;
+  font-size:9px;
+  font-weight:700
+}
+
+.bottomNav{
+  position:fixed;
+  z-index:90;
+  left:50%;
+  bottom:calc(8px + var(--safe-bottom));
+  transform:translateX(-50%);
+  width:min(calc(100% - 24px),496px);
+  height:70px;
+  padding:7px 10px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  align-items:center;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none
+}
+.bottomNavItem{
+  position:relative;
+  min-width:0;
+  height:54px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  color:#111;
+  text-decoration:none;
+  font-size:6.5px;
+  font-weight:500
+}
+.bottomNavItem svg{
+  width:22px;
+  height:22px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.45
+}
+.bottomNavPlus{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#090909;
+  color:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.2)
+}
+.bottomNavPlus svg{
+  width:21px;
+  height:21px
+}
+.bottomNavBadge{
+  position:absolute;
+  top:0;
+  right:10px;
+  min-width:18px;
+  height:18px;
+  padding:0 4px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  border:2px solid #fff;
+  background:#080808;
+  color:#fff;
+  font-size:7px;
+  font-weight:800
+}
+
+.toast{
+  position:fixed;
+  z-index:200;
+  left:50%;
+  bottom:calc(92px + var(--safe-bottom));
+  transform:translateX(-50%) translateY(8px);
+  max-width:calc(100vw - 30px);
+  padding:10px 14px;
+  border-radius:999px;
+  background:#080808;
+  color:#fff;
+  font-size:9px;
+  white-space:nowrap;
+  opacity:0;
+  pointer-events:none;
+  transition:.2s ease
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0)
+}
+
+@media(min-width:560px){
+  body{background:#f5f5f5}
+  .checkoutApp{box-shadow:0 0 70px rgba(0,0,0,.07)}
+}
+
+@media(max-width:390px){
+  .checkoutIntro,
+  .stepPanel{
+    padding-left:20px;
+    padding-right:20px
+  }
+
+  .stepNav{
+    margin-left:20px;
+    margin-right:20px
+  }
+
+  .checkoutIntro h1{font-size:46px}
+  .cartItem{grid-template-columns:88px 1fr;gap:11px;min-height:146px;padding:10px}
+  .cartImage{
+    width:88px;
+    height:122px
+  }
+  .cartBottom{
+    align-items:flex-end;
+    flex-direction:row
+  }
+  .reviewItem{grid-template-columns:66px 1fr auto}
+  .reviewImage{
+    width:66px;
+    height:82px
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .stepTrack,
+  .stepViewport,
+  .stepPanel,
+  .stepTab::after,
+  .primaryButton,
+  .secondaryButton{
+    transition:none!important
+  }
+}
+
+.headerButton{
+  background:linear-gradient(145deg,rgba(255,255,255,.83),rgba(255,255,255,.36));
+  border:1px solid rgba(255,255,255,.96);
+  box-shadow:0 0 0 1px rgba(0,0,0,.026),inset 0 1px 0 rgba(255,255,255,1),0 8px 24px rgba(0,0,0,.055);
+  backdrop-filter:blur(25px) saturate(165%);
+  -webkit-backdrop-filter:blur(25px) saturate(165%);
+}
+#headerBag,#bottomBagButton{width:39px;height:39px;min-width:39px;min-height:39px;margin:auto;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,rgba(255,255,255,.83),rgba(255,255,255,.36));border:1px solid rgba(255,255,255,.96);box-shadow:0 0 0 1px rgba(0,0,0,.026),inset 0 1px 0 rgba(255,255,255,1),0 8px 24px rgba(0,0,0,.055);backdrop-filter:blur(25px) saturate(165%);-webkit-backdrop-filter:blur(25px) saturate(165%)}
+#backButton,#headerBag,#bottomBagButton{background:transparent;border-color:transparent;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+#headerBag svg,#bottomBagButton svg{width:23px;height:23px;stroke-width:1.45}
+#headerBagBadge,#bottomBagBadge{top:-2px;right:-2px;min-width:18px;height:18px;padding:0 4px;border:2px solid #fff;font-size:8px}
+
+.emailCapture{
+  margin-top:18px;
+  padding:16px;
+  border-radius:20px
+}
+.emailCaptureTitle{
+  margin-bottom:10px;
+  font-size:10px;
+  font-weight:700
+}
+.guestCheckoutButton{
+  display:block;
+  margin:10px auto 0;
+  padding:7px 12px;
+  color:#333;
+  font-size:11px;
+  font-weight:600;
+  text-decoration:underline
+}
+.stepNav{grid-template-columns:repeat(3,1fr)}
+
+.paymentSectionTitle{
+  margin:0 0 12px;
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:27px;
+  line-height:1;
+  font-weight:600
+}
+.reviewList + .paymentSectionTitle{margin-top:22px}
+.deliveryGlass,.paymentGlass,.paymentSummary{
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(255,255,255,.58));
+  border:1px solid rgba(0,0,0,.075);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 14px 38px rgba(0,0,0,.065);
+  backdrop-filter:blur(30px) saturate(150%);
+  -webkit-backdrop-filter:blur(30px) saturate(150%)
+}
+.deliveryGlass{padding:17px;margin-bottom:24px}
+.promiseRow{display:grid;grid-template-columns:48px 1fr 36px;gap:12px;align-items:center}
+.promiseBadge{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:#080808;color:#fff;font-size:22px;font-weight:650}
+.promiseName{font-size:13px;font-weight:750}.promiseTime{margin-top:3px;color:#737373;font-size:9px}
+.infoButton{width:34px;height:34px;border:1px solid rgba(0,0,0,.13);border-radius:50%;display:grid;place-items:center;font-family:Georgia,serif;font-size:15px}
+.deliveryDivider,.paymentDivider{height:1px;margin:15px 0;background:rgba(0,0,0,.09)}
+.deliveryChoiceLabel{margin-bottom:10px;font-size:10px;font-weight:600}
+.deliveryChoices{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.deliveryChoice{min-height:46px;padding:0 11px;border:1px solid rgba(0,0,0,.18);border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:9px;font-weight:600}
+.deliveryChoice[hidden]{display:none}
+.deliveryChoice svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5}
+.deliveryChoice.isSelected{background:#080808;color:#fff;border-color:#080808}
+.deliveryChoice[data-delivery="national"]:not([hidden]){grid-column:1/-1}
+.deliveryNote{margin:12px 2px 0;color:#737373;font-size:8px}
+.deliveryQuoteBreakdown{margin-top:12px;padding:12px 13px;border:1px solid rgba(0,0,0,.08);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(248,241,230,.46))}
+.deliveryQuoteBreakdown[hidden]{display:none}
+.deliveryQuoteRow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:5px 0;color:#5f5f5f;font-size:8.5px}
+.deliveryQuoteRow span:last-child{color:#111;font-weight:650}
+.deliveryQuoteTotal{margin-top:7px;padding-top:10px;border-top:1px solid rgba(0,0,0,.09);color:#111;font-size:10px;font-weight:750}
+.pickupAddress{margin:10px 2px 0;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.58);border:1px solid rgba(0,0,0,.07);font-size:8px;line-height:1.5;color:#555}
+.deliveryDetails{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.deliveryDetails label{min-width:0}.deliveryDetails .wide{grid-column:1/-1}
+.compactInput{width:100%;height:45px;padding:0 13px;border:1px solid rgba(0,0,0,.10);border-radius:13px;outline:0;background:rgba(255,255,255,.58);font-size:9px}
+.shippingFields .deliveryField{position:relative;min-width:0;min-height:64px;padding:8px 13px 6px;border:1px solid rgba(0,0,0,.09);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(255,252,247,.52));box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 9px 24px rgba(0,0,0,.035);transition:border-color .18s ease,box-shadow .18s ease}
+.shippingFields .deliveryField:focus-within{border-color:rgba(0,0,0,.22);box-shadow:inset 0 1px 0 #fff,0 13px 30px rgba(0,0,0,.065)}
+.shippingFields .fieldLabel{display:block;color:#555;font-size:7.5px;line-height:1.2;font-weight:600}
+.shippingFields .deliveryField .compactInput{height:36px;margin:0;padding:0;border:0;border-radius:0;background:transparent;font-size:10.5px}
+.shippingFields .deliveryField select.compactInput{padding-right:24px}
+.shippingFields .fieldStatus{display:block;margin:1px 0 3px;color:#9b241d;font-size:7px;line-height:1.35}
+.shippingFields .fieldStatus[hidden]{display:none}
+.shippingFields .deliveryField.hasError{border-color:rgba(155,36,29,.34)}
+.shippingFields .deliveryField.hasSuccess{border-color:rgba(122,91,42,.28)}
+.shippingFields .deliveryField.hasSuccess .fieldStatus{color:#6f542f}
+.shippingFields .deliveryField input:disabled{cursor:wait;color:#8b8b8b}
+.deliveryReady{display:flex;align-items:center;gap:9px;margin-top:14px;padding:11px 13px;border:1px solid rgba(122,91,42,.16);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.74),rgba(248,241,230,.52));color:#555;font-size:8px;line-height:1.4}
+.deliveryReady::before{content:"✓";width:22px;height:22px;flex:0 0 auto;display:grid;place-items:center;border:1px solid rgba(122,91,42,.20);border-radius:50%;background:rgba(248,241,230,.72);color:#111;font-size:11px}
+.deliveryHelp{position:fixed;z-index:120;inset:0;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(255,255,255,.52);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.deliveryHelp.isOpen{display:flex}.deliveryHelpCard{width:min(360px,100%);padding:24px;border-radius:24px;background:rgba(255,255,255,.9);border:1px solid rgba(0,0,0,.08);box-shadow:0 24px 70px rgba(0,0,0,.15)}
+.deliveryHelpTop{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.deliveryHelpTitle{font-family:"Cormorant Garamond",Georgia,serif;font-size:25px;font-weight:600}.deliveryHelpClose{width:34px;height:34px;border-radius:50%;background:#f4f4f4;font-size:18px}
+.deliveryHelpLine{padding:12px 0;border-top:1px solid rgba(0,0,0,.08);font-size:10px;line-height:1.55}.deliveryHelpLine strong{display:block;font-size:11px}
+.paymentMethodTabs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.paymentMethod{position:relative;height:56px;border:1px solid rgba(0,0,0,.08);border-radius:17px;background:rgba(255,255,255,.62);font-size:11px;font-weight:650}
+.paymentMethod.isSelected::after{content:"";position:absolute;left:16px;right:16px;bottom:-1px;height:2px;background:#080808;border-radius:4px}
+.paymentMethod[data-method="nequi"].isSelected{color:#4d0bb7}
+.paymentGlass{padding:19px}
+.paymentGlass.isStripe{padding:0;background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.paymentEyebrow{color:#555;font-size:8px}.paymentAmount{margin-top:4px;font-size:24px;font-weight:760;letter-spacing:-.7px}
+.nequiSteps{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,0,0,.1)}.nequiStepsTitle{font-size:11px;font-weight:700}.nequiSteps ol{margin:9px 0 0;padding-left:19px}.nequiSteps li{margin-top:5px;color:#444;font-size:8.5px;line-height:1.45}.nequiPriceBreakdown{margin-bottom:12px;padding:11px 13px;border:1px solid rgba(0,0,0,.1);border-radius:14px;background:rgba(255,255,255,.55)}.nequiPriceLine{display:flex;justify-content:space-between;gap:14px;padding:5px 0;color:#555;font-size:8.5px}.nequiPriceLine span:last-child{color:#111;font-weight:650}.nequiFinalLine{margin-top:6px;padding-top:10px;border-top:1px solid rgba(0,0,0,.1);align-items:end}.nequiFinalLabel{color:#111;font-size:10px;font-weight:700}.nequiFinalNote{display:block;margin-top:3px;color:#666;font-size:7.5px;font-weight:500}.nequiAmountRow{display:flex;align-items:end;justify-content:space-between;gap:12px}.copyAmountButton{flex:0 0 auto;margin-bottom:2px;padding:9px 12px;border:1px solid rgba(0,0,0,.35);border-radius:10px;background:#fff;font-size:8px;font-weight:700}.nequiLabel{margin-top:15px;font-size:8px}.nequiNumber{margin-top:5px;font-size:18px;font-weight:650;letter-spacing:.8px}
+.nequiActions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.paymentAction{height:45px;border:1px solid #111;border-radius:13px;font-size:9px;font-weight:650}.paymentAction.nequiOpen{border-color:#4d0bb7;background:#4d0bb7;color:#fff}
+.referenceLabel{display:block;font-size:8px}.referenceLabel input{margin-top:8px}
+.confirmPayment{width:100%;height:52px;margin-top:13px;border-radius:14px;background:#080808;color:#fff;font-size:10px;font-weight:700}.confirmPayment:disabled{cursor:not-allowed;opacity:.42}
+.pendingNote{margin:9px 0 0;text-align:center;color:#777;font-size:7.5px;line-height:1.45}
+.stripePane{text-align:left}.stripePane[hidden],.nequiPane[hidden]{display:none}.stripeTop{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:5px}.stripeTitle{font-family:"Cormorant Garamond",Georgia,serif;font-size:24px;font-weight:600}.stripeSecure{display:flex;align-items:center;gap:5px;color:#666;font-size:7.5px;white-space:nowrap}.stripeSecure svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.7}.stripeCopy{margin:0 0 16px;color:#737373;font-size:8.5px;line-height:1.5}.customCardShell{padding:16px;border:1px solid rgba(0,0,0,.08);border-radius:18px;background:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 12px 30px rgba(0,0,0,.035)}.billingGlass{margin-top:14px;padding:16px;border:1px solid rgba(255,255,255,.94);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(255,255,255,.44));box-shadow:inset 0 1px 0 rgba(255,255,255,.96),0 12px 30px rgba(0,0,0,.05);backdrop-filter:blur(28px) saturate(150%);-webkit-backdrop-filter:blur(28px) saturate(150%)}.billingTitle{font-size:10px;font-weight:700}.billingAddressSummary{margin:9px 1px 2px;padding:10px 12px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:rgba(255,255,255,.52);color:#666;font-size:8px;line-height:1.45}.billingAddressSummary[hidden]{display:none}.postalHelper{display:block;margin:0 0 3px;color:#777;font-size:7px;line-height:1.35;font-weight:500}.linkArea[hidden],.billingFields[hidden]{display:none}.linkHeading{margin-bottom:8px;text-align:center;font-size:9px;font-weight:700}.expressCheckout{min-height:48px}.cardDivider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#777;font-size:8px}.cardDivider::before,.cardDivider::after{content:"";height:1px;flex:1;background:rgba(0,0,0,.12)}.cardLabel{display:block;margin-top:12px;font-size:8px;font-weight:600}.cardInput,.stripeField{width:100%;height:48px;margin-top:7px;border:1px solid rgba(0,0,0,.14);border-radius:13px;background:rgba(255,255,255,.72);padding:0 13px;color:#080808;font:500 10px/1 Inter,Arial,sans-serif;transition:border-color .16s,box-shadow .16s}.stripeField{display:flex;align-items:center;cursor:text}.stripeField .StripeElement,.stripeField iframe{width:100%!important;min-width:0}.stripeField.isFocused{border-color:#080808;box-shadow:0 0 0 1px #080808}.stripeField.hasError,.cardInput.hasError{border-color:#a31919}.cardPair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.billingToggle{display:flex;align-items:flex-start;gap:9px;margin:16px 1px 3px;font-size:8px;line-height:1.4}.billingToggle input{width:18px;height:18px;flex:0 0 auto;accent-color:#080808}.billingFields{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.billingFields .wide{grid-column:1/-1}.stripePayButton{width:100%;height:52px;margin-top:16px;border-radius:14px;background:#080808;color:#fff;font-size:10px;font-weight:700;transition:opacity .18s}.stripePayButton:disabled{opacity:.38}.stripeError{min-height:16px;margin-top:8px;color:#a31919;text-align:center;font-size:8px;line-height:1.4}.stripeTrust{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:2px;color:#777;font-size:7.5px}.stripeTrust svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:1.7}
+.stripeStatus{padding:12px 0;color:#737373;text-align:center;font-size:8.5px}.stripeStatus[hidden]{display:none}.billingPickupNote{margin:10px 1px 0;color:#666;font-size:8px;line-height:1.45}.billingPickupNote[hidden]{display:none}
+.paymentSummary{margin-top:16px;padding:16px 18px}
+@media(max-width:390px){.deliveryChoices,.nequiActions,.deliveryDetails{grid-template-columns:1fr}.deliveryDetails .wide{grid-column:auto}.billingFields{grid-template-columns:1fr}.billingFields .wide{grid-column:auto}}
+.autocompleteField{position:relative;min-width:0}
+.shippingFields .autocompleteField{position:relative}
+.autocompleteMenu{position:absolute;z-index:140;top:calc(100% + 6px);left:0;right:0;max-height:260px;overflow-y:auto;border:1px solid rgba(0,0,0,.12);border-radius:15px;background:rgba(255,255,255,.98);box-shadow:0 18px 42px rgba(0,0,0,.16);padding:6px;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.autocompleteMenu[hidden]{display:none}
+.autocompleteOption{width:100%;min-height:48px;padding:10px 12px;border-radius:11px;display:block;text-align:left}
+.autocompleteOption:active,.autocompleteOption:focus{background:#f2f2f2;outline:none}
+.autocompletePrimary{display:block;font-size:10px;font-weight:700;line-height:1.35}
+.autocompleteSecondary{display:block;margin-top:3px;color:#737373;font-size:8px;line-height:1.35}
+.autocompleteMessage{padding:12px;color:#666;font-size:8.5px;line-height:1.45}
+.cityInput{padding-right:42px!important}
+.cityDropdownButton{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;display:grid;place-items:center;border-radius:50%;color:#222;line-height:1}
+.cityDropdownButton svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8}
+.cityDropdownButton:disabled{opacity:.35;cursor:wait}
+.googleAttribution{padding:7px 12px 5px;text-align:right;color:#777;font-size:7px;font-weight:650;letter-spacing:.02em}
+.phoneUnified .phoneInputGroup{display:grid;grid-template-columns:110px 1fr;gap:0}.phoneUnified .phoneInputGroup .compactInput{min-width:0}.phoneUnified .phoneInputGroup select{padding-right:24px;border-right:1px solid rgba(0,0,0,.09)!important}.phoneUnified .phoneInputGroup input{padding-left:14px!important}
+.cartItem.isUnavailable{border-color:rgba(163,25,25,.28);background:rgba(255,246,244,.76)}
+.cartUnavailableNotice{margin-top:10px;padding:11px 12px;border:1px solid rgba(163,25,25,.18);border-radius:12px;background:#fff5f3;color:#8e211b;font-size:8.5px;line-height:1.45}
+.cartUnavailableRemove{margin-top:9px;padding:9px 12px;border:1px solid #8e211b;border-radius:10px;background:#fff;color:#8e211b;font-size:8px;font-weight:750}
+</style>
+</head>
+
+<body>
+<div class="checkoutApp">
+  <header class="checkoutHeader">
+    <button
+      id="backButton"
+      class="headerButton"
+      type="button"
+      aria-label="Volver"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </button>
+
+    <div class="brandLockup" aria-label="CajaModa Colombia">
+      <div class="brandMonogram">
+        <span class="brandC">C</span>
+        <span class="brandM">M</span>
+      </div>
+      <div class="brandWord">CAJAMODA</div>
+      <div class="brandCountryRow">
+        <span class="brandCountryLine"></span>
+        <span class="brandCountry">COLOMBIA</span>
+        <span class="brandCountryLine"></span>
+      </div>
+    </div>
+
+    <button
+      id="headerBag"
+      class="headerButton"
+      type="button"
+      aria-label="Bolsa"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M6.3 8.4h11.4l1 11H5.3l1-11Z"/>
+        <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/>
+      </svg>
+      <span id="headerBagBadge" class="headerBagBadge">0</span>
+    </button>
+  </header>
+
+  <section class="checkoutIntro">
+    <div>
+      <h1>Tu pedido</h1>
+      <p>
+        Revisa tu bolsa y elige cómo pagar de forma segura.
+      </p>
+    </div>
+
+    <div class="introTotal">
+      <div class="introTotalLabel">Total</div>
+      <div id="headerTotal" class="introTotalValue">$0</div>
+    </div>
+  </section>
+
+  <nav class="stepNav" aria-label="Proceso de compra">
+    <button
+      class="stepTab isActive"
+      type="button"
+      data-step="bag"
+      aria-current="step"
+    >
+      Bolsa
+    </button>
+
+    <button
+      class="stepTab"
+      type="button"
+      data-step="payment"
+      data-method="stripe"
+    >
+      Tarjeta
+    </button>
+
+    <button
+      class="stepTab"
+      type="button"
+      data-step="payment"
+      data-method="nequi"
+    >
+      Nequi
+    </button>
+
+  </nav>
+
+  <main id="stepViewport" class="stepViewport">
+    <div id="stepTrack" class="stepTrack">
+
+      <section
+        class="stepPanel isActive"
+        data-panel="bag"
+        aria-label="Bolsa"
+      >
+        <div class="panelHeading">
+          <div class="panelTitle">Tu bolsa</div>
+          <div id="cartItemCount" class="panelMeta">0 productos</div>
+        </div>
+
+        <div id="cartList" class="cartList"></div>
+
+        <section id="bagDeliverySummary" class="summaryCard glassCard" aria-label="Entrega de tu pedido" hidden>
+          <div class="deliverySummaryHeader">
+            <div class="deliverySummaryTitle">
+              <div class="summaryTotalLabel">Entrega de tu pedido</div>
+              <button id="bagDeliveryInfoButton" class="bagDeliveryInfoButton" type="button" aria-label="Ver tipos de entrega">i</button>
+            </div>
+            <span id="deliveryGarmentCount" class="deliveryGarmentCount">0 prendas</span>
+          </div>
+          <div id="deliverySummaryRows"></div>
+          <div id="bagProntoReceivingChoice" class="deliveryQuoteBreakdown" hidden>
+            <div class="deliveryChoiceLabel">Elige cómo recibir tu pedido Pronto</div>
+            <div class="deliveryChoices">
+              <button class="deliveryChoice" type="button" data-pronto-delivery="pickup">
+                <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>
+                Recoger en punto
+              </button>
+              <button class="deliveryChoice" type="button" data-pronto-delivery="moto">
+                <svg viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-2.5-6H8m5-3h3"/></svg>
+                Moto a tu dirección
+              </button>
+            </div>
+            <div id="bagPickupAddress" class="pickupAddress" hidden><strong>Pronto: Recoger en punto · 10.000 COP</strong><br>Cl. 35 #10-22, piso 1, local 1, San Diego, Cartagena de Indias, Bolívar.</div>
+          </div>
+          <div id="deliverySeparateNote" class="deliverySeparateNote" hidden></div>
+        </section>
+
+        <div class="summaryCard glassCard">
+          <div class="summaryLine">
+            <span>Subtotal</span>
+            <span id="bagSubtotalValue" class="summaryValue">$0</span>
+          </div>
+
+          <div id="bagShipmentCharges"></div>
+
+          <div class="summaryDivider"></div>
+
+          <div class="summaryTotal">
+            <span class="summaryTotalLabel">Total</span>
+            <span id="bagTotalValue" class="summaryTotalValue">$0</span>
+          </div>
+        </div>
+
+        <div class="panelActions">
+          <button
+            id="toDeliveryButton"
+            class="primaryButton"
+            type="button"
+          >
+            <span>Continuar al pago seguro</span>
+            <svg viewBox="0 0 24 24">
+              <path d="m9 5 7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="trustLine">
+          <svg viewBox="0 0 24 24">
+            <rect x="5" y="10" width="14" height="10" rx="2"/>
+            <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+          </svg>
+          <span>Pago seguro y cifrado</span>
+        </div>
+      </section>
+
+      <section
+        class="stepPanel"
+        data-panel="payment"
+        aria-label="Pago"
+        aria-hidden="true"
+      >
+        <div id="reviewList" class="reviewList"></div>
+
+        <h2 class="paymentSectionTitle">Datos de entrega</h2>
+        <section class="deliveryGlass" aria-label="Entrega">
+          <div class="promiseRow" hidden style="display:none">
+            <div class="promiseBadge">P</div>
+            <div aria-live="polite">
+              <div id="promiseName" class="promiseName">Pronto – Cartagena</div>
+              <div id="promiseTime" class="promiseTime">Disponible en 24–48 h</div>
+            </div>
+            <button id="deliveryInfoButton" class="infoButton" type="button" aria-label="Ver tiempos de entrega">i</button>
+          </div>
+          <div class="deliveryDivider" hidden style="display:none"></div>
+          <div class="deliveryDetails shippingFields">
+            <label class="deliveryField"><span class="fieldLabel">Nombre</span><input id="customerFirstName" name="firstName" class="compactInput" autocomplete="given-name" placeholder="Nombre"></label>
+            <label class="deliveryField"><span class="fieldLabel">Apellido</span><input id="customerLastName" name="lastName" class="compactInput" autocomplete="family-name" placeholder="Apellido"></label>
+            <label class="wide deliveryField"><span class="fieldLabel">Correo electrónico</span><input id="email" name="email" class="compactInput" type="email" autocomplete="email" placeholder="correo@ejemplo.com"></label>
+            <label class="wide deliveryField phoneUnified"><span class="fieldLabel">Teléfono</span><span class="phoneInputGroup"><select id="phoneCountryCode" class="compactInput" aria-label="Código de país">
+              <option value="+57">CO +57</option><option value="+1">US +1</option><option value="+51">PE +51</option><option value="+58">VE +58</option><option value="+593">EC +593</option><option value="+55">BR +55</option><option value="+54">AR +54</option><option value="+56">CL +56</option><option value="+591">BO +591</option><option value="+595">PY +595</option><option value="+598">UY +598</option>
+            </select><input id="customerPhone" name="phone" class="compactInput" autocomplete="tel-national" inputmode="tel" placeholder="Número de teléfono"></span></label>
+            <label id="departmentField" class="deliveryField"><span class="fieldLabel">Departamento</span><select id="deliveryDepartment" class="compactInput" autocomplete="address-level1" disabled><option value="">Cargando departamentos…</option></select><span id="departmentFieldStatus" class="fieldStatus" hidden></span></label>
+            <div id="cityField" class="deliveryField autocompleteField"><span class="fieldLabel">Ciudad / municipio / localidad</span><input id="deliveryCity" name="city" class="compactInput cityInput" autocomplete="address-level2" aria-autocomplete="list" aria-controls="citySuggestionPanel" aria-expanded="false" aria-label="Ciudad, municipio o localidad de entrega" placeholder="Selecciona el departamento primero" disabled><button id="cityDropdownButton" class="cityDropdownButton" type="button" aria-label="Mostrar ciudades, municipios o localidades" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 9 5 5 5-5"/></svg></button><input id="deliveryCityDaneCode" type="hidden"><input id="deliveryMunicipalityName" type="hidden"><input id="deliveryLocality" type="hidden"><span id="cityFieldStatus" class="fieldStatus" hidden></span><div id="citySuggestionPanel" class="autocompleteMenu" role="listbox" hidden></div></div>
+            <div id="addressField" class="wide deliveryField autocompleteField"><span class="fieldLabel">Dirección principal</span><input id="deliveryAddress" class="compactInput" autocomplete="shipping street-address" aria-autocomplete="list" aria-controls="addressSuggestionPanel" aria-expanded="false" aria-label="Dirección principal de entrega" placeholder="Ej. Carrera 13 #60-19"><span id="addressFieldStatus" class="fieldStatus" hidden></span><div id="addressSuggestionPanel" class="autocompleteMenu" role="listbox" hidden></div></div>
+            <label id="neighborhoodField" class="deliveryField"><span class="fieldLabel">Barrio o localidad (opcional)</span><input id="deliveryNeighborhood" class="compactInput" autocomplete="shipping address-level3" placeholder="Barrio o localidad"><span id="neighborhoodFieldStatus" class="fieldStatus" hidden></span></label>
+            <label class="deliveryField"><span class="fieldLabel">Apto., torre o interior (opcional)</span><input id="deliveryComplement" class="compactInput" autocomplete="shipping address-line2" placeholder="Apartamento, torre o interior"></label>
+            <input id="deliveryAddressPlaceId" type="hidden">
+            <label id="postalCodeField" class="wide deliveryField"><span class="fieldLabel">Código postal</span><input id="deliveryPostalCode" class="compactInput" autocomplete="shipping postal-code" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="Código postal"><span class="postalHelper">Lo completamos automáticamente cuando sea posible. Puedes corregirlo.</span><span id="postalCodeFieldStatus" class="fieldStatus" hidden></span></label>
+            <label class="wide deliveryField"><span class="fieldLabel">Referencias para la entrega (opcional)</span><input id="deliveryReferences" class="compactInput" placeholder="Ej. portería, color de la casa o punto cercano"></label>
+          </div>
+          <p id="addressSuggestionSource" class="deliveryNote" role="status" aria-live="polite" hidden>Dirección verificada por Google</p>
+          <div id="prontoReceivingChoice">
+            <div class="deliveryDivider"></div>
+            <div class="deliveryChoiceLabel">Elige cómo recibir tu pedido Pronto</div>
+            <div class="deliveryChoices">
+              <button class="deliveryChoice isSelected" type="button" data-pronto-delivery="pickup">
+                <svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg>
+                Recoger en punto
+              </button>
+              <button class="deliveryChoice" type="button" data-pronto-delivery="moto">
+                <svg viewBox="0 0 24 24"><circle cx="6" cy="17" r="3"/><circle cx="18" cy="17" r="3"/><path d="M9 17h6l-2.5-6H8m5-3h3"/></svg>
+                Moto a tu dirección
+              </button>
+            </div>
+            <div id="pickupAddress" class="pickupAddress"><strong>Punto de recogida · 10.000 COP</strong><br>Cl. 35 #10-22, piso 1, local 1, San Diego, Cartagena de Indias, Bolívar.</div>
+          </div>
+          <button id="confirmDeliveryButton" class="confirmPayment" type="button">Confirmar entrega</button>
+          <p id="deliveryQuoteStatus" class="deliveryNote" role="status" aria-live="polite">Completa tus datos y confirma la entrega.</p>
+          <div id="deliveryQuoteBreakdown" class="deliveryQuoteBreakdown" aria-live="polite" hidden>
+            <div id="deliveryQuoteGroups"></div>
+            <div class="deliveryQuoteRow deliveryQuoteTotal"><span>Total con entrega</span><span id="deliveryQuoteTotal">Por calcular</span></div>
+          </div>
+        </section>
+
+        <h2 id="paymentSectionTitle" class="paymentSectionTitle">Finaliza tu pago</h2>
+        <section id="paymentGlass" class="paymentGlass isStripe">
+          <div id="nequiPane" class="nequiPane" hidden>
+            <div class="nequiSteps">
+              <div class="nequiStepsTitle">Paga con Nequi en 3 pasos</div>
+              <ol>
+                <li>Copia el número y el monto exacto.</li>
+                <li>Abre Nequi y realiza la transferencia.</li>
+                <li>Regresa e ingresa el número de referencia.</li>
+              </ol>
+            </div>
+            <div class="nequiPriceBreakdown" aria-label="Desglose del precio final">
+              <div class="nequiPriceLine"><span>Precio de los artículos</span><span id="nequiSubtotal">$0</span></div>
+              <div id="nequiShipmentCharges"></div>
+              <div class="nequiPriceLine nequiFinalLine">
+                <span class="nequiFinalLabel">Precio final</span>
+                <span id="nequiAmount" class="paymentAmount">$0 COP</span>
+              </div>
+            </div>
+            <button id="copyNequiAmountButton" class="copyAmountButton" type="button">Copiar monto final</button>
+            <div class="nequiLabel">Número Nequi</div>
+            <div id="nequiNumber" class="nequiNumber">••• ••• ••••</div>
+            <div class="nequiActions">
+              <button id="copyNequiButton" class="paymentAction" type="button">Copiar número</button>
+              <button id="openNequiButton" class="paymentAction nequiOpen" type="button">Abrir Nequi</button>
+            </div>
+            <div class="paymentDivider"></div>
+            <label class="referenceLabel" for="nequiReference">Número de referencia Nequi *
+              <input id="nequiReference" class="compactInput" inputmode="numeric" placeholder="Ingresa el número de referencia" required aria-required="true">
+            </label>
+            <button id="confirmNequiButton" class="confirmPayment" type="button" disabled>Confirmar que ya pagué</button>
+            <p class="pendingNote">Verificaremos el pago antes de confirmar tu pedido.</p>
+          </div>
+
+          <div id="stripePane" class="stripePane">
+            <div class="stripeTop">
+              <div class="stripeTitle">Tarjeta</div>
+              <div class="stripeSecure"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pago seguro</div>
+            </div>
+              <div class="customCardShell">
+              <div id="stripeStatus" class="stripeStatus">Preparando el formulario seguro de Stripe…</div>
+              <div id="paymentElement"></div>
+            </div>
+            <section class="billingGlass" aria-labelledby="billingTitle">
+              <div id="billingTitle" class="billingTitle">Dirección de facturación</div>
+              <label id="billingSameRow" class="billingToggle"><input id="billingSame" type="checkbox" checked><span>La dirección de facturación es igual a la dirección de entrega</span></label>
+              <div id="billingAddressSummary" class="billingAddressSummary" aria-live="polite"></div>
+              <div id="billingFields" class="billingFields">
+                <label class="cardLabel wide" for="billingAddress">Dirección
+                  <input id="billingAddress" class="cardInput" autocomplete="billing address-line1" placeholder="Calle y número">
+                </label>
+                <label class="cardLabel wide" for="billingComplement">Complemento (opcional)
+                  <input id="billingComplement" class="cardInput" autocomplete="billing address-line2" placeholder="Apartamento, torre o interior">
+                </label>
+                <label class="cardLabel" for="billingCity">Ciudad
+                  <input id="billingCity" class="cardInput" autocomplete="billing address-level2" placeholder="Ciudad">
+                </label>
+                <label class="cardLabel" for="billingDepartment">Departamento
+                  <select id="billingDepartment" class="cardInput" autocomplete="billing address-level1"><option value="">Departamento</option></select>
+                </label>
+                <label class="cardLabel wide" for="billingPostalCode">Código postal
+                  <input id="billingPostalCode" class="cardInput" autocomplete="billing postal-code" inputmode="numeric" pattern="\d{6}" maxlength="6" placeholder="Código postal">
+                </label>
+              </div>
+            </section>
+            <div class="paymentSummary">
+              <div class="summaryLine">
+                <span>Precio de los artículos</span>
+                <span id="subtotalValue" class="summaryValue">$0</span>
+              </div>
+              <div id="stripeShipmentCharges"></div>
+              <div class="summaryDivider"></div>
+              <div class="summaryTotal">
+                <span class="summaryTotalLabel">Precio final</span>
+                <span id="totalValue" class="summaryTotalValue">$0</span>
+              </div>
+            </div>
+            <button id="stripePayButton" class="stripePayButton" type="button" disabled>Pagar de forma segura</button>
+            <div id="stripeError" class="stripeError" role="alert" aria-live="polite"></div>
+            <div class="stripeTrust"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Pago seguro y cifrado</div>
+          </div>
+        </section>
+
+        <div class="panelActions">
+          <button
+            id="backToContactButton"
+            class="secondaryButton"
+            type="button"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="m15 5-7 7 7 7"/>
+            </svg>
+            <span>Volver a la bolsa</span>
+          </button>
+        </div>
+
+      </section>
+    </div>
+  </main>
+</div>
+
+<div id="deliveryHelp" class="deliveryHelp" role="dialog" aria-modal="true" aria-labelledby="deliveryHelpTitle">
+  <div class="deliveryHelpCard">
+    <div class="deliveryHelpTop">
+      <div id="deliveryHelpTitle" class="deliveryHelpTitle">Tiempos de entrega</div>
+      <button id="deliveryHelpClose" class="deliveryHelpClose" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <div id="deliveryHelpContent">
+      <div class="deliveryHelpLine"><strong>Pronto a domicilio</strong>24–48 h · Solo Cartagena. Elige Moto a tu dirección o Recoger en punto.</div>
+      <div class="deliveryHelpLine"><strong>Rápido Nacional</strong>4–7 días.</div>
+      <div class="deliveryHelpLine"><strong>Libéralo</strong>14–28 días.</div>
+      <div class="deliveryHelpLine">El tiempo disponible depende de cada producto.</div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottomNav" aria-label="Navegación principal">
+  <a class="bottomNavItem" href="/" aria-label="Explorar">
+    <span class="bottomNavPlus">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+    </span>
+  </a>
+
+  <a class="bottomNavItem" href="/#favoritos">
+    <svg viewBox="0 0 24 24">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/>
+    </svg>
+    <span>Favorita</span>
+  </a>
+
+  <a class="bottomNavItem" href="/">
+    <svg viewBox="0 0 24 24">
+      <path d="m3 11 9-8 9 8v9H3Z"/>
+      <path d="M9 20v-6h6v6"/>
+    </svg>
+    <span>Inicio</span>
+  </a>
+
+  <a class="bottomNavItem" href="/#perfil">
+    <svg viewBox="0 0 24 24">
+      <circle cx="12" cy="7" r="4"/>
+      <path d="M4 21a8 8 0 0 1 16 0"/>
+    </svg>
+    <span>Perfil</span>
+  </a>
+
+  <a
+    id="bottomBagButton"
+    class="bottomNavItem"
+    href="/checkout/"
+    aria-current="page"
+  >
+    <svg viewBox="0 0 24 24">
+      <path d="M6.3 8.4h11.4l1 11H5.3l1-11Z"/>
+      <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/>
+    </svg>
+    <span>Bolsa</span>
+    <span id="bottomBagBadge" class="bottomNavBadge">0</span>
+  </a>
+</nav>
+
+<div
+  id="toast"
+  class="toast"
+  role="status"
+  aria-live="polite"
+></div>
+<script src="/analytics/client.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  const $ = id => document.getElementById(id);
+  const STEPS = ["bag", "payment"];
+  const STORE_API_URL = "https://cajamoda-storeload-api.onrender.com";
+  const BOGOTA_LOCALITIES = [
+    "Antonio Nariño", "Barrios Unidos", "Bosa", "Chapinero", "Ciudad Bolívar",
+    "Engativá", "Fontibón", "Kennedy", "La Candelaria", "Los Mártires",
+    "Puente Aranda", "Rafael Uribe Uribe", "San Cristóbal", "Santa Fe", "Suba",
+    "Sumapaz", "Teusaquillo", "Tunjuelito", "Usaquén", "Usme"
+  ];
+  let selectedDelivery = "";
+  let selectedPayment = "stripe";
+  let nequiPhone = "";
+  let stripePublishableKey = "";
+  let stripeClient = null;
+  let checkoutElements = null;
+  let checkoutActions = null;
+  let paymentElement = null;
+  let stripeSessionId = "";
+  let stripeCanConfirm = false;
+  let stripeInitializing = false;
+  let stripeSessionUpdate = Promise.resolve();
+  let stripeSessionCartKey = "";
+  let stripeSessionUpdating = false;
+  let deliveryQuoteToken = "";
+  let deliveryQuote = { method: "pickup", prontoMethod: "pickup", fee: 10000, title: "Pronto · Recoger" };
+  let deliveryQuotePending = false;
+  let deliveryQuoteError = "";
+  let quoteDestinationKey = "";
+  let quoteRequestVersion = 0;
+  let quoteTimer = null;
+  let cityRequestVersion = 0;
+  let deliveryCities = [];
+  let deliveryLocationsReady = false;
+  let deliveryDestinationActive = false;
+  let addressSuggestionVersion = 0;
+  let addressSuggestionTimer = null;
+  let postalLookupTimer = null;
+  let postalLookupVersion = 0;
+  let applyingAddressSuggestion = false;
+  const addressAutocompleteSession = createId();
+  let unavailableProductIds = new Set();
+  let incompatibleProntoItemIds = new Set();
+  const PICKUP_FEE_COP = 10000;
+  const CART_ITEM_UNAVAILABLE_CODE = "CART_ITEM_UNAVAILABLE";
+  const PRONTO_LOCATION_UNAVAILABLE_CODE = "PRONTO_LOCATION_UNAVAILABLE";
+  const PAYMENT_PREPARATION_ERROR = "No pudimos preparar el pago. Inténtalo nuevamente.";
+
+  function checkoutFulfillmentProfile(cart = readCart()) {
+    const modes = cart.items
+      .map(item => normalizeDeliveryMode(item.selectedDeliveryMode))
+      .filter(Boolean);
+    return {
+      hasPronto: modes.includes("pickup"),
+      hasFast: modes.includes("fast"),
+      hasShip: modes.includes("ship"),
+      hasNational: modes.includes("fast") || modes.includes("ship")
+    };
+  }
+
+  function checkoutDeliveryMethod(cart = readCart()) {
+    const profile = checkoutFulfillmentProfile(cart);
+    if (profile.hasPronto && profile.hasNational) return "mixed";
+    if (profile.hasPronto) return selectedDelivery === "moto" ? "moto" : "pickup";
+    return "national";
+  }
+
+  function deliverySummaryLabel(cart = readCart()) {
+    const profile = checkoutFulfillmentProfile(cart);
+    const dates = deliveryDateRanges();
+    const labels = [];
+    if (profile.hasPronto) labels.push(selectedDelivery === "moto" ? "Pronto a domicilio · 24–48 h" : "Pronto: Recoger en punto · 24–48 h");
+    if (profile.hasFast) labels.push(`Rápido Nacional · Llega ${dates.fast}`);
+    if (profile.hasShip) labels.push(`Libéralo · Llega ${dates.ship}`);
+    return labels.join(" + ") || "Entrega";
+  }
+
+  function currentDeliveryQuoteKey(cart = readCart()) {
+    const cartFingerprint = (Array.isArray(cart?.items) ? cart.items : [])
+      .map(item => [
+        item?.id || "",
+        item?.productId || "",
+        item?.variantId || "",
+        Math.max(1, Math.floor(Number(item?.quantity || 1))),
+        normalizeDeliveryMode(item?.selectedDeliveryMode || item?.deliveryMode)
+      ].join(":"))
+      .sort()
+      .join(",");
+    return [
+      Number(cart?.revision || 0),
+      cartFingerprint,
+      checkoutDeliveryMethod(cart),
+      selectedDelivery,
+      completeDeliveryAddress().toLowerCase(),
+      $("deliveryCity")?.value.trim().toLowerCase() || "",
+      $("deliveryCityDaneCode")?.value || "",
+      $("deliveryDepartment")?.value || "",
+      $("deliveryPostalCode")?.value.trim() || "",
+      $("deliveryAddressPlaceId")?.value || ""
+    ].join("|");
+  }
+
+  function deliveryQuoteMatchesCart(cart = readCart()) {
+    const profile = checkoutFulfillmentProfile(cart);
+    return Boolean(
+      deliveryQuote &&
+      deliveryQuote.method === checkoutDeliveryMethod(cart) &&
+      (!profile.hasPronto || deliveryQuote.prontoMethod === selectedDelivery) &&
+      quoteDestinationKey === currentDeliveryQuoteKey(cart)
+    );
+  }
+
+  function checkoutDeliveryFee() {
+    return deliveryQuoteMatchesCart() ? Number(deliveryQuote.fee || 0) : 0;
+  }
+
+  function checkoutTotal() {
+    return readCart().total + checkoutDeliveryFee();
+  }
+
+  function selectedShipmentChargeRows(cart = readCart()) {
+    const profile = checkoutFulfillmentProfile(cart);
+    const dates = deliveryDateRanges();
+    const quoteReady = deliveryQuoteMatchesCart(cart);
+    const groups = quoteReady && Array.isArray(deliveryQuote?.groups) ? deliveryQuote.groups : [];
+    const rows = [];
+    if (profile.hasPronto && selectedDelivery === "pickup") {
+      rows.push({ key: "pickup", label: "Pronto: Recoger en punto · 24–48 h", fee: PICKUP_FEE_COP, resolved: true });
+    }
+    if (profile.hasPronto && selectedDelivery === "moto") {
+      const quote = groups.find(group => group?.fulfillment === "pronto" && group?.method === "moto");
+      rows.push({
+        key: "moto",
+        label: "Pronto a domicilio · 24–48 h",
+        fee: Number(quote?.fee || 0),
+        resolved: Boolean(quote),
+        pending: "Se calcula con la dirección"
+      });
+    }
+    if (profile.hasFast) {
+      const quote = groups.find(group => group?.type === "R");
+      rows.push({
+        key: "R",
+        label: `Rápido Nacional · Llega ${dates.fast}`,
+        fee: Number(quote?.fee || 0),
+        resolved: Boolean(quote),
+        pending: "Se calcula con Envia"
+      });
+    }
+    if (profile.hasShip) {
+      const quote = groups.find(group => group?.type === "L");
+      rows.push({
+        key: "L",
+        label: `Libéralo · Llega ${dates.ship}`,
+        fee: Number(quote?.fee || 0),
+        resolved: Boolean(quote),
+        pending: "Se calcula con Envia"
+      });
+    }
+    return rows;
+  }
+
+  function renderShipmentCharges(containerId, chargeRows) {
+    const container = $(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+    chargeRows.forEach(charge => {
+      const row = document.createElement("div");
+      row.className = containerId === "nequiShipmentCharges" ? "nequiPriceLine" : "summaryLine";
+      const label = document.createElement("span");
+      label.textContent = charge.label;
+      const amount = document.createElement("span");
+      const bagNeedsAddress = containerId === "bagShipmentCharges" && charge.key !== "pickup";
+      amount.textContent = bagNeedsAddress
+        ? "Ver cálculo al ingresar la dirección"
+        : charge.resolved
+          ? money(charge.fee)
+          : charge.pending;
+      if (containerId !== "nequiShipmentCharges") amount.className = "summaryValue";
+      row.append(label, amount);
+      container.append(row);
+    });
+  }
+
+  function renderDeliveryQuoteBreakdown(profile, quoteReady, total) {
+    const panel = $("deliveryQuoteBreakdown");
+    const groupsContainer = $("deliveryQuoteGroups");
+    const totalElement = $("deliveryQuoteTotal");
+    if (!panel || !groupsContainer || !totalElement) return;
+    panel.hidden = !profile.hasNational;
+    if (!profile.hasNational) return;
+    const quotedGroups = quoteReady && Array.isArray(deliveryQuote?.groups)
+      ? deliveryQuote.groups
+      : [];
+    const requestedTypes = [profile.hasFast ? "R" : "", profile.hasShip ? "L" : ""].filter(Boolean);
+    groupsContainer.innerHTML = "";
+    requestedTypes.forEach(type => {
+      const quoted = quotedGroups.find(group => group?.type === type);
+      const row = document.createElement("div");
+      row.className = "deliveryQuoteRow";
+      const label = document.createElement("span");
+      label.textContent = type === "R" ? "Entrega Rápido (R)" : "Entrega Libéralo (L)";
+      const amount = document.createElement("span");
+      amount.textContent = quoteReady && quoted
+        ? money(Number(quoted.fee || 0))
+        : deliveryQuotePending
+          ? "Calculando…"
+          : "Por calcular";
+      row.append(label, amount);
+      groupsContainer.append(row);
+    });
+    totalElement.textContent = quoteReady
+      ? money(total)
+      : deliveryQuotePending
+        ? "Calculando…"
+        : "Por calcular";
+  }
+
+  function renderPaymentTotals() {
+    const cart = readCart();
+    const subtotal = cart.total;
+    const chargeRows = selectedShipmentChargeRows(cart);
+    const deliveryFee = chargeRows
+      .filter(charge => charge.resolved)
+      .reduce((sum, charge) => sum + Math.max(0, Number(charge.fee || 0)), 0);
+    const total = subtotal + deliveryFee;
+    const bagKnownDeliveryFee = chargeRows
+      .filter(charge => charge.key === "pickup" && charge.resolved)
+      .reduce((sum, charge) => sum + Math.max(0, Number(charge.fee || 0)), 0);
+    const bagTotal = subtotal + bagKnownDeliveryFee;
+    const quoteReady = deliveryQuoteMatchesCart(cart) &&
+      deliveryPlanSelectionsComplete(cart) &&
+      chargeRows.length > 0 &&
+      chargeRows.every(charge => charge.resolved);
+    const profile = checkoutFulfillmentProfile(cart);
+    if ($("subtotalValue")) $("subtotalValue").textContent = money(subtotal);
+    if ($("totalValue")) $("totalValue").textContent = money(total);
+    if ($("bagTotalValue")) $("bagTotalValue").textContent = money(bagTotal);
+    if ($("headerTotal")) $("headerTotal").textContent = money(total);
+    if ($("nequiAmount")) $("nequiAmount").textContent = `${money(total)} COP`;
+    if ($("nequiSubtotal")) $("nequiSubtotal").textContent = money(subtotal);
+    renderShipmentCharges("bagShipmentCharges", chargeRows);
+    renderShipmentCharges("nequiShipmentCharges", chargeRows);
+    renderShipmentCharges("stripeShipmentCharges", chargeRows);
+    renderDeliveryQuoteBreakdown(profile, quoteReady, total);
+    if ($("stripePayButton")) $("stripePayButton").textContent = `Pagar ${money(total)} COP`;
+    const quoteStatus = $("deliveryQuoteStatus");
+    if (quoteStatus && profile.hasNational) {
+      const destinationReady = Boolean(
+        $("deliveryDepartment")?.value &&
+        $("deliveryCityDaneCode")?.value &&
+        $("deliveryAddress")?.value.trim()
+      );
+      const hasFieldError = Boolean(document.querySelector(".shippingFields .deliveryField.hasError"));
+      const showQuoteStatus = !hasFieldError && (
+        quoteReady ||
+        (deliveryQuotePending && destinationReady) ||
+        Boolean(deliveryQuoteError)
+      );
+      quoteStatus.hidden = !showQuoteStatus;
+      if (showQuoteStatus) {
+        quoteStatus.textContent = deliveryQuotePending
+          ? "Calculando envío con Envia…"
+          : quoteReady
+            ? `Envío nacional calculado con Envia. Total de entrega: ${money(deliveryFee)}.`
+            : deliveryQuoteError;
+      }
+    }
+    syncDeliveryConfirmationUi();
+    updateStripePayAvailability();
+    updateNequiConfirmAvailability();
+  }
+
+  let activeStep = "bag";
+  let paymentTimer = null;
+
+  function readJson(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  function saveJson(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  }
+
+  function createId() {
+    return window.crypto?.randomUUID
+      ? window.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function isUnavailableItem(item) {
+    return unavailableProductIds.has(String(item?.productId || ""));
+  }
+
+  function isIncompatibleProntoItem(item) {
+    return incompatibleProntoItemIds.has(String(item?.id || ""));
+  }
+
+  function isFlaggedCartItem(item) {
+    return isUnavailableItem(item) || isIncompatibleProntoItem(item);
+  }
+
+  function unavailableItemNotice(item) {
+    if (!isFlaggedCartItem(item)) return "";
+    if(isIncompatibleProntoItem(item)){
+      const alternatives=allowedDeliveryModes(item).filter(mode=>mode!=="pickup");
+      if(alternatives.length){
+        return `<div class="cartUnavailableNotice" role="alert"><strong>Pronto solo está disponible en Cartagena. Revisa tu dirección de entrega en Tarjeta o Nequi. Si la entrega es fuera de Cartagena, selecciona R o L para continuar con este producto.</strong></div>`;
+      }
+    }
+    return `<div class="cartUnavailableNotice" role="alert">
+      <strong>${isIncompatibleProntoItem(item)?"Pronto solo está disponible en Cartagena. Revisa tu dirección de entrega en Tarjeta o Nequi. Si la entrega es fuera de Cartagena, retira este producto para continuar.":"Este producto ya no está disponible. Retíralo para continuar."}</strong>
+      <button class="cartUnavailableRemove" type="button" data-remove-unavailable="${escapeHtml(item.id)}">Retirar de la bolsa</button>
+    </div>`;
+  }
+
+  function paymentPreparationFailure(result) {
+    const error = new Error(PAYMENT_PREPARATION_ERROR);
+    if (result?.code === CART_ITEM_UNAVAILABLE_CODE && Array.isArray(result?.productIds)) {
+      unavailableProductIds = new Set(result.productIds.map(String).filter(Boolean));
+      renderCart();
+      error.code = CART_ITEM_UNAVAILABLE_CODE;
+    } else if (result?.code === PRONTO_LOCATION_UNAVAILABLE_CODE && Array.isArray(result?.cartLineIds)) {
+      incompatibleProntoItemIds = new Set(result.cartLineIds.map(String).filter(Boolean));
+      renderCart();
+      error.message = result?.message || "Pronto a domicilio solo está disponible en Cartagena.";
+      error.code = PRONTO_LOCATION_UNAVAILABLE_CODE;
+    } else {
+      error.code = "PAYMENT_PREPARATION_FAILED";
+    }
+    return error;
+  }
+
+  function money(amount) {
+    return new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "COP",
+      maximumFractionDigits: 0
+    }).format(Number(amount || 0));
+  }
+
+  const DELIVERY_MONTH_ABBREVIATIONS = [
+    "ene.", "feb.", "mar.", "abr.", "may.", "jun.",
+    "jul.", "ago.", "sep.", "oct.", "nov.", "dic."
+  ];
+
+  function deliveryDateRanges(now = new Date()) {
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(now).filter(part => part.type !== "literal").map(part => [part.type, part.value])
+    );
+    const base = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)));
+    const addDays = days => {
+      const date = new Date(base);
+      date.setUTCDate(date.getUTCDate() + days);
+      return date;
+    };
+    const formatRange = (startDays, endDays) => {
+      const start = addDays(startDays);
+      const end = addDays(endDays);
+      const startDay = start.getUTCDate();
+      const endDay = end.getUTCDate();
+      const startMonth = DELIVERY_MONTH_ABBREVIATIONS[start.getUTCMonth()];
+      const endMonth = DELIVERY_MONTH_ABBREVIATIONS[end.getUTCMonth()];
+      const startYear = start.getUTCFullYear();
+      const endYear = end.getUTCFullYear();
+      if (startYear !== endYear) return `${startDay} ${startMonth} ${startYear}–${endDay} ${endMonth} ${endYear}`;
+      if (start.getUTCMonth() !== end.getUTCMonth()) return `${startDay} ${startMonth}–${endDay} ${endMonth}`;
+      return `${startDay}–${endDay} ${startMonth}`;
+    };
+    return {
+      fast: formatRange(4, 7),
+      ship: formatRange(14, 28)
+    };
+  }
+
+  function showToast(message) {
+    const toast = $("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(showToast.timer);
+
+    showToast.timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 1800);
+  }
+
+  function normalizePrice(...candidates) {
+    function read(candidate) {
+      if (
+        candidate === null ||
+        candidate === undefined ||
+        candidate === ""
+      ) {
+        return null;
+      }
+
+      if (typeof candidate === "object") {
+        const nestedCandidates = [
+          candidate.amount,
+          candidate.value,
+          candidate.discountedPrice,
+          candidate.price,
+          candidate.formattedAmount
+        ];
+
+        for (const nested of nestedCandidates) {
+          const value = read(nested);
+
+          if (value !== null) {
+            return value;
+          }
+        }
+
+        return null;
+      }
+
+      if (typeof candidate === "string") {
+        const cleaned = candidate
+          .replace(/[^0-9,.-]/g, "")
+          .replace(/\.(?=\d{3}(?:\D|$))/g, "")
+          .replace(",", ".");
+
+        const numeric = Number(cleaned);
+
+        return Number.isFinite(numeric)
+          ? Math.round(numeric)
+          : null;
+      }
+
+      const numeric = Number(candidate);
+
+      return Number.isFinite(numeric)
+        ? Math.round(numeric)
+        : null;
+    }
+
+    for (const candidate of candidates) {
+      const numeric = read(candidate);
+
+      if (numeric !== null) {
+        return numeric;
+      }
+    }
+
+    return 0;
+  }
+
+  function normalizeCart(cart) {
+    const sourceItems = Array.isArray(cart?.items)
+      ? cart.items
+      : Array.isArray(cart?.lineItems)
+        ? cart.lineItems
+        : [];
+
+    const items = sourceItems.map(item => {
+      const unitPrice = normalizePrice(
+        item.unitPrice,
+        item.price,
+        item.lineItemPrice,
+        item.priceData?.discountedPrice,
+        item.priceData?.price
+      );
+      const allowedDeliveryModes = [...new Set((Array.isArray(item.allowedDeliveryModes)
+        ? item.allowedDeliveryModes
+        : Array.isArray(item.deliveryModes)
+          ? item.deliveryModes
+          : [item.deliveryMode || "fast"]
+      ).map(normalizeDeliveryMode).filter(Boolean))];
+      const selectedCandidate = normalizeDeliveryMode(item.selectedDeliveryMode);
+      const selectedDeliveryMode = selectedCandidate && allowedDeliveryModes.includes(selectedCandidate)
+        ? selectedCandidate
+        : "";
+
+      return {
+        id:
+          item.id ||
+          item._id ||
+          item.lineItemId ||
+          createId(),
+
+        productId:
+          item.productId ||
+          item.catalogReference?.catalogItemId ||
+          null,
+
+        variantId:
+          item.variantId ||
+          item.catalogReference?.options?.variantId ||
+          null,
+
+        name:
+          item.name ||
+          item.productName ||
+          "Producto",
+
+        image:
+          item.image ||
+          item.imageUrl ||
+          item.media?.url ||
+          "",
+
+        size:
+          item.size ||
+          item.options?.Size ||
+          item.options?.Talla ||
+          item.options?.size ||
+          item.options?.talla ||
+          "",
+
+        color:
+          item.color ||
+          item.options?.Color ||
+          item.options?.color ||
+          "",
+
+        deliveryMode:
+          selectedDeliveryMode || "",
+
+        allowedDeliveryModes,
+
+        selectedDeliveryMode,
+
+        quantity: Math.max(
+          1,
+          Math.floor(Number(item.quantity || 1))
+        ),
+
+        unitPrice,
+        price: unitPrice,
+        autoSelected: item.autoSelected === true
+      };
+    });
+
+    const canonicalItems=[];
+    items.forEach(item=>{
+      const key=[
+        String(item.productId||""),
+        String(item.variantId||""),
+        normalizeChoice(item.size),
+        normalizeChoice(item.color)
+      ].join("::");
+      const existing=canonicalItems.find(candidate=>candidate._lineKey===key);
+      if(existing){
+        existing.quantity+=item.quantity;
+        existing.unitPrice=item.unitPrice;
+        existing.price=item.unitPrice;
+      }else{
+        canonicalItems.push({...item,_lineKey:key});
+      }
+    });
+    const syncedItems=canonicalItems.map(({_lineKey,...item})=>item);
+
+    return {
+      items:syncedItems,
+
+      count: syncedItems.reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      ),
+
+      total: syncedItems.reduce(
+        (sum, item) =>
+          sum + item.unitPrice * item.quantity,
+        0
+      ),
+      revision: Math.max(0,Number(cart?.revision || 0)),
+      updatedAt: Math.max(0,Number(cart?.updatedAt || 0)),
+      authoritative: cart?.authoritative === true
+    };
+  }
+
+  function readCart() {
+    const checkoutCart = readJson(
+      "cajamoda-checkout-cart",
+      null
+    );
+
+    const regularCart = readJson(
+      "cajamoda-cart",
+      null
+    );
+
+    const chosen = regularCart !== null
+      ? regularCart
+      : checkoutCart;
+
+    return normalizeCart(
+      chosen || { items: [] }
+    );
+  }
+
+  function saveCart(cart, syncBackend = true) {
+    const normalized = normalizeCart(cart);
+
+    normalized.revision = Math.max(
+      Number(readJson("cajamoda-cart",null)?.revision || 0),
+      Number(cart?.revision || 0)
+    ) + 1;
+    normalized.updatedAt = Date.now();
+    normalized.authoritative = true;
+
+    saveJson(
+      "cajamoda-cart",
+      normalized
+    );
+
+    saveJson(
+      "cajamoda-checkout-cart",
+      normalized
+    );
+
+    if (syncBackend) {
+      window.postMessage({
+        source: "CAJAMODA_CHECKOUT",
+        type: "SYNC_CART",
+        payload: { cart: normalized }
+      }, "*");
+    }
+
+    renderCart();
+    if (normalized.items.length) {
+      prepareStripeInBackground();
+      scheduleDeliveryQuote();
+    } else {
+      quoteRequestVersion += 1;
+      clearTimeout(quoteTimer);
+      deliveryQuote = null;
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = "";
+      quoteDestinationKey = "";
+      stripeSessionCartKey = "";
+      updateStripePayAvailability();
+    }
+
+    return normalized;
+  }
+
+  function normalizeChoice(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function normalizeLocationChoice(value) {
+    return normalizeChoice(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  }
+
+  function normalizeDeliveryMode(value){
+    const mode=normalizeChoice(value).replace(/[áàä]/g,"a").replace(/[éèë]/g,"e");
+    if(["pickup","pronto","pick","p"].includes(mode)){return "pickup"}
+    if(["ship","liberalo","liberala","release","global","l"].includes(mode)){return "ship"}
+    if(["fast","rapido","r"].includes(mode)){return "fast"}
+    return "";
+  }
+
+  function deliveryModesFromSku(value){
+    const code=String(value||"").trim().toUpperCase().match(/^(PRL|PR|RP|PL|LP|RL|LR|P|R|L)(?:-|$)/)?.[1]||"";
+    if(code==="PRL"){return ["pickup","fast","ship"]}
+    if(["PR","RP"].includes(code)){return ["pickup","fast"]}
+    if(["PL","LP"].includes(code)){return ["pickup","ship"]}
+    if(["RL","LR"].includes(code)){return ["fast","ship"]}
+    if(code==="P"){return ["pickup"]}
+    if(code==="L"){return ["ship"]}
+    if(code==="R"){return ["fast"]}
+    return [];
+  }
+
+  function catalogProduct(productId) {
+    const catalog = readJson("cajamoda-catalog", []);
+    return Array.isArray(catalog)
+      ? catalog.find(product => String(product.id || product._id) === String(productId)) || null
+      : null;
+  }
+
+  function productVariants(item) {
+    const product = catalogProduct(item.productId);
+    const variants = product?.variants || product?.raw?.variants || [];
+    return Array.isArray(variants)
+      ? variants.filter(variant => variant.inStock !== false)
+      : [];
+  }
+
+  function variantChoice(variant, name) {
+    const choices = variant.choices || variant.options || variant.selectedOptions || {};
+    return variant[name] || choices[name] || choices[name.toLowerCase()] || "";
+  }
+
+  function selectedVariant(item) {
+    const variants = productVariants(item);
+    const byId = variants.find(variant =>
+      String(variant.id || variant._id || "") === String(item.variantId || "")
+    );
+    if (byId) return byId;
+
+    return variants.find(variant => {
+      const size = variantChoice(variant, "Size");
+      const color = variantChoice(variant, "Color");
+      return (!size || normalizeChoice(size) === normalizeChoice(item.size)) &&
+        (!color || normalizeChoice(color) === normalizeChoice(item.color));
+    }) || null;
+  }
+
+  function allowedDeliveryModes(item){
+    const variant=selectedVariant(item);
+    const source=Array.isArray(variant?.deliveryModes)&&variant.deliveryModes.length
+      ?variant.deliveryModes
+      :Array.isArray(item.allowedDeliveryModes)&&item.allowedDeliveryModes.length
+        ?item.allowedDeliveryModes
+        :deliveryModesFromSku(variant?.sku||item.sku);
+    const modes=[...new Set(source.map(normalizeDeliveryMode).filter(Boolean))];
+    return modes.length?modes:[normalizeDeliveryMode(item.deliveryMode)||"fast"];
+  }
+
+  function itemInventoryLimit(item) {
+    const variant = selectedVariant(item);
+    const product = catalogProduct(item.productId);
+    const raw = variant?.inventoryQuantity ??
+      variant?.stock?.quantity ??
+      variant?.quantity ??
+      product?.inventoryQuantity;
+    const limit = Number(raw);
+    return raw !== null && raw !== undefined && raw !== "" && Number.isFinite(limit) && limit >= 0
+      ? Math.max(0, Math.floor(limit))
+      : Infinity;
+  }
+
+  function quantityCapAttributes(item) {
+    return Number(item.quantity || 0) >= itemInventoryLimit(item)
+      ? 'disabled aria-disabled="true"'
+      : "";
+  }
+
+  function optionValues(item, name) {
+    return [...new Set(productVariants(item)
+      .map(variant => String(variantChoice(variant, name)).trim())
+      .filter(Boolean))];
+  }
+
+  function optionSelect(item, name, label, current) {
+    const values = optionValues(item, name);
+    if (!values.length || values.length === 1) return "";
+
+    return `<select class="cartOptionSelect" data-cart-option="${name.toLowerCase()}" data-item-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(label)}">
+      ${!current?`<option value="" selected disabled>${escapeHtml(label)}: Selecciona</option>`:""}
+      ${values.map(value => `<option value="${escapeHtml(value)}" ${normalizeChoice(value) === normalizeChoice(current) ? "selected" : ""}>${escapeHtml(label)}: ${escapeHtml(value)}</option>`).join("")}
+    </select>`;
+  }
+
+  function visibleColor(item){
+    const colors=optionValues(item,"Color");
+    if(!colors.length){return ""}
+    if(colors.length===1){return colors[0]}
+    return colors.some(color=>normalizeChoice(color)===normalizeChoice(item.color))
+      ?item.color
+      :"";
+  }
+
+  function deliveryModeLabel(item){
+    const mode=normalizeDeliveryMode(item.selectedDeliveryMode||item.deliveryMode);
+    if(["ship","liberalo","liberala","release","global","l"].includes(mode)){return "Libéralo"}
+    if(["pickup","pronto","pick","p"].includes(mode)){return "Pronto"}
+    return "Rápido Nacional";
+  }
+
+  function deliveryChoices(item){
+    const allowed=allowedDeliveryModes(item);
+    const selected=normalizeDeliveryMode(item.selectedDeliveryMode);
+    const short={pickup:"P",fast:"R",ship:"L"};
+    const label={pickup:"Pronto",fast:"Rápido Nacional",ship:"Libéralo"};
+    return `<div class="cartDeliveryChoices" aria-label="Método de entrega">
+      <span class="cartDeliveryLabel">Selecciona tu entrega:</span>
+      ${allowed.map(mode=>`<button class="cartDeliveryChoice ${selected===mode?"selected":""}" type="button" data-cart-delivery="${mode}" data-item-id="${escapeHtml(item.id)}" aria-label="${label[mode]}">${short[mode]}</button>`).join("")}
+    </div>`;
+  }
+
+  const deliveryExplanations={
+    pickup:{label:"Pronto a domicilio",copy:"24–48 h · Solo Cartagena. Elige Moto a tu dirección o Recoger en punto."},
+    fast:{label:"Rápido Nacional",copy:"4–7 días."},
+    ship:{label:"Libéralo",copy:"14–28 días."}
+  };
+
+  function openDeliveryHelp(mode=""){
+    const explanation=deliveryExplanations[normalizeDeliveryMode(mode)];
+    $("deliveryHelpTitle").textContent=explanation?explanation.label:"Tiempos de entrega";
+    $("deliveryHelpContent").innerHTML=explanation
+      ? `<div class="deliveryHelpLine"><strong>${explanation.label}</strong>${explanation.copy}</div>`
+      : Object.values(deliveryExplanations).map(item=>`<div class="deliveryHelpLine"><strong>${item.label}</strong>${item.copy}</div>`).join("")+
+        `<div class="deliveryHelpLine">El tiempo disponible depende de cada producto.</div>`;
+    $("deliveryHelp").classList.add("isOpen");
+  }
+
+  function renderBagDeliverySummary(cart=readCart()){
+    const counts={pickup:0,fast:0,ship:0};
+    cart.items.forEach(item=>{
+      const allowed=allowedDeliveryModes(item);
+      const selected=normalizeDeliveryMode(item.selectedDeliveryMode);
+      if(counts[selected]===undefined||!allowed.includes(selected)){return}
+      counts[selected]+=Math.max(1,Math.floor(Number(item.quantity||1)));
+    });
+    const nationalQuoteFees={};
+    (Array.isArray(deliveryQuote?.groups)?deliveryQuote.groups:[]).forEach(group=>{
+      if(group?.type==="R"){nationalQuoteFees.fast=Number(group.fee||0)}
+      if(group?.type==="L"){nationalQuoteFees.ship=Number(group.fee||0)}
+    });
+    const prontoLabel=selectedDelivery==="pickup"
+      ? "Pronto: Recoger en punto"
+      : selectedDelivery==="moto"
+        ? "Pronto a domicilio"
+        : "Pronto";
+    const prontoTime=selectedDelivery==="pickup"
+      ? `24–48 h · ${money(PICKUP_FEE_COP)}`
+      : selectedDelivery==="moto"
+        ? "24–48 h · Ver cálculo al ingresar la dirección"
+        : "Elige recoger en punto o moto";
+    const dates=deliveryDateRanges();
+    const groups=[
+      {mode:"pickup",label:prontoLabel,time:prontoTime},
+      {mode:"fast",label:`Rápido Nacional · Llega ${dates.fast}`,time:"Ver cálculo al ingresar la dirección"},
+      {mode:"ship",label:`Libéralo · Llega ${dates.ship}`,time:"Ver cálculo al ingresar la dirección"}
+    ].filter(group=>counts[group.mode]>0);
+    const garmentCount=cart.items.reduce((total,item)=>total+Math.max(1,Math.floor(Number(item.quantity||1))),0);
+    $("bagDeliverySummary").hidden=groups.length===0;
+    $("deliveryGarmentCount").textContent=garmentCount===1?"1 prenda":`${garmentCount} prendas`;
+    $("deliverySummaryRows").innerHTML=groups.map(group=>`
+      <div class="summaryLine">
+        <span class="deliveryGroupName">${group.label}<span class="deliveryGroupCount">${counts[group.mode]}</span></span>
+        <span class="summaryValue">${group.time}</span>
+      </div>`).join("");
+    if ($("bagProntoReceivingChoice")) $("bagProntoReceivingChoice").hidden=counts.pickup===0;
+    if ($("bagPickupAddress")) $("bagPickupAddress").hidden=counts.pickup===0||selectedDelivery!=="pickup";
+    $("deliverySeparateNote").hidden=groups.length<2;
+    $("deliverySeparateNote").textContent=groups.length>1
+      ? `Tu pedido llegará en ${groups.length} entregas separadas.`
+      :"";
+  }
+
+  function deliverySelectionsComplete(cart=readCart()){
+    return cart.items.every(item=>{
+      const selected=normalizeDeliveryMode(item.selectedDeliveryMode);
+      return Boolean(selected&&allowedDeliveryModes(item).includes(selected));
+    });
+  }
+
+  function deliveryPlanSelectionsComplete(cart=readCart()){
+    if(!deliverySelectionsComplete(cart)){return false}
+    const profile=checkoutFulfillmentProfile(cart);
+    return !profile.hasPronto||["pickup","moto"].includes(selectedDelivery);
+  }
+
+  function selectedDepartmentIsBolivar() {
+    const select = $("deliveryDepartment");
+    const optionText = select?.selectedOptions?.[0]?.textContent || "";
+    const normalizedValue = normalizeChoice(select?.value);
+    return normalizedValue === "bl" || normalizeChoice(optionText) === "bolivar";
+  }
+
+  function selectBolivarDepartment() {
+    const select = $("deliveryDepartment");
+    if (!select || normalizeChoice($("deliveryCity")?.value) !== "cartagena") return false;
+    const option = [...select.options].find(candidate =>
+      normalizeChoice(candidate.value) === "bl" || normalizeChoice(candidate.textContent) === "bolivar"
+    );
+    if (!option) return false;
+    if (select.value !== option.value) select.value = option.value;
+    return true;
+  }
+
+  function syncProntoLocationWarnings(cart = readCart()) {
+    const city = normalizeChoice($("deliveryCity")?.value);
+    const departmentSelected = Boolean($("deliveryDepartment")?.value);
+    const addressConfirmed = Boolean($("deliveryAddress")?.value.trim());
+    const isCartagena = city === "cartagena" || city === "cartagena de indias";
+    const outsideCartagena = Boolean(city) && !isCartagena;
+    const wrongDepartment = departmentSelected && !selectedDepartmentIsBolivar();
+    const validateMotoLocation =
+      deliveryDestinationActive &&
+      selectedDelivery === "moto" &&
+      addressConfirmed &&
+      Boolean(city) &&
+      departmentSelected;
+    incompatibleProntoItemIds = new Set(
+      validateMotoLocation && (outsideCartagena || wrongDepartment)
+        ? cart.items
+            .filter(item => normalizeDeliveryMode(item.selectedDeliveryMode) === "pickup")
+            .map(item => String(item.id))
+        : []
+    );
+    return incompatibleProntoItemIds;
+  }
+
+  function cartItemDetails(item){
+    const details=[];
+    if(item.size){details.push(`<span class="cartOptionLine">Talla: ${escapeHtml(item.size)}</span>`)}
+    const color=visibleColor(item);
+    if(color){details.push(`<span class="cartOptionLine">Color: ${escapeHtml(color)}</span>`)}
+    const allowed=allowedDeliveryModes(item);
+    const selected=normalizeDeliveryMode(item.selectedDeliveryMode);
+    details.push(`<span class="cartOptionLine cartPromise">${escapeHtml(selected ? deliveryModeLabel({ ...item, selectedDeliveryMode: selected }) : "Selecciona la entrega")}</span>`);
+    return `<div class="cartOptions">${details.join("")}</div>`;
+  }
+
+  function colorChoices(item){
+    const values=optionValues(item,"Color");
+    if(values.length<2){return ""}
+    const swatch=value=>({negro:"#111",black:"#111",blanco:"#fff",white:"#fff",rojo:"#c91f37",red:"#c91f37",crema:"#eadcc7",cream:"#eadcc7",azul:"#315b8a",blue:"#315b8a",verde:"#55745a",green:"#55745a"}[normalizeChoice(value)]||"#d8d8d8");
+    return `<div class="cartColorChoices" aria-label="Color">${values.map(value=>`<button class="cartColorChoice ${normalizeChoice(value)===normalizeChoice(item.color)?"selected":""}" type="button" data-cart-color="${escapeHtml(value)}" data-item-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(value)}" style="--swatch:${swatch(value)}"></button>`).join("")}</div>`;
+  }
+
+  function productDescription(item){
+    const product=catalogProduct(item.productId);
+    const source=String(item.description || product?.description || "").trim();
+    if(!source){return ""}
+    const text=document.createElement("div");
+    text.innerHTML=source;
+    const clean=String(text.textContent || "").replace(/\s+/g," ").trim();
+    return clean.length>92 ? `${clean.slice(0,89).trim()}…` : clean;
+  }
+
+  const liveReviewSummaries=new Map();
+
+  function productRatingLabel(item){
+    const live=liveReviewSummaries.get(String(item.productId));
+    const product=catalogProduct(item.productId);
+    const rating=Number(live?.averageRating || product?.reviewSummary?.averageRating || product?.rating || 0);
+    const count=Number(live?.reviewCount || product?.reviewSummary?.reviewCount || product?.reviewCount || 0);
+    return count>0 ? `★★★★★ ${rating.toFixed(1)} · ${count} reseñas` : "☆ Sin reseñas";
+  }
+
+  async function hydrateCheckoutReviews(items){
+    const ids=[...new Set(items.map(item=>String(item.productId||"")).filter(Boolean))];
+    await Promise.all(ids.map(async productId=>{
+      if(liveReviewSummaries.has(productId)){return}
+      liveReviewSummaries.set(productId,null);
+      try{
+        const response=await fetch(`/api/reviews?productId=${encodeURIComponent(productId)}`,{headers:{Accept:"application/json"}});
+        if(!response.ok){return}
+        const payload=await response.json();
+        liveReviewSummaries.set(productId,payload.summary||{averageRating:0,reviewCount:0});
+        document.querySelectorAll(`[data-review-product="${CSS.escape(productId)}"]`).forEach(node=>{
+          const item=items.find(candidate=>String(candidate.productId)===productId);
+          if(item){node.textContent=productRatingLabel(item)}
+        });
+      }catch{}
+    }));
+  }
+
+  function sizeChoices(item){
+    const values=optionValues(item,"Size");
+    if(!values.length){return ""}
+    const canonical=["S","M","L","XL"];
+    const alias=value=>({small:"S",pequeno:"S",pequeño:"S",medium:"M",mediano:"M",large:"L",grande:"L","extra large":"XL",extra_grande:"XL"}[normalizeChoice(value)]||String(value).toUpperCase());
+    const available=new Set(values.map(alias));
+    return `<div class="cartSizeChoices" aria-label="Talla">
+      ${canonical.map(value=>`<button class="cartSizeChoice ${alias(item.size)===value?"selected":""}" type="button" data-cart-size="${escapeHtml(value)}" data-item-id="${escapeHtml(item.id)}" ${available.has(value)?"":"disabled aria-disabled=\"true\""}>${value}</button>`).join("")}
+    </div>`;
+  }
+
+  function isFavorite(productId){
+    const saved=readJson("cajamoda-favorites",[]);
+    return Array.isArray(saved)&&saved.map(String).includes(String(productId));
+  }
+
+  function productUrl(item) {
+    const url = new URL("/product/", location.origin);
+    url.searchParams.set("productId", item.productId || "");
+    return url.toString();
+  }
+
+  function productImage(item, review = false) {
+    const className = review
+      ? "reviewImage"
+      : "cartImage";
+
+    if (item.image) {
+      return `
+        <a class="${review ? "reviewImageLink" : "cartImageLink"}" href="${escapeHtml(productUrl(item))}" aria-label="Ver ${escapeHtml(item.name)}">
+        <div class="${className}">
+          <img
+            src="${escapeHtml(item.image)}"
+            alt="${escapeHtml(item.name)}"
+          >
+        </div>
+        </a>
+      `;
+    }
+
+    return `
+      <a class="${review ? "reviewImageLink" : "cartImageLink"}" href="${escapeHtml(productUrl(item))}" aria-label="Ver ${escapeHtml(item.name)}">
+      <div class="${className}">
+        <div class="cartImagePlaceholder">
+          CAJAMODA
+        </div>
+      </div>
+      </a>
+    `;
+  }
+
+  function renderCart() {
+    const cart = readCart();
+    syncProntoLocationWarnings(cart);
+    const totalText = money(cart.total);
+
+    $("headerBagBadge").textContent =
+      String(cart.count);
+
+    $("bottomBagBadge").textContent =
+      String(cart.count);
+
+    $("cartItemCount").textContent =
+      cart.count === 1
+        ? "1 producto"
+        : `${cart.count} productos`;
+
+    [
+      "bagSubtotalValue",
+      "bagTotalValue",
+      "subtotalValue",
+      "totalValue",
+      "headerTotal"
+    ].forEach(id => {
+      $(id).textContent = totalText;
+    });
+
+    $("toDeliveryButton").disabled =
+      cart.items.length === 0 || !deliveryPlanSelectionsComplete(cart);
+
+    updateNequiConfirmAvailability();
+
+    syncDeliveryControls();
+    renderPaymentTotals();
+    renderBagDeliverySummary(cart);
+
+    if (!cart.items.length) {
+      $("cartList").innerHTML = `
+        <div class="emptyCart">
+          <div class="emptyBagIcon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <path d="M6.3 8.4h11.4l1 11H5.3l1-11Z"/>
+              <path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/>
+            </svg>
+          </div>
+
+          <div class="emptyCartTitle">
+            Tu bolsa está vacía
+          </div>
+
+          <div class="emptyCartText">
+            Agrega un producto antes de continuar.
+          </div>
+
+          <button
+            class="continueShopping"
+            id="continueShopping"
+            type="button"
+          >
+            Seguir comprando
+          </button>
+        </div>
+      `;
+
+      $("reviewList").innerHTML = "";
+
+      $("continueShopping").onclick = () => {
+        location.href = "/";
+      };
+
+      syncPanelHeight();
+      return;
+    }
+
+    $("cartList").innerHTML = cart.items.map(item => `
+      <article
+        class="cartItem ${isFlaggedCartItem(item) ? "isUnavailable" : ""}"
+        data-cart-item="${escapeHtml(item.id)}"
+      >
+        ${productImage(item)}
+
+        <div class="cartInfo">
+          <div class="cartTop">
+            <div>
+              <div class="cartName">${escapeHtml(item.name)}</div>
+              ${productDescription(item)?`<div class="cartDescription">${escapeHtml(productDescription(item))}</div>`:""}
+              <div class="cartRating" data-review-product="${escapeHtml(item.productId)}">${productRatingLabel(item)}</div>
+            </div>
+
+            <div class="cartTopActions">
+            <button class="cartHeart ${isFavorite(item.productId)?"active":""}" type="button" data-cart-favorite="${escapeHtml(item.productId)}" aria-label="Favorita">
+              <svg viewBox="0 0 24 24"><path d="M20.3 5.7a5.2 5.2 0 0 0-7.4 0L12 6.6l-.9-.9a5.2 5.2 0 0 0-7.4 7.4L12 21l8.3-7.9a5.2 5.2 0 0 0 0-7.4Z"/></svg>
+            </button>
+            <button
+              class="removeButton"
+              type="button"
+              data-remove="${escapeHtml(item.id)}"
+              aria-label="Eliminar"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <path d="M6 6l12 12M18 6 6 18"/>
+              </svg>
+            </button>
+            </div>
+          </div>
+
+          ${cartItemDetails(item)}
+
+          ${unavailableItemNotice(item)}
+
+          <div class="cartOptionControls">
+            ${deliveryChoices(item)}
+            ${colorChoices(item)}
+            ${sizeChoices(item)}
+          </div>
+
+          <div class="cartBottom">
+            <div class="cartPrice">
+              ${money(item.unitPrice * item.quantity)}
+            </div>
+
+            <div class="quantityControl">
+              <button
+                class="quantityButton"
+                type="button"
+                data-minus="${escapeHtml(item.id)}"
+                aria-label="Reducir cantidad"
+              >
+                −
+              </button>
+
+              <span class="quantityValue">
+                ${item.quantity}
+              </span>
+
+              <button
+                class="quantityButton"
+                type="button"
+                data-plus="${escapeHtml(item.id)}"
+                aria-label="Aumentar cantidad"
+                ${quantityCapAttributes(item)}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    $("reviewList").innerHTML = cart.items.map(item => `
+      <article class="cartItem finalCheckoutItem ${isFlaggedCartItem(item) ? "isUnavailable" : ""}" data-cart-item="${escapeHtml(item.id)}">
+        ${productImage(item)}
+
+        <div class="cartInfo">
+          <div class="cartTop">
+            <div>
+              <div class="cartName">${escapeHtml(item.name)}</div>
+              ${productDescription(item)?`<div class="cartDescription">${escapeHtml(productDescription(item))}</div>`:""}
+              <div class="cartRating" data-review-product="${escapeHtml(item.productId)}">${productRatingLabel(item)}</div>
+            </div>
+
+            <div class="cartTopActions">
+              <button class="cartHeart ${isFavorite(item.productId)?"active":""}" type="button" data-cart-favorite="${escapeHtml(item.productId)}" aria-label="Favorita">
+                <svg viewBox="0 0 24 24"><path d="M20.3 5.7a5.2 5.2 0 0 0-7.4 0L12 6.6l-.9-.9a5.2 5.2 0 0 0-7.4 7.4L12 21l8.3-7.9a5.2 5.2 0 0 0 0-7.4Z"/></svg>
+              </button>
+              <button class="removeButton" type="button" data-remove="${escapeHtml(item.id)}" aria-label="Eliminar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          ${cartItemDetails(item)}
+
+          ${isIncompatibleProntoItem(item) ? "" : unavailableItemNotice(item)}
+
+          <div class="cartOptionControls">
+            ${colorChoices(item)}
+            ${sizeChoices(item)}
+          </div>
+
+          <div class="cartBottom">
+            <div class="cartPrice">${money(item.unitPrice * item.quantity)}</div>
+            <div class="quantityControl">
+              <button class="quantityButton" type="button" data-minus="${escapeHtml(item.id)}" aria-label="Reducir cantidad">−</button>
+              <span class="quantityValue">${item.quantity}</span>
+              <button class="quantityButton" type="button" data-plus="${escapeHtml(item.id)}" aria-label="Aumentar cantidad" ${quantityCapAttributes(item)}>+</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    `).join("");
+
+    document
+      .querySelectorAll("[data-remove]")
+      .forEach(button => {
+        button.onclick = () => {
+          removeItem(button.dataset.remove);
+        };
+      });
+
+    document
+      .querySelectorAll("[data-remove-unavailable]")
+      .forEach(button => {
+        button.onclick = () => removeUnavailableItem(button.dataset.removeUnavailable);
+      });
+
+    document
+      .querySelectorAll("[data-minus]")
+      .forEach(button => {
+        button.onclick = () => {
+          changeQuantity(
+            button.dataset.minus,
+            -1
+          );
+        };
+      });
+
+    document
+      .querySelectorAll("[data-plus]")
+      .forEach(button => {
+        button.onclick = () => {
+          changeQuantity(
+            button.dataset.plus,
+            1
+          );
+        };
+      });
+
+    document
+      .querySelectorAll("[data-cart-option]")
+      .forEach(select => {
+        select.onchange = () => {
+          changeOption(select.dataset.itemId, select.dataset.cartOption, select.value);
+        };
+      });
+
+    document.querySelectorAll("[data-cart-size]").forEach(button=>{
+      button.onclick=()=>changeOption(button.dataset.itemId,"size",button.dataset.cartSize);
+    });
+    document.querySelectorAll("[data-cart-color]").forEach(button=>{
+      button.onclick=()=>changeOption(button.dataset.itemId,"color",button.dataset.cartColor);
+    });
+    document.querySelectorAll("[data-cart-delivery]").forEach(button=>{
+      button.onclick=()=>changeDeliveryMode(button.dataset.itemId,button.dataset.cartDelivery);
+    });
+
+    document.querySelectorAll("[data-cart-favorite]").forEach(button=>{
+      button.onclick=()=>{
+        const id=String(button.dataset.cartFavorite);
+        const saved=readJson("cajamoda-favorites",[]);
+        const favorites=new Set(Array.isArray(saved)?saved.map(String):[]);
+        favorites.has(id)?favorites.delete(id):favorites.add(id);
+        saveJson("cajamoda-favorites",[...favorites]);
+        renderCart();
+      };
+    });
+
+    document
+      .querySelectorAll(
+        ".cartImage img,.reviewImage img"
+      )
+      .forEach(image => {
+        image.addEventListener(
+          "load",
+          syncPanelHeight,
+          { once: true }
+        );
+      });
+
+    hydrateCheckoutReviews(cart.items);
+    syncPanelHeight();
+  }
+
+  function changeQuantity(itemId, amount) {
+    const cart = readCart();
+
+    const item = cart.items.find(
+      candidate =>
+        String(candidate.id) === String(itemId)
+    );
+
+    if (!item) {
+      return;
+    }
+
+    const nextQuantity = item.quantity + amount;
+    if (amount > 0 && nextQuantity > itemInventoryLimit(item)) {
+      return;
+    }
+
+    item.quantity = nextQuantity;
+
+    if (item.quantity <= 0) {
+      cart.items = cart.items.filter(
+        candidate =>
+          String(candidate.id) !== String(itemId)
+      );
+    }
+
+    saveCart(cart);
+  }
+
+  function changeOption(itemId, option, value) {
+    const cart = readCart();
+    const item = cart.items.find(candidate =>
+      String(candidate.id) === String(itemId)
+    );
+
+    if (!item) return;
+
+    const nextSize = option === "size" ? value : item.size;
+    const nextColor = option === "color" ? value : item.color;
+    const variant = productVariants(item).find(candidate => {
+      const size = variantChoice(candidate, "Size");
+      const color = variantChoice(candidate, "Color");
+      return (!size || normalizeChoice(size) === normalizeChoice(nextSize)) &&
+        (!color || normalizeChoice(color) === normalizeChoice(nextColor));
+    });
+
+    if (!variant) {
+      showToast("Esa combinación no está disponible en Wix.");
+      renderCart();
+      return;
+    }
+
+    item.size = nextSize;
+    item.color = nextColor;
+    item.variantId = variant.id || variant._id || item.variantId;
+    item.unitPrice = normalizePrice(
+      variant.price,
+      variant.priceData?.discountedPrice,
+      variant.priceData?.price,
+      item.unitPrice
+    );
+    item.price = item.unitPrice;
+    item.allowedDeliveryModes = Array.isArray(variant.deliveryModes)
+      ? variant.deliveryModes
+      : deliveryModesFromSku(variant.sku);
+    item.selectedDeliveryMode = "";
+
+    const duplicate=cart.items.find(candidate=>
+      candidate!==item &&
+      String(candidate.productId)===String(item.productId) &&
+      normalizeChoice(candidate.size)===normalizeChoice(item.size) &&
+      normalizeChoice(candidate.color)===normalizeChoice(item.color)
+    );
+    if(duplicate){
+      item.quantity+=duplicate.quantity;
+      cart.items=cart.items.filter(candidate=>candidate!==duplicate);
+    }
+
+    saveCart(cart);
+    showToast("Producto actualizado.");
+  }
+
+  function changeDeliveryMode(itemId, mode){
+    const cart=readCart();
+    const item=cart.items.find(candidate=>String(candidate.id)===String(itemId));
+    const normalized=normalizeDeliveryMode(mode);
+    if(!item||!allowedDeliveryModes(item).includes(normalized)){return}
+    item.allowedDeliveryModes=allowedDeliveryModes(item);
+    if(normalizeDeliveryMode(item.selectedDeliveryMode)===normalized){
+      openDeliveryHelp(normalized);
+      return;
+    }
+    const alreadyHasPronto=cart.items.some(candidate=>candidate!==item&&normalizeDeliveryMode(candidate.selectedDeliveryMode)==="pickup");
+    item.selectedDeliveryMode=normalized;
+    item.deliveryMode=normalized;
+    if(normalized==="pickup"&&!alreadyHasPronto){selectedDelivery=""}
+    saveCart(cart);
+  }
+
+  function removeItem(itemId) {
+    const cart = readCart();
+
+    const removedItem = cart.items.find(item => String(item.id) === String(itemId));
+
+    cart.items = cart.items.filter(
+      item =>
+        String(item.id) !== String(itemId)
+    );
+
+    if (removedItem && !cart.items.some(item => String(item.productId) === String(removedItem.productId))) {
+      unavailableProductIds.delete(String(removedItem.productId));
+    }
+    incompatibleProntoItemIds.delete(String(itemId));
+
+    saveCart(cart);
+    showToast("Producto eliminado.");
+  }
+
+  async function removeUnavailableItem(itemId) {
+    const cart = readCart();
+    const removedItem = cart.items.find(item => String(item.id) === String(itemId));
+    if (!removedItem) return;
+
+    cart.items = cart.items.filter(item => String(item.id) !== String(itemId));
+    if (!cart.items.some(item => String(item.productId) === String(removedItem.productId))) {
+      unavailableProductIds.delete(String(removedItem.productId));
+    }
+    incompatibleProntoItemIds.delete(String(itemId));
+    const correctedCart = saveCart(cart);
+    if (!correctedCart.items.length) {
+      unavailableProductIds.clear();
+      incompatibleProntoItemIds.clear();
+      goToStep("bag");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${STORE_API_URL}/api/checkout/validate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(checkoutPayload())
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result?.ok !== true) throw paymentPreparationFailure(result);
+      unavailableProductIds.clear();
+      incompatibleProntoItemIds.clear();
+      renderCart();
+      scheduleDeliveryQuote();
+      updateNequiConfirmAvailability();
+    } catch (error) {
+      if (error?.code !== CART_ITEM_UNAVAILABLE_CODE) showToast(PAYMENT_PREPARATION_ERROR);
+    }
+  }
+
+  const deliveryLocationFields = [
+    "deliveryCity", "deliveryCityDaneCode", "deliveryMunicipalityName", "deliveryLocality", "deliveryDepartment", "deliveryPostalCode",
+    "deliveryAddress", "deliveryAddressPlaceId", "deliveryNeighborhood",
+    "deliveryComplement", "deliveryReferences"
+  ];
+  const customerFields = [
+    "email", "customerFirstName", "customerLastName", "phoneCountryCode",
+    "customerPhone", ...deliveryLocationFields
+  ];
+
+  function loadCustomer({ restoreLocation = deliveryLocationsReady } = {}) {
+    const saved = readJson("cajamoda-checkout-customer", {});
+    customerFields.forEach(field => {
+      if (!restoreLocation && deliveryLocationFields.includes(field)) return;
+      if ($(field) && saved[field] !== undefined) $(field).value = saved[field];
+    });
+    const savedPhone = String(saved.customerPhone || "").replace(/\s/g, "");
+    if (savedPhone.startsWith("+") && $("phoneCountryCode") && $("customerPhone")) {
+      const matchingCode = Array.from($("phoneCountryCode").options)
+        .map(option => option.value)
+        .sort((a, b) => b.length - a.length)
+        .find(code => savedPhone.startsWith(code));
+      if (matchingCode) {
+        $("phoneCountryCode").value = matchingCode;
+        $("customerPhone").value = savedPhone.slice(matchingCode.length);
+      }
+    }
+    if (!saved.customerFirstName && saved.customerName && $("customerFirstName")) {
+      const parts = String(saved.customerName).trim().split(/\s+/);
+      $("customerFirstName").value = parts.shift() || "";
+      $("customerLastName").value = parts.join(" ");
+    }
+    updateReviewCustomer();
+    syncDeliveryControls();
+  }
+
+  function collectCustomer() {
+    const customer = {};
+    customerFields.forEach(field => {
+      customer[field] = $(field)?.value?.trim() || "";
+    });
+    customer.customerName = [customer.customerFirstName, customer.customerLastName].filter(Boolean).join(" ");
+    const enteredPhone = String(customer.customerPhone || "").replace(/[\s()-]/g, "");
+    customer.customerPhone = enteredPhone.startsWith("+")
+      ? enteredPhone
+      : `${customer.phoneCountryCode || "+57"}${enteredPhone.replace(/\D/g, "")}`;
+    return customer;
+  }
+
+  function saveCustomer() {
+    const next = collectCustomer();
+    if (!deliveryLocationsReady) {
+      const saved = readJson("cajamoda-checkout-customer", {});
+      deliveryLocationFields.forEach(field => {
+        if (saved[field] !== undefined) next[field] = saved[field];
+      });
+    }
+    saveJson("cajamoda-checkout-customer", next);
+    updateReviewCustomer();
+  }
+
+  function updateReviewCustomer() {
+    const email = $("email")?.value?.trim();
+    if ($("reviewEmail")) $("reviewEmail").textContent = email || "Correo pendiente";
+  }
+
+  customerFields.forEach(field => {
+    $(field)?.addEventListener("input", saveCustomer);
+  });
+
+  function validateCart() {
+    if (!readCart().items.length) {
+      showToast("Tu bolsa está vacía.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function validateContact() {
+    if (!validateCart()) {
+      return false;
+    }
+
+    const email = $("email");
+
+    if (!email.value.trim()) {
+      saveCustomer();
+      return true;
+    }
+
+    if (!email.checkValidity()) {
+      requestAnimationFrame(() => {
+        email.focus();
+      });
+
+      showToast(
+        "Revisa tu correo electrónico."
+      );
+
+      return false;
+    }
+
+    saveCustomer();
+    return true;
+  }
+
+  function syncPanelHeight() {
+    requestAnimationFrame(() => {
+      const panel = document.querySelector(
+        `[data-panel="${activeStep}"]`
+      );
+
+      if (panel) {
+        $("stepViewport").style.height =
+          `${panel.scrollHeight}px`;
+      }
+    });
+  }
+
+  function goToStep(step, options = {}) {
+    if(step==="payment"&&!deliveryPlanSelectionsComplete()){
+      showToast(checkoutFulfillmentProfile().hasPronto&&!["pickup","moto"].includes(selectedDelivery)?"Elige recoger en punto o moto para tu pedido Pronto.":"Selecciona la entrega de cada producto.");
+      return false;
+    }
+    const index = STEPS.indexOf(step);
+
+    if (index < 0) {
+      return false;
+    }
+
+    if (
+      step !== "bag" &&
+      !validateCart()
+    ) {
+      return false;
+    }
+
+    activeStep = step;
+    if (step === "payment") deliveryDestinationActive = true;
+
+    document
+      .querySelector(".checkoutApp")
+      ?.classList.toggle(
+        "isPayment",
+        step === "payment"
+      );
+
+    $("stepTrack").style.transform = "none";
+
+    document
+      .querySelectorAll("[data-panel]")
+      .forEach(panel => {
+        const active =
+          panel.dataset.panel === step;
+
+        panel.classList.toggle(
+          "isActive",
+          active
+        );
+
+        panel.setAttribute(
+          "aria-hidden",
+          String(!active)
+        );
+      });
+
+    document
+      .querySelectorAll("[data-step]")
+      .forEach(tab => {
+        const active = tab.dataset.step === step &&
+          (step !== "payment" || tab.dataset.method === selectedPayment);
+
+        tab.classList.toggle(
+          "isActive",
+          active
+        );
+
+        if (active) {
+          tab.setAttribute(
+            "aria-current",
+            "step"
+          );
+        } else {
+          tab.removeAttribute(
+            "aria-current"
+          );
+        }
+      });
+
+    if (step === "payment") {
+      updateReviewCustomer();
+    }
+
+    syncPanelHeight();
+
+    if (options.scroll !== false) {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+    return true;
+  }
+
+  function syncDeliveryControls() {
+    const profile = checkoutFulfillmentProfile();
+    const showProntoChoice = profile.hasPronto;
+    if (!profile.hasPronto) selectedDelivery = "";
+    else if (!["pickup", "moto"].includes(selectedDelivery)) selectedDelivery = "";
+    if ($("prontoReceivingChoice")) $("prontoReceivingChoice").hidden = !showProntoChoice;
+    if ($("bagProntoReceivingChoice")) $("bagProntoReceivingChoice").hidden = !showProntoChoice;
+    document.querySelectorAll("[data-pronto-delivery]").forEach(button => {
+      button.classList.toggle("isSelected", button.dataset.prontoDelivery === selectedDelivery);
+    });
+    if ($("pickupAddress")) $("pickupAddress").hidden = !showProntoChoice || selectedDelivery !== "pickup";
+    if ($("bagPickupAddress")) $("bagPickupAddress").hidden = !showProntoChoice || selectedDelivery !== "pickup";
+    const address = $("deliveryAddress");
+    if (address) {
+      address.disabled = false;
+      address.placeholder = profile.hasNational
+        ? "Dirección completa de entrega"
+        : selectedDelivery === "moto"
+          ? "Dirección para moto"
+          : "Dirección del cliente";
+    }
+    if ($("promiseName")) {
+      $("promiseName").textContent = profile.hasPronto && profile.hasNational
+        ? "Entrega separada"
+        : profile.hasPronto
+          ? "Pronto – Cartagena"
+          : profile.hasFast
+            ? "Rápido Nacional"
+            : "Libéralo";
+    }
+    if ($("promiseTime")) {
+      const dates = deliveryDateRanges();
+      const nationalPromises = [profile.hasFast ? `Rápido Nacional · Llega ${dates.fast}` : "", profile.hasShip ? `Libéralo · Llega ${dates.ship}` : ""].filter(Boolean);
+      $("promiseTime").textContent = profile.hasPronto && profile.hasNational
+        ? `Pronto Cartagena + ${nationalPromises.join(" + ")}`
+        : profile.hasPronto
+          ? "Disponible en 24–48 h"
+          : nationalPromises.join(" + ");
+    }
+  }
+
+  function validatePaymentDetails() {
+    const cart = readCart();
+    const profile = checkoutFulfillmentProfile(cart);
+    if(!deliveryPlanSelectionsComplete(cart)){
+      goToStep("bag");
+      showToast(profile.hasPronto&&!["pickup","moto"].includes(selectedDelivery)?"Elige recoger en punto o moto para tu pedido Pronto.":"Selecciona la entrega de cada producto.");
+      return false;
+    }
+    if (!validateContact()) return false;
+    const firstName = $("customerFirstName")?.value.trim();
+    const lastName = $("customerLastName")?.value.trim();
+    const phone = $("customerPhone")?.value.trim();
+    const address = $("deliveryAddress")?.value.trim();
+    if (!firstName) {
+      $("customerFirstName")?.focus();
+      showToast("Ingresa tu nombre.");
+      return false;
+    }
+    if (!lastName) {
+      $("customerLastName")?.focus();
+      showToast("Ingresa tu apellido.");
+      return false;
+    }
+    if (!phone) {
+      $("customerPhone")?.focus();
+      showToast("Ingresa tu número de teléfono.");
+      return false;
+    }
+    if (!$("deliveryCity")?.value.trim()) {
+      $("deliveryCity")?.focus();
+      showToast("Ingresa la ciudad de entrega.");
+      return false;
+    }
+    if (profile.hasNational && !$("deliveryDepartment")?.value) {
+      $("deliveryDepartment")?.focus();
+      setDeliveryFieldStatus("department", "Selecciona el departamento de entrega.");
+      return false;
+    }
+    if (profile.hasNational && !$("deliveryCityDaneCode")?.value) {
+      $("deliveryCity")?.focus();
+      setDeliveryFieldStatus("city", "Selecciona una ciudad, municipio o localidad de la lista.");
+      renderCitySuggestions();
+      return false;
+    }
+    if (syncProntoLocationWarnings(cart).size) {
+      renderCart();
+      setDeliveryFieldStatus("city", "Pronto a domicilio solo está disponible en Cartagena, Bolívar.");
+      $("deliveryCity")?.focus();
+      return false;
+    }
+    if ((profile.hasNational || (profile.hasPronto && selectedDelivery === "moto")) && !address) {
+      $("deliveryAddress")?.focus();
+      setDeliveryFieldStatus("address", "Ingresa la dirección principal.");
+      return false;
+    }
+
+    saveCustomer();
+    return true;
+  }
+
+  function updateNequiConfirmAvailability() {
+    const button = $("confirmNequiButton");
+    if (!button) return;
+    const cart=readCart();
+    button.disabled =
+      cart.items.length === 0 ||
+      !deliveryPlanSelectionsComplete(cart) ||
+      !deliveryQuoteMatchesCart(cart) ||
+      !$("nequiReference")?.value.trim();
+  }
+
+  function checkoutPayload() {
+    const cart = readCart();
+    const profile = checkoutFulfillmentProfile(cart);
+    const locality = $("deliveryLocality")?.value.trim() || "";
+    const neighborhood = $("deliveryNeighborhood")?.value.trim() || "";
+    const analyticsLocation = window.CajaModaAnalytics?.setLocation({
+      city: $("deliveryMunicipalityName")?.value.trim() || $("deliveryCity")?.value.trim() || "",
+      region: $("deliveryDepartment")?.selectedOptions?.[0]?.textContent || $("deliveryDepartment")?.value || "",
+      country: "CO"
+    });
+    return {
+      requestId: createId(),
+      cart,
+      analytics: {
+        ...(window.CajaModaAnalytics?.context?.() || {}),
+        location: analyticsLocation || window.CajaModaAnalytics?.context?.()?.location || {}
+      },
+      customer: collectCustomer(),
+      delivery: {
+        method: checkoutDeliveryMethod(cart),
+        prontoMethod: profile.hasPronto ? selectedDelivery : "",
+        promise: profile.hasPronto && profile.hasNational ? "mixed" : profile.hasShip ? "liberalo" : profile.hasFast ? "rapido-nacional" : "pronto",
+        city: $("deliveryMunicipalityName")?.value.trim() || $("deliveryCity")?.value.trim() || "",
+        cityDaneCode: $("deliveryCityDaneCode")?.value || "",
+        state: $("deliveryDepartment")?.value || "",
+        stateName: $("deliveryDepartment")?.selectedOptions?.[0]?.textContent || "",
+        postalCode: $("deliveryPostalCode")?.value.trim() || "",
+        fee: checkoutDeliveryFee(),
+        quoteToken: deliveryQuoteToken,
+        address: completeDeliveryAddress(),
+        addressLine1: $("deliveryAddress")?.value.trim() || "",
+        neighborhood: [locality, neighborhood].filter(Boolean).join(", "),
+        complement: $("deliveryComplement")?.value.trim() || "",
+        references: $("deliveryReferences")?.value.trim() || "",
+        addressPlaceId: $("deliveryAddressPlaceId")?.value || ""
+      },
+      currency: "COP",
+      country: "CO"
+    };
+  }
+
+  function reportDeliveryQuoteError(message) {
+    const text = String(message || "Envia no pudo calcular el envío.");
+    const normalized = normalizeLocationChoice(text);
+    ["department", "city", "address", "neighborhood", "postalCode"].forEach(fieldId => {
+      const field = $(`${fieldId}Field`);
+      if (field?.classList.contains("hasError")) clearDeliveryFieldStatus(fieldId);
+    });
+    if (normalized.includes("departamento")) {
+      setDeliveryFieldStatus("department", text);
+      return "Corrige el departamento marcado para calcular el envío.";
+    }
+    if (
+      normalized.includes("ciudad") ||
+      normalized.includes("municipio") ||
+      (normalized.includes("pronto") && normalized.includes("cartagena"))
+    ) {
+      setDeliveryFieldStatus("city", text);
+      return "Corrige la ciudad o municipio marcado para calcular el envío.";
+    }
+    if (normalized.includes("postal")) {
+      setDeliveryFieldStatus("postalCode", text);
+      return "Corrige el código postal marcado para calcular el envío.";
+    }
+    if (normalized.includes("direccion")) {
+      setDeliveryFieldStatus("address", text);
+      return "Corrige la dirección marcada para calcular el envío.";
+    }
+    return `Envia no pudo calcular el envío: ${text}`;
+  }
+
+  function deliveryQuoteRequiresConfirmation(cart = readCart()) {
+    const profile = checkoutFulfillmentProfile(cart);
+    return profile.hasNational || (profile.hasPronto && selectedDelivery === "moto");
+  }
+
+  function syncDeliveryConfirmationUi() {
+    const button = $("confirmDeliveryButton");
+    const paymentTitle = $("paymentSectionTitle");
+    const paymentGlass = $("paymentGlass");
+    if (!button || !paymentTitle || !paymentGlass) return;
+    const awaitingConfirmation =
+      deliveryQuoteRequiresConfirmation() &&
+      !deliveryQuoteMatchesCart();
+    button.hidden = !awaitingConfirmation;
+    button.disabled = deliveryQuotePending;
+    button.textContent = deliveryQuotePending ? "Confirmando entrega…" : "Confirmar entrega";
+    paymentTitle.hidden = false;
+    paymentGlass.hidden = false;
+    const quoteStatus = $("deliveryQuoteStatus");
+    const hasFieldError = Boolean(document.querySelector(".shippingFields .deliveryField.hasError"));
+    if (awaitingConfirmation && quoteStatus && !deliveryQuotePending) {
+      quoteStatus.hidden = hasFieldError;
+      if (!hasFieldError) {
+        quoteStatus.textContent = deliveryQuoteError ||
+          "Completa tus datos y selecciona Confirmar entrega.";
+      }
+    }
+    syncPanelHeight();
+  }
+
+  function validateDeliveryConfirmationFields() {
+    if (!deliveryQuoteRequiresConfirmation()) return true;
+    if (!$("deliveryDepartment")?.value) {
+      setDeliveryFieldStatus("department", "Selecciona el departamento de entrega.");
+      $("deliveryDepartment")?.focus();
+      return false;
+    }
+    if (
+      !$("deliveryCity")?.value.trim() ||
+      !$("deliveryCityDaneCode")?.value
+    ) {
+      setDeliveryFieldStatus("city", "Selecciona una ciudad, municipio o localidad de la lista.");
+      $("deliveryCity")?.focus();
+      return false;
+    }
+    if (!$("deliveryAddress")?.value.trim()) {
+      setDeliveryFieldStatus("address", "Ingresa la dirección principal de entrega.");
+      $("deliveryAddress")?.focus();
+      return false;
+    }
+    return true;
+  }
+
+  async function confirmDeliveryQuote() {
+    if (!validateDeliveryConfirmationFields()) {
+      syncDeliveryConfirmationUi();
+      return;
+    }
+    clearTimeout(quoteTimer);
+    try {
+      await refreshDeliveryQuote({ required: true });
+    } catch {}
+    syncDeliveryConfirmationUi();
+  }
+
+  async function refreshDeliveryQuote(options = {}) {
+    const profile = checkoutFulfillmentProfile();
+    if (profile.hasPronto && !profile.hasNational && selectedDelivery === "pickup") {
+      quoteRequestVersion += 1;
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = "";
+      deliveryQuote = { method: "pickup", prontoMethod: "pickup", fee: PICKUP_FEE_COP, title: "Pronto: Recoger en punto · 24–48 h" };
+      quoteDestinationKey = currentDeliveryQuoteKey();
+      renderPaymentTotals();
+      syncPaymentInBackground();
+      return deliveryQuote;
+    }
+    if (!deliveryDestinationActive) {
+      quoteRequestVersion += 1;
+      deliveryQuote = null;
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = "";
+      quoteDestinationKey = "";
+      incompatibleProntoItemIds.clear();
+      renderPaymentTotals();
+      return null;
+    }
+    const addressRequired = profile.hasNational || (profile.hasPronto && selectedDelivery === "moto");
+    const address = $("deliveryAddress")?.value.trim();
+    const nationalReady = !profile.hasNational || (
+      $("deliveryCity")?.value.trim() &&
+      $("deliveryCityDaneCode")?.value &&
+      $("deliveryDepartment")?.value
+    );
+    if ((addressRequired && !address) || !nationalReady) {
+      if (addressRequired && !address) {
+        setDeliveryFieldStatus("address", "Ingresa la dirección principal para calcular la entrega.");
+      }
+      quoteRequestVersion += 1;
+      deliveryQuote = null;
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = "";
+      quoteDestinationKey = "";
+      renderPaymentTotals();
+      if (options.required) throw new Error("Completa la dirección para calcular la entrega.");
+      return null;
+    }
+    const requestVersion = ++quoteRequestVersion;
+    const destinationKey = currentDeliveryQuoteKey();
+    deliveryQuotePending = true;
+    deliveryQuoteError = "";
+    deliveryQuoteToken = "";
+    deliveryQuote = null;
+    quoteDestinationKey = "";
+    renderPaymentTotals();
+    try {
+      const response = await fetch(`${STORE_API_URL}/api/delivery/quote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(checkoutPayload())
+      });
+      const result = await response.json().catch(() => ({}));
+      if (requestVersion !== quoteRequestVersion) return null;
+      if (!response.ok || !result?.quote) {
+        if ([CART_ITEM_UNAVAILABLE_CODE, PRONTO_LOCATION_UNAVAILABLE_CODE].includes(result?.code)) {
+          throw paymentPreparationFailure(result);
+        }
+        throw new Error(result?.error || result?.message || "No pudimos calcular el envío con Envia.");
+      }
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = String(result.quoteToken || "");
+      deliveryQuote = result.quote;
+      const resolvedPostalCode = deliveryQuote?.groups
+        ?.find(group => /^\d{6}$/.test(String(group?.postalCode || "")))
+        ?.postalCode;
+      if (!$("deliveryPostalCode")?.value.trim() && resolvedPostalCode) {
+        $("deliveryPostalCode").value = resolvedPostalCode;
+        clearDeliveryFieldStatus("postalCode");
+        saveCustomer();
+      }
+      quoteDestinationKey = currentDeliveryQuoteKey();
+      renderBillingAddressSummary();
+      renderPaymentTotals();
+      syncPaymentInBackground();
+      return deliveryQuote;
+    } catch (error) {
+      if (requestVersion !== quoteRequestVersion) return null;
+      deliveryQuote = null;
+      deliveryQuotePending = false;
+      deliveryQuoteToken = "";
+      quoteDestinationKey = "";
+      deliveryQuoteError = reportDeliveryQuoteError(error?.message);
+      renderPaymentTotals();
+      if (options.required) throw error;
+      if ([CART_ITEM_UNAVAILABLE_CODE, PRONTO_LOCATION_UNAVAILABLE_CODE].includes(error?.code)) return null;
+      return null;
+    }
+  }
+
+  function scheduleDeliveryQuote() {
+    clearTimeout(quoteTimer);
+    quoteRequestVersion += 1;
+    const profile = checkoutFulfillmentProfile();
+    const pickupOnly = profile.hasPronto && !profile.hasNational && selectedDelivery === "pickup";
+    deliveryQuote = pickupOnly
+      ? { method: "pickup", prontoMethod: "pickup", fee: PICKUP_FEE_COP, title: "Pronto: Recoger en punto · 24–48 h" }
+      : null;
+    deliveryQuotePending = false;
+    deliveryQuoteError = "";
+    deliveryQuoteToken = "";
+    quoteDestinationKey = pickupOnly ? currentDeliveryQuoteKey() : "";
+    stripeSessionCartKey = "";
+    renderPaymentTotals();
+    syncPaymentInBackground();
+  }
+
+  function renderBillingAddressSummary() {
+    const summary = $("billingAddressSummary");
+    if (!summary) return;
+    const same = Boolean($("billingSame")?.checked);
+    summary.hidden = !same;
+    if (!same) return;
+    const address = completeDeliveryAddress();
+    const city = $("deliveryCity")?.value.trim() || "";
+    const department = selectedDepartmentName();
+    const postalCode = $("deliveryPostalCode")?.value.trim() || "";
+    const completed = [address, city, department, postalCode].filter(Boolean);
+    summary.textContent = completed.length
+      ? `Se usará: ${completed.join(", ")}`
+      : "La dirección de entrega aparecerá aquí cuando la completes.";
+  }
+
+  function syncBillingAddressMode() {
+    const same = $("billingSame");
+    same.disabled = false;
+    $("billingSameRow").hidden = false;
+    $("billingFields").hidden = same.checked;
+    renderBillingAddressSummary();
+    updateStripePayAvailability();
+    syncPanelHeight();
+  }
+
+  function cardCheckoutDetailsReady() {
+    const profile = checkoutFulfillmentProfile();
+    if(!deliveryPlanSelectionsComplete()){return false}
+    if (!$("customerFirstName")?.value.trim() ||
+        !$("customerLastName")?.value.trim() ||
+        !$("customerPhone")?.value.trim() ||
+        !$("deliveryCity")?.value.trim()) return false;
+    if ((profile.hasNational || (profile.hasPronto && selectedDelivery === "moto")) && !$("deliveryAddress")?.value.trim()) return false;
+    if (profile.hasNational && (!$("deliveryDepartment")?.value || !$("deliveryCityDaneCode")?.value)) return false;
+    if (!$("billingSame")?.checked) {
+      return Boolean(
+        $("billingAddress")?.value.trim() &&
+        $("billingCity")?.value.trim() &&
+        $("billingDepartment")?.value &&
+        $("billingPostalCode")?.value.trim()
+      );
+    }
+    return Boolean($("deliveryAddress")?.value.trim());
+  }
+
+  function updateStripePayAvailability() {
+    const ready = Boolean(
+      checkoutElements &&
+      checkoutActions &&
+      paymentElement &&
+      !stripeSessionUpdating &&
+      stripeSessionCartKey === currentDeliveryQuoteKey() &&
+      cardCheckoutDetailsReady() &&
+      deliveryQuoteMatchesCart()
+    );
+    $("stripePayButton").disabled = !ready;
+  }
+
+  function billingAddress() {
+    if ($("billingSame")?.checked) {
+      if (!$("deliveryAddress")?.value.trim()) {
+        $("deliveryAddress")?.focus();
+        throw new Error("Ingresa tu dirección para usarla también como dirección de facturación.");
+      }
+      return {
+        line1: completeDeliveryAddress(),
+        line2: "",
+        city: $("deliveryMunicipalityName")?.value.trim() || $("deliveryCity")?.value.trim() || "",
+        state: $("deliveryDepartment")?.value || "",
+        postal_code: $("deliveryPostalCode")?.value.trim() || "",
+        country: "CO"
+      };
+    }
+    const address = {
+      line1: $("billingAddress")?.value.trim() || "",
+      line2: $("billingComplement")?.value.trim() || "",
+      city: $("billingCity")?.value.trim() || "",
+      state: $("billingDepartment")?.value || "",
+      postal_code: $("billingPostalCode")?.value.trim() || "",
+      country: "CO"
+    };
+    const missing = [
+      ["billingAddress", address.line1], ["billingCity", address.city],
+      ["billingDepartment", address.state], ["billingPostalCode", address.postal_code]
+    ].find(([, value]) => !value);
+    if (missing) {
+      $(missing[0])?.focus();
+      throw new Error("Completa toda la dirección de facturación.");
+    }
+    return address;
+  }
+
+  function syncStripeCheckoutSession() {
+    if (!checkoutElements || !stripeSessionId || typeof checkoutElements.runServerUpdate !== "function") {
+      return Promise.resolve();
+    }
+    const synchronizedKey = currentDeliveryQuoteKey();
+    const expectedAmountTotal = Math.round(checkoutTotal() * 100);
+    let returnedAmountTotal = null;
+    stripeSessionCartKey = "";
+    updateStripePayAvailability();
+    const update = async () => {
+      const response = await fetch(`${STORE_API_URL}/api/stripe/checkout/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ ...checkoutPayload(), sessionId: stripeSessionId })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result?.ok !== true) throw paymentPreparationFailure(result);
+      returnedAmountTotal = Number(result.amountTotal);
+      if (!Number.isFinite(returnedAmountTotal) || returnedAmountTotal !== expectedAmountTotal) {
+        throw new Error("El total de Stripe no coincide con el pedido.");
+      }
+    };
+    stripeSessionUpdate = stripeSessionUpdate.catch(() => {}).then(async () => {
+      stripeSessionUpdating = true;
+      updateStripePayAvailability();
+      try {
+        const result = await checkoutElements.runServerUpdate(update);
+        if (result?.type === "error") throw new Error(result?.error?.message || PAYMENT_PREPARATION_ERROR);
+        if (synchronizedKey === currentDeliveryQuoteKey()) {
+          stripeSessionCartKey = synchronizedKey;
+        }
+      } finally {
+        stripeSessionUpdating = false;
+        updateStripePayAvailability();
+      }
+    });
+    return stripeSessionUpdate;
+  }
+
+  function prepareStripeInBackground() {
+    const cart = readCart();
+    if (
+      checkoutElements ||
+      stripeInitializing ||
+      !stripePublishableKey ||
+      !cart.items.length ||
+      !deliverySelectionsComplete(cart)
+    ) return;
+    void initializeStripePaymentElement();
+  }
+
+  function syncPaymentInBackground() {
+    if (activeStep !== "payment" || selectedPayment !== "stripe" || !deliveryQuoteMatchesCart()) return;
+    if (!checkoutElements || !stripeSessionId) {
+      prepareStripeInBackground();
+      return;
+    }
+    void syncStripeCheckoutSession().catch(error => {
+      console.error("[CajaModa] Stripe Checkout update error:", error);
+      $("stripeError").textContent = PAYMENT_PREPARATION_ERROR;
+      updateStripePayAvailability();
+    });
+  }
+
+  async function initializeStripePaymentElement() {
+    const cart = readCart();
+    if (checkoutElements || stripeInitializing || !cart.items.length || !deliverySelectionsComplete(cart)) return;
+    stripeInitializing = true;
+    const errorBox = $("stripeError");
+    const status = $("stripeStatus");
+    if (!stripePublishableKey || typeof window.Stripe !== "function") {
+      errorBox.textContent = "El pago con tarjeta todavía no está configurado.";
+      return;
+    }
+    try {
+      errorBox.textContent = "";
+      status.hidden = false;
+      status.textContent = "Preparando el formulario seguro de Stripe…";
+      stripeClient ||= window.Stripe(stripePublishableKey);
+      if (typeof stripeClient.initCheckoutElementsSdk !== "function") {
+        throw new Error("No se pudo cargar la versión actual del formulario de Stripe.");
+      }
+      const payload = { ...checkoutPayload(), prepareOnly: true };
+      const response = await fetch(`${STORE_API_URL}/api/stripe/checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.clientSecret || !result?.sessionId) {
+        throw paymentPreparationFailure(result);
+      }
+      const expectedAmountTotal = Math.round(readCart().total * 100);
+      if (Number(result.amountTotal) !== expectedAmountTotal) {
+        throw new Error("El subtotal inicial de Stripe no coincide con el pedido.");
+      }
+      stripeSessionCartKey = "";
+      unavailableProductIds.clear();
+      incompatibleProntoItemIds.clear();
+      saveJson("cajamoda-pending-checkout", payload);
+      saveJson("cajamoda-pending-stripe-session", result.sessionId);
+      stripeSessionId = result.sessionId;
+      checkoutElements = stripeClient.initCheckoutElementsSdk({
+        clientSecret: result.clientSecret,
+        elementsOptions: {
+          appearance: {
+            theme: "stripe",
+            variables: { colorPrimary: "#080808", borderRadius: "13px", fontFamily: "Inter, Arial, sans-serif" }
+          }
+        }
+      });
+      const loaded = await checkoutElements.loadActions();
+      if (loaded?.type === "error") throw new Error(loaded.error?.message || "No pudimos cargar el pago seguro.");
+      checkoutActions = loaded.actions;
+      paymentElement = checkoutElements.createPaymentElement({
+        layout: "accordion",
+        fields: { billingDetails: "never" }
+      });
+      paymentElement.mount("#paymentElement");
+      stripeCanConfirm = false;
+      updateStripePayAvailability();
+      checkoutElements.on("change", session => {
+        $("stripePayButton").textContent = `Pagar ${money(checkoutTotal())} COP`;
+        stripeCanConfirm = Boolean(session.canConfirm);
+        if (stripeCanConfirm) errorBox.textContent = "";
+        updateStripePayAvailability();
+        syncPanelHeight();
+      });
+      status.hidden = true;
+      syncPanelHeight();
+    } catch (error) {
+      stripeCanConfirm = false;
+      checkoutElements = null;
+      checkoutActions = null;
+      paymentElement = null;
+      stripeSessionId = "";
+      stripeSessionCartKey = "";
+      stripeSessionUpdating = false;
+      console.error("[CajaModa] Stripe Payment Element error:", error);
+      status.hidden = true;
+      errorBox.textContent = [CART_ITEM_UNAVAILABLE_CODE, PRONTO_LOCATION_UNAVAILABLE_CODE].includes(error?.code)
+        ? ""
+        : PAYMENT_PREPARATION_ERROR;
+    } finally {
+      stripeInitializing = false;
+    }
+  }
+
+  async function submitStripePayment() {
+    const button = $("stripePayButton");
+    const errorBox = $("stripeError");
+    const originalLabel = button.textContent;
+    button.disabled = true;
+    errorBox.textContent = "";
+    button.textContent = "Procesando pago…";
+    try {
+      if (!checkoutElements || !checkoutActions || !paymentElement) throw new Error("El formulario de Stripe todavía está cargando.");
+      if (!validatePaymentDetails()) throw new Error("Completa tus datos de contacto y entrega.");
+      await refreshDeliveryQuote({ required: true });
+      await syncStripeCheckoutSession();
+      const firstName = $("customerFirstName")?.value.trim();
+      const lastName = $("customerLastName")?.value.trim();
+      const result = await checkoutActions.confirm({
+        billingAddress: { name: `${firstName} ${lastName}`, address: billingAddress() }
+      });
+      if (result?.type === "error") throw result.error;
+      location.href = `${location.origin}/order-confirmation/?stripeSessionId=${encodeURIComponent(stripeSessionId)}`;
+    } catch (error) {
+      if (![CART_ITEM_UNAVAILABLE_CODE, PRONTO_LOCATION_UNAVAILABLE_CODE].includes(error?.code)) {
+        errorBox.textContent = error?.message || "No pudimos procesar el pago.";
+      }
+      button.textContent = originalLabel;
+      updateStripePayAvailability();
+    }
+  }
+
+  async function submitNequiPayment() {
+    if (!validatePaymentDetails()) return;
+    const reference = $("nequiReference")?.value.trim() || "";
+    if (!reference) {
+      $("nequiReference")?.focus();
+      showToast("Ingresa el número de referencia Nequi.");
+      return;
+    }
+    const button = $("confirmNequiButton");
+    button.disabled = true;
+    button.textContent = "Registrando pedido…";
+    try {
+      if (!deliveryQuoteMatchesCart()) {
+        throw new Error("Confirma la entrega antes de registrar el pago.");
+      }
+      const response = await fetch(`${STORE_API_URL}/api/nequi/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ ...checkoutPayload(), reference })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.orderNumber) {
+        throw paymentPreparationFailure(result);
+      }
+      unavailableProductIds.clear();
+      incompatibleProntoItemIds.clear();
+      saveJson("cajamoda-pending-nequi-order", result);
+      location.href = `/order-confirmation/?nequiOrder=${encodeURIComponent(result.orderNumber)}`;
+    } catch (error) {
+      console.error("[CajaModa] Nequi order error:", error);
+      button.disabled = false;
+      button.textContent = "Confirmar que ya pagué";
+      if (![CART_ITEM_UNAVAILABLE_CODE, PRONTO_LOCATION_UNAVAILABLE_CODE].includes(error?.code)) {
+        showToast(error?.code === "PAYMENT_PREPARATION_FAILED" ? PAYMENT_PREPARATION_ERROR : error?.message || PAYMENT_PREPARATION_ERROR);
+      }
+    }
+  }
+
+  async function loadCheckoutConfig() {
+    try {
+      const response = await fetch(`${STORE_API_URL}/api/checkout/config`, { headers: { Accept: "application/json" } });
+      const result = await response.json();
+      nequiPhone = String(result?.nequi?.phone || "");
+      stripePublishableKey = String(result?.stripe?.publishableKey || "");
+      $("nequiNumber").textContent = result?.nequi?.masked || "Número pendiente";
+    } catch {
+      $("nequiNumber").textContent = "Número pendiente";
+    }
+  }
+
+  function selectedDepartmentName() {
+    return $("deliveryDepartment")?.selectedOptions?.[0]?.textContent || "";
+  }
+
+  function selectedDepartmentIsBogota() {
+    return normalizeLocationChoice(selectedDepartmentName()).includes("bogota");
+  }
+
+  function setDeliveryFieldStatus(fieldId, message = "", state = "error") {
+    const field = $(`${fieldId}Field`);
+    const status = $(`${fieldId}FieldStatus`);
+    if (!field || !status) return;
+    field.classList.toggle("hasError", Boolean(message) && state === "error");
+    field.classList.toggle("hasSuccess", Boolean(message) && state === "success");
+    status.textContent = message;
+    status.hidden = !message;
+  }
+
+  function clearDeliveryFieldStatus(fieldId) {
+    setDeliveryFieldStatus(fieldId, "");
+  }
+
+  function syncCityDaneCode() {
+    const value = normalizeLocationChoice($("deliveryCity")?.value);
+    const match = deliveryCities.find(city => normalizeLocationChoice(city.name) === value);
+    if ($("deliveryCityDaneCode")) $("deliveryCityDaneCode").value = match?.daneCode || "";
+    if ($("deliveryMunicipalityName")) $("deliveryMunicipalityName").value = match?.municipalityName || match?.name || "";
+    if ($("deliveryLocality")) $("deliveryLocality").value = match?.isLocality ? match.name : "";
+    return match || null;
+  }
+
+  function completeDeliveryAddress() {
+    const line1 = $("deliveryAddress")?.value.trim() || "";
+    const locality = $("deliveryLocality")?.value.trim() || "";
+    const neighborhood = $("deliveryNeighborhood")?.value.trim() || "";
+    const complement = $("deliveryComplement")?.value.trim() || "";
+    const references = $("deliveryReferences")?.value.trim() || "";
+    return [
+      line1,
+      locality ? `Localidad ${locality}` : "",
+      neighborhood ? `Barrio ${neighborhood}` : "",
+      complement,
+      references ? `Referencia: ${references}` : ""
+    ].filter(Boolean).join(", ");
+  }
+
+  function setAutocompleteExpanded(inputId, panelId, expanded) {
+    const input = $(inputId);
+    const panel = $(panelId);
+    if (input) input.setAttribute("aria-expanded", String(Boolean(expanded)));
+    if (panel) panel.hidden = !expanded;
+  }
+
+  function clearAutocompletePanel(inputId, panelId) {
+    const panel = $(panelId);
+    if (panel) panel.innerHTML = "";
+    setAutocompleteExpanded(inputId, panelId, false);
+  }
+
+  function renderAutocompleteMessage(inputId, panelId, message) {
+    const panel = $(panelId);
+    if (!panel) return;
+    panel.innerHTML = "";
+    const status = document.createElement("div");
+    status.className = "autocompleteMessage";
+    status.textContent = message;
+    panel.append(status);
+    setAutocompleteExpanded(inputId, panelId, true);
+  }
+
+  function selectDeliveryCity(city) {
+    $("deliveryCity").value = city.name;
+    $("deliveryCityDaneCode").value = city.daneCode || "";
+    $("deliveryMunicipalityName").value = city.municipalityName || city.name;
+    $("deliveryLocality").value = city.isLocality ? city.name : "";
+    clearDeliveryFieldStatus("city");
+    clearAutocompletePanel("deliveryCity", "citySuggestionPanel");
+    clearAddressVerification();
+    saveCustomer();
+    renderCart();
+    syncDeliveryControls();
+    updateStripePayAvailability();
+    scheduleDeliveryQuote();
+    syncPanelHeight();
+  }
+
+  function renderCitySuggestions() {
+    const input = $("deliveryCity");
+    const panel = $("citySuggestionPanel");
+    if (!input || !panel || !$("deliveryDepartment")?.value) {
+      clearAutocompletePanel("deliveryCity", "citySuggestionPanel");
+      return;
+    }
+    const query = normalizeLocationChoice(input.value);
+    const matches = deliveryCities
+      .filter(city => !query || normalizeLocationChoice(city.name).includes(query));
+    panel.innerHTML = "";
+    if (!matches.length) {
+      renderAutocompleteMessage("deliveryCity", "citySuggestionPanel", "No encontramos una ciudad, municipio o localidad con ese nombre.");
+      return;
+    }
+    matches.forEach(city => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "autocompleteOption";
+      button.setAttribute("role", "option");
+      const name = document.createElement("span");
+      name.className = "autocompletePrimary";
+      name.textContent = city.name;
+      button.append(name);
+      button.addEventListener("pointerdown", event => event.preventDefault());
+      button.addEventListener("click", () => selectDeliveryCity(city));
+      panel.append(button);
+    });
+    setAutocompleteExpanded("deliveryCity", "citySuggestionPanel", true);
+  }
+
+  async function loadDeliveryCities({ preserveCity = false } = {}) {
+    const select = $("deliveryDepartment");
+    const cityInput = $("deliveryCity");
+    const cityButton = $("cityDropdownButton");
+    const state = select?.value || "";
+    const stateName = selectedDepartmentName();
+    const previousCity = preserveCity ? cityInput?.value.trim() || "" : "";
+    const previousLocality = preserveCity ? $("deliveryLocality")?.value || "" : "";
+    const requestVersion = ++cityRequestVersion;
+    deliveryCities = [];
+    clearDeliveryFieldStatus("city");
+    clearAutocompletePanel("deliveryCity", "citySuggestionPanel");
+    if (!state || !stateName) {
+      cityInput.value = "";
+      $("deliveryCityDaneCode").value = "";
+      $("deliveryMunicipalityName").value = "";
+      $("deliveryLocality").value = "";
+      cityInput.disabled = true;
+      if (cityButton) cityButton.disabled = true;
+      cityInput.placeholder = "Selecciona el departamento primero";
+      return [];
+    }
+    cityInput.disabled = true;
+    if (cityButton) cityButton.disabled = true;
+    cityInput.placeholder = "Cargando ciudades…";
+    try {
+      const params = new URLSearchParams({ state, stateName });
+      const response = await fetch(`${STORE_API_URL}/api/delivery/cities?${params}`, {
+        headers: { Accept: "application/json" }
+      });
+      const result = await response.json().catch(() => ({}));
+      if (requestVersion !== cityRequestVersion) return [];
+      if (!response.ok || !Array.isArray(result?.cities)) {
+        throw new Error("No pudimos cargar las ciudades.");
+      }
+      const municipality = result.cities[0] || null;
+      deliveryCities = selectedDepartmentIsBogota() && municipality
+        ? BOGOTA_LOCALITIES.map(name => ({
+            name,
+            daneCode: municipality.daneCode,
+            municipalityName: municipality.name,
+            isLocality: true
+          }))
+        : result.cities.map(city => ({ ...city, municipalityName: city.name, isLocality: false }));
+      const matchingCity = deliveryCities.find(city =>
+        normalizeLocationChoice(city.name) === normalizeLocationChoice(previousLocality || previousCity)
+      );
+      const selectedCity = matchingCity || null;
+      cityInput.value = selectedCity?.name || "";
+      $("deliveryCityDaneCode").value = selectedCity?.daneCode || "";
+      $("deliveryMunicipalityName").value = selectedCity?.municipalityName || "";
+      $("deliveryLocality").value = selectedCity?.isLocality ? selectedCity.name : "";
+      cityInput.disabled = false;
+      if (cityButton) cityButton.disabled = false;
+      cityInput.placeholder = selectedDepartmentIsBogota()
+        ? "Selecciona una localidad"
+        : "Selecciona una ciudad o municipio";
+      return deliveryCities;
+    } catch (error) {
+      if (requestVersion !== cityRequestVersion) return [];
+      cityInput.value = "";
+      $("deliveryCityDaneCode").value = "";
+      $("deliveryMunicipalityName").value = "";
+      $("deliveryLocality").value = "";
+      cityInput.disabled = true;
+      if (cityButton) cityButton.disabled = true;
+      cityInput.placeholder = "Ciudades no disponibles";
+      setDeliveryFieldStatus("city", "No pudimos cargar los municipios. Inténtalo nuevamente.");
+      console.error("[CajaModa] Cities error:", error);
+      return [];
+    }
+  }
+
+  function clearAddressVerification() {
+    if ($("deliveryAddressPlaceId")) $("deliveryAddressPlaceId").value = "";
+  }
+
+  async function applyAddressSuggestion(suggestion) {
+    const placeId = suggestion?.placeId || "";
+    if (!placeId) return;
+    applyingAddressSuggestion = true;
+    clearAutocompletePanel("deliveryAddress", "addressSuggestionPanel");
+    try {
+      const response = await fetch(`${STORE_API_URL}/api/delivery/address-details`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ placeId, sessionToken: addressAutocompleteSession })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.address) throw new Error("No pudimos completar la dirección.");
+      const details = result.address;
+      const departmentOption = [...($("deliveryDepartment")?.options || [])].find(candidate =>
+        normalizeLocationChoice(candidate.textContent) === normalizeLocationChoice(details.departmentName)
+      );
+      if (departmentOption) {
+        const preserveCity = $("deliveryDepartment").value === departmentOption.value;
+        $("deliveryDepartment").value = departmentOption.value;
+        await loadDeliveryCities({ preserveCity });
+      }
+      if (details.city && !selectedDepartmentIsBogota()) $("deliveryCity").value = details.city;
+      const matchedCity = syncCityDaneCode();
+      if (!matchedCity) {
+        setDeliveryFieldStatus("city", "Selecciona una ciudad, municipio o localidad de la lista.");
+        renderCitySuggestions();
+      } else {
+        clearDeliveryFieldStatus("city");
+      }
+      if (details.address) $("deliveryAddress").value = details.address;
+      if (details.postalCode) $("deliveryPostalCode").value = details.postalCode;
+      $("deliveryAddressPlaceId").value = details.placeId || placeId;
+      if ($("deliveryCityDaneCode")?.value) clearDeliveryFieldStatus("city");
+      setDeliveryFieldStatus("address", "Dirección verificada por Google", "success");
+      $("addressSuggestionSource").hidden = true;
+      saveCustomer();
+      renderCart();
+      syncDeliveryControls();
+      updateStripePayAvailability();
+      scheduleDeliveryQuote();
+    } catch (error) {
+      clearAddressVerification();
+      setDeliveryFieldStatus("address", "No pudimos completar esta sugerencia. Puedes escribir la dirección manualmente.");
+      $("addressSuggestionSource").hidden = true;
+    } finally {
+      applyingAddressSuggestion = false;
+    }
+  }
+
+  function renderAddressSuggestions(suggestions) {
+    const panel = $("addressSuggestionPanel");
+    if (!panel) return;
+    panel.innerHTML = "";
+    if (!suggestions.length) {
+      renderAutocompleteMessage("deliveryAddress", "addressSuggestionPanel", "No encontramos direcciones. Continúa escribiendo o verifica la ciudad.");
+      return;
+    }
+    suggestions.forEach(suggestion => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "autocompleteOption";
+      button.setAttribute("role", "option");
+      const primary = document.createElement("span");
+      primary.className = "autocompletePrimary";
+      primary.textContent = suggestion.mainText || suggestion.text;
+      const secondary = document.createElement("span");
+      secondary.className = "autocompleteSecondary";
+      secondary.textContent = suggestion.secondaryText || suggestion.text;
+      button.append(primary, secondary);
+      button.addEventListener("pointerdown", event => event.preventDefault());
+      button.addEventListener("click", () => applyAddressSuggestion(suggestion));
+      panel.append(button);
+    });
+    const attribution = document.createElement("div");
+    attribution.className = "googleAttribution";
+    attribution.textContent = "Powered by Google";
+    panel.append(attribution);
+    setAutocompleteExpanded("deliveryAddress", "addressSuggestionPanel", true);
+  }
+
+  function scheduleAddressSuggestions() {
+    clearTimeout(addressSuggestionTimer);
+    const requestVersion = ++addressSuggestionVersion;
+    const input = $("deliveryAddress")?.value.trim() || "";
+    clearAddressVerification();
+    clearDeliveryFieldStatus("address");
+    $("addressSuggestionSource").hidden = true;
+    if (input.length < 3) {
+      clearAutocompletePanel("deliveryAddress", "addressSuggestionPanel");
+      return;
+    }
+    renderAutocompleteMessage("deliveryAddress", "addressSuggestionPanel", "Buscando direcciones…");
+    addressSuggestionTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(`${STORE_API_URL}/api/delivery/address-suggestions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            input,
+            city: $("deliveryCity")?.value.trim() || "",
+            stateName: selectedDepartmentName(),
+            sessionToken: addressAutocompleteSession
+          })
+        });
+        const result = await response.json().catch(() => ({}));
+        if (requestVersion !== addressSuggestionVersion) return;
+        if (!response.ok) throw new Error(result?.error || "Google no devolvió direcciones.");
+        renderAddressSuggestions(Array.isArray(result?.suggestions) ? result.suggestions : []);
+      } catch (error) {
+        if (requestVersion !== addressSuggestionVersion) return;
+        renderAutocompleteMessage("deliveryAddress", "addressSuggestionPanel", "No pudimos cargar sugerencias. Puedes escribir la dirección manualmente.");
+        clearDeliveryFieldStatus("address");
+        $("addressSuggestionSource").hidden = true;
+        console.error("[CajaModa] Address suggestions error:", error);
+      }
+    }, 350);
+  }
+
+  function schedulePostalLookup() {
+    clearTimeout(postalLookupTimer);
+    const requestVersion = ++postalLookupVersion;
+    const postalCode = $("deliveryPostalCode")?.value.trim() || "";
+    if (!/^\d{6}$/.test(postalCode)) return;
+    postalLookupTimer = setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `${STORE_API_URL}/api/delivery/postal-code?postalCode=${encodeURIComponent(postalCode)}`,
+          { headers: { Accept: "application/json" } }
+        );
+        const result = await response.json().catch(() => ({}));
+        if (requestVersion !== postalLookupVersion) return;
+        if (!response.ok || !result?.location) return;
+        const stateOption = [...($("deliveryDepartment")?.options || [])].find(option =>
+          normalizeChoice(option.value) === normalizeChoice(result.location.state)
+        );
+        if (stateOption && $("deliveryDepartment").value !== stateOption.value) {
+          $("deliveryDepartment").value = stateOption.value;
+          await loadDeliveryCities();
+        }
+        if (result.location.city && !selectedDepartmentIsBogota()) $("deliveryCity").value = result.location.city;
+        syncCityDaneCode();
+        if (result.location.postalCode) $("deliveryPostalCode").value = result.location.postalCode;
+        clearAddressVerification();
+        saveCustomer();
+        renderCart();
+        scheduleDeliveryQuote();
+      } catch (error) {
+        console.error("[CajaModa] Postal code lookup error:", error);
+      }
+    }, 450);
+  }
+
+  async function loadDeliveryDepartments() {
+    const select = $("deliveryDepartment");
+    try {
+      const response = await fetch(`${STORE_API_URL}/api/delivery/departments`, { headers: { Accept: "application/json" } });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !Array.isArray(result?.departments) || !result.departments.length) {
+        throw new Error("No pudimos cargar los departamentos.");
+      }
+      select.innerHTML = '<option value="">Departamento</option>';
+      $("billingDepartment").innerHTML = '<option value="">Departamento</option>';
+      result.departments.forEach(department => {
+        const option = document.createElement("option");
+        option.value = department.code;
+        option.textContent = department.name;
+        select.append(option);
+        $("billingDepartment")?.append(option.cloneNode(true));
+      });
+      deliveryLocationsReady = true;
+      select.disabled = false;
+      clearDeliveryFieldStatus("department");
+      loadCustomer({ restoreLocation: true });
+      await loadDeliveryCities({ preserveCity: true });
+      syncCityDaneCode();
+      saveCustomer();
+      renderCart();
+      scheduleDeliveryQuote();
+    } catch (error) {
+      deliveryLocationsReady = true;
+      select.disabled = false;
+      select.innerHTML = '<option value="">Departamento no disponible</option>';
+      setDeliveryFieldStatus("department", "No pudimos cargar los departamentos. Inténtalo nuevamente.");
+      console.error("[CajaModa] Departments error:", error);
+    }
+  }
+
+  document
+    .querySelectorAll("[data-step]")
+    .forEach(tab => {
+      tab.onclick = () => {
+        if (tab.dataset.method) {
+          selectedPayment = tab.dataset.method;
+          $("nequiPane").hidden = selectedPayment !== "nequi";
+          $("stripePane").hidden = selectedPayment !== "stripe";
+          $("paymentGlass").classList.toggle("isStripe", selectedPayment === "stripe");
+        }
+        if (!goToStep(tab.dataset.step)) return;
+        if (!deliveryQuoteMatchesCart()) scheduleDeliveryQuote();
+        if (selectedPayment === "stripe" && tab.dataset.method === "stripe") {
+          syncBillingAddressMode();
+            syncPaymentInBackground();
+          syncPanelHeight();
+        }
+      };
+    });
+
+  $("toDeliveryButton").onclick = () => {
+    selectedPayment = "stripe";
+    $("nequiPane").hidden = true;
+    $("stripePane").hidden = false;
+    $("paymentGlass").classList.add("isStripe");
+    if (!goToStep("payment")) return;
+    syncBillingAddressMode();
+    if (!deliveryQuoteMatchesCart()) scheduleDeliveryQuote();
+    syncPaymentInBackground();
+    syncPanelHeight();
+  };
+
+  $("guestCheckoutButton")?.addEventListener("click", () => {
+    $("email").value = "";
+    saveCustomer();
+    goToStep("payment");
+  });
+
+  $("backToContactButton").onclick = () => {
+    goToStep("bag");
+  };
+
+  $("confirmNequiButton").onclick = submitNequiPayment;
+  $("confirmDeliveryButton").onclick = confirmDeliveryQuote;
+  $("nequiReference")?.addEventListener("input", updateNequiConfirmAvailability);
+  $("stripePayButton").onclick = submitStripePayment;
+  $("billingSame")?.addEventListener("change", () => {
+    syncBillingAddressMode();
+  });
+
+  document.querySelectorAll("[data-pronto-delivery]").forEach(button => {
+    button.onclick = () => {
+      if (!checkoutFulfillmentProfile().hasPronto) return;
+      selectedDelivery = button.dataset.prontoDelivery;
+      const scrollToPayment = selectedDelivery === "moto";
+      renderCart();
+      syncBillingAddressMode();
+      scheduleDeliveryQuote();
+      syncPanelHeight();
+      if (scrollToPayment) {
+        requestAnimationFrame(() => {
+          $("toDeliveryButton")?.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+      }
+    };
+  });
+
+  $("deliveryCity")?.addEventListener("focus", renderCitySuggestions);
+  $("cityDropdownButton")?.addEventListener("click", () => {
+    $("deliveryCity")?.focus();
+    renderCitySuggestions();
+  });
+  $("deliveryCity")?.addEventListener("input", () => {
+    $("deliveryCityDaneCode").value = "";
+    $("deliveryMunicipalityName").value = "";
+    $("deliveryLocality").value = "";
+    renderCitySuggestions();
+    clearDeliveryFieldStatus("city");
+    clearAddressVerification();
+    renderCart();
+    syncDeliveryControls();
+    updateStripePayAvailability();
+    scheduleDeliveryQuote();
+    syncPanelHeight();
+  });
+  $("deliveryCity")?.addEventListener("blur", () => {
+    if ($("deliveryCity")?.value.trim() && !$("deliveryCityDaneCode")?.value) {
+      setDeliveryFieldStatus("city", "Selecciona una ciudad, municipio o localidad de la lista.");
+      renderPaymentTotals();
+    }
+  });
+  ["deliveryAddress", "deliveryNeighborhood", "deliveryComplement", "deliveryReferences", "deliveryPostalCode"].forEach(id => {
+    $(id)?.addEventListener("input", () => {
+      if (id === "deliveryAddress") clearDeliveryFieldStatus("address");
+      if (id === "deliveryNeighborhood") clearDeliveryFieldStatus("neighborhood");
+      if (id === "deliveryPostalCode") {
+        const digits = $("deliveryPostalCode").value.replace(/\D/g, "").slice(0, 6);
+        if ($("deliveryPostalCode").value !== digits) $("deliveryPostalCode").value = digits;
+        clearDeliveryFieldStatus("postalCode");
+      }
+      renderBillingAddressSummary();
+      scheduleDeliveryQuote();
+    });
+  });
+  $("deliveryAddress")?.addEventListener("input", () => {
+    if (!applyingAddressSuggestion) scheduleAddressSuggestions();
+  });
+  $("deliveryAddress")?.addEventListener("focus", () => {
+    if ($("deliveryAddress")?.value.trim().length >= 3) scheduleAddressSuggestions();
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!event.target.closest(".autocompleteField")) {
+      clearAutocompletePanel("deliveryCity", "citySuggestionPanel");
+      clearAutocompletePanel("deliveryAddress", "addressSuggestionPanel");
+    }
+  });
+  $("deliveryPostalCode")?.addEventListener("input", schedulePostalLookup);
+  $("deliveryDepartment")?.addEventListener("change", async () => {
+    $("deliveryCity").value = "";
+    $("deliveryCityDaneCode").value = "";
+    $("deliveryMunicipalityName").value = "";
+    $("deliveryLocality").value = "";
+    $("deliveryPostalCode").value = "";
+    clearDeliveryFieldStatus("department");
+    clearDeliveryFieldStatus("city");
+    clearAddressVerification();
+    saveCustomer();
+    await loadDeliveryCities();
+    renderCart();
+    scheduleDeliveryQuote();
+  });
+
+  [
+    "customerFirstName", "customerLastName", "customerPhone", "deliveryAddress", "deliveryCity",
+    "deliveryNeighborhood", "deliveryComplement", "deliveryReferences", "deliveryDepartment", "billingAddress", "billingComplement", "billingCity", "billingDepartment", "billingPostalCode"
+  ].forEach(id => {
+    $(id)?.addEventListener("input", updateStripePayAvailability);
+    $(id)?.addEventListener("change", updateStripePayAvailability);
+  });
+
+  $("bagDeliveryInfoButton").onclick = () => openDeliveryHelp();
+  $("deliveryInfoButton").onclick = () => openDeliveryHelp();
+  $("deliveryHelpClose").onclick = () => $("deliveryHelp").classList.remove("isOpen");
+  $("deliveryHelp").onclick = event => { if (event.target === $("deliveryHelp")) $("deliveryHelp").classList.remove("isOpen"); };
+  $("copyNequiButton").onclick = async () => {
+    if (!nequiPhone) return showToast("El número Nequi aún no está configurado.");
+    await navigator.clipboard.writeText(nequiPhone);
+    showToast("Número Nequi copiado.");
+  };
+  $("copyNequiAmountButton").onclick = async () => {
+    const amount = String(checkoutTotal());
+    await navigator.clipboard.writeText(amount);
+    showToast("Monto exacto copiado.");
+  };
+  $("openNequiButton").onclick = () => {
+    if (!nequiPhone) return showToast("El número Nequi aún no está configurado.");
+    location.href = "nequi://";
+  };
+
+  window.addEventListener(
+    "message",
+    event => {
+      const message = event.data || {};
+      const payload = message.payload || {};
+
+      if (
+        (message.type === "INIT" || message.type === "CATALOG_PATCH") &&
+        Array.isArray(payload.products)
+      ) {
+        saveJson("cajamoda-catalog", payload.products);
+        renderCart();
+      }
+
+      if (
+        [
+          "CHECKOUT_URL",
+          "CHECKOUT_CREATED",
+          "REDIRECT_TO_CHECKOUT"
+        ].includes(message.type)
+      ) {
+        const url =
+          payload.url ||
+          payload.checkoutUrl ||
+          payload.redirectUrl ||
+          "";
+
+        if (url) {
+          if (payload.checkoutId) {
+            try {
+              localStorage.setItem(
+                "cajamoda-pending-checkout",
+                payload.checkoutId
+              );
+            } catch {}
+          }
+
+          location.href = url;
+        }
+      }
+
+      if (
+        message.type === "CHECKOUT_ERROR"
+      ) {
+        showToast("No pudimos continuar. Intenta nuevamente.");
+      }
+    }
+  );
+
+  $("backButton").onclick = () => {
+    window.CajaModaBagPreview?.close();
+
+    if (activeStep === "payment") {
+      goToStep("bag");
+      return;
+    }
+
+    if (history.length > 1) {
+      history.back();
+    } else {
+      location.href = "/";
+    }
+  };
+
+  $("headerBag").onclick = () => {
+    window.CajaModaBagPreview?.open();
+  };
+
+  $("bottomBagButton").onclick = event => {
+    if (window.CajaModaBagPreview?.open) {
+      event.preventDefault();
+      window.CajaModaBagPreview.open();
+    }
+  };
+
+  if (typeof ResizeObserver === "function") {
+    new ResizeObserver(syncPanelHeight).observe($("stepTrack"));
+  }
+
+  window.addEventListener(
+    "resize",
+    syncPanelHeight,
+    { passive: true }
+  );
+
+  window.addEventListener(
+    "pageshow",
+    () => {
+      window.CajaModaBagPreview?.close();
+      deliveryDestinationActive = false;
+      incompatibleProntoItemIds.clear();
+      deliveryQuote = null;
+      deliveryQuotePending = false;
+      deliveryQuoteError = "";
+      deliveryQuoteToken = "";
+      quoteDestinationKey = "";
+      loadCustomer({ restoreLocation: deliveryLocationsReady });
+      renderCart();
+
+      goToStep(
+        activeStep,
+        {
+          skipValidation: true,
+          scroll: false
+        }
+      );
+    }
+  );
+
+  function handleExternalCartUpdate() {
+    renderCart();
+    scheduleDeliveryQuote();
+  }
+
+  window.addEventListener("storage", event => {
+    if(event.key === "cajamoda-cart") handleExternalCartUpdate();
+  });
+
+  window.addEventListener("cajamoda:cart-updated", handleExternalCartUpdate);
+
+  let deliveryDateRefreshTimer = 0;
+  function scheduleDeliveryDateRefresh() {
+    clearTimeout(deliveryDateRefreshTimer);
+    const parts = Object.fromEntries(
+      new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      }).formatToParts(new Date()).filter(part => part.type !== "literal").map(part => [part.type, part.value])
+    );
+    const elapsed = (Number(parts.hour) * 3600) + (Number(parts.minute) * 60) + Number(parts.second);
+    deliveryDateRefreshTimer = setTimeout(() => {
+      renderCart();
+      scheduleDeliveryDateRefresh();
+    }, ((24 * 3600) - elapsed + 1) * 1000);
+  }
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      renderCart();
+      scheduleDeliveryDateRefresh();
+    }
+  });
+  scheduleDeliveryDateRefresh();
+
+  document.fonts?.ready?.then(
+    syncPanelHeight
+  );
+
+  loadCustomer({ restoreLocation: false });
+  renderCart();
+  syncBillingAddressMode();
+  loadCheckoutConfig().then(prepareStripeInBackground);
+  loadDeliveryDepartments();
+
+  window.postMessage({
+    source:"CAJAMODA_CHECKOUT",
+    type:"READY",
+    payload:{page:"CHECKOUT",needs:["CATALOG","VARIANTS"]}
+  },"*");
+
+  goToStep(
+    "bag",
+    {
+      skipValidation: true,
+      scroll: false
+    }
+  );
+})();
+</script>
+
+<script
+  type="module"
+  src="/src/bag-preview.js"
+></script>
+
+<script
+  type="module"
+  src="/src/main.js"
+></script>
+</body>
+</html>
