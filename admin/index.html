@@ -3064,10 +3064,10 @@ img{
    ============================================================ */
 
 [data-admin-only][hidden]{display:none!important}
-#panel-analytics{margin:-28px;padding:30px;min-height:calc(100vh - 42px);border-radius:28px;background:
+#panel-analytics{margin:-28px;padding:30px;min-height:calc(100vh - 42px);border-radius:0;background:
   radial-gradient(circle at 12% 4%,rgba(94,118,255,.18),transparent 26%),
   radial-gradient(circle at 88% 18%,rgba(34,220,170,.11),transparent 22%),
-  #050506;color:#f7f7f8;overflow:hidden}
+  #050506;color:#f7f7f8;overflow:visible}
 .analyticsShell{display:grid;gap:24px;max-width:1540px;margin:0 auto}
 .analyticsTopbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
 .analyticsEyebrow{display:flex;align-items:center;gap:9px;color:#aaaeb8;font-size:12px;font-weight:760;letter-spacing:.13em;text-transform:uppercase}
@@ -3119,7 +3119,7 @@ img{
 .analyticsSetting label{color:#9da1ab;font-size:11px;line-height:1.3}.analyticsSetting input{height:38px;width:100%;border:1px solid rgba(255,255,255,.11);border-radius:11px;background:rgba(0,0,0,.26);color:#fff;padding:0 11px;font-size:12px;text-align:right;outline:0}
 .analyticsSetting input:focus{border-color:rgba(109,130,255,.75);box-shadow:0 0 0 3px rgba(109,130,255,.13)}
 .analyticsSave{margin-top:4px;background:#fff;color:#080809;width:100%}
-.analyticsTableCard{padding:0}.analyticsTableHeader{padding:22px 22px 15px}.analyticsTableScroll{position:relative;overflow:auto;max-height:520px}
+.analyticsTableCard{padding:0}.analyticsTableHeader{padding:22px 22px 15px}.analyticsTableScroll{position:relative;overflow-x:auto;overflow-y:visible;max-height:none}
 .analyticsTable{width:100%;border-collapse:collapse;min-width:900px}.analyticsTable th{position:sticky;top:0;z-index:2;background:rgba(10,10,12,.94);backdrop-filter:blur(20px);color:#747985;font-size:10px;font-weight:740;text-transform:uppercase;letter-spacing:.07em;text-align:right;padding:12px 13px;border-top:1px solid rgba(255,255,255,.065);border-bottom:1px solid rgba(255,255,255,.075);cursor:pointer;white-space:nowrap}
 .analyticsTable th:first-child{text-align:left;padding-left:22px}.analyticsTable th.sorted{color:#fff}.analyticsTable td{padding:13px;border-bottom:1px solid rgba(255,255,255,.055);color:#afb3bc;font-size:11px;text-align:right;white-space:nowrap}.analyticsTable td:first-child{text-align:left;padding-left:22px}
 .analyticsProduct{display:flex;align-items:center;gap:11px;min-width:260px}.analyticsProduct img,.analyticsProductFallback{width:40px;height:49px;border-radius:10px;object-fit:cover;background:linear-gradient(145deg,#272a32,#101115);border:1px solid rgba(255,255,255,.09)}.analyticsProductFallback{display:grid;place-items:center;color:#7c818c;font-size:10px;font-weight:800}.analyticsProduct strong{display:block;max-width:245px;color:#f2f3f4;font-size:11px;overflow:hidden;text-overflow:ellipsis}.analyticsProduct span{display:block;margin-top:4px;color:#676c76;font-size:9px}
@@ -3133,7 +3133,7 @@ img{
 @keyframes analyticsSpin{to{transform:rotate(360deg)}}
 @keyframes analyticsGrow{from{transform:scaleX(0)}}
 @media(max-width:1320px){.analyticsKpis{grid-template-columns:repeat(3,1fr)}.analyticsThreeCol{grid-template-columns:1fr 1fr}.analyticsThreeCol>.analyticsCard:last-child{grid-column:1/-1}}
-@media(max-width:960px){#panel-analytics{margin:-18px;padding:20px;border-radius:22px}.analyticsTopbar{flex-direction:column}.analyticsControls{justify-content:flex-start}.analyticsTwoCol,.analyticsBottom,.analyticsThreeCol{grid-template-columns:1fr}.analyticsThreeCol>.analyticsCard:last-child{grid-column:auto}.analyticsLiveRow{grid-template-columns:100px 72px minmax(100px,1fr)}.analyticsLiveRow>:nth-child(4),.analyticsLiveRow>:nth-child(5){display:none}}
+@media(max-width:960px){#panel-analytics{margin:-18px;padding:20px;border-radius:0}.analyticsTopbar{flex-direction:column}.analyticsControls{justify-content:flex-start}.analyticsTwoCol,.analyticsBottom,.analyticsThreeCol{grid-template-columns:1fr}.analyticsThreeCol>.analyticsCard:last-child{grid-column:auto}.analyticsLiveRow{grid-template-columns:100px 72px minmax(100px,1fr)}.analyticsLiveRow>:nth-child(4),.analyticsLiveRow>:nth-child(5){display:none}}
 @media(max-width:620px){#panel-analytics{margin:-12px;padding:16px}.analyticsKpis{grid-template-columns:1fr 1fr}.analyticsKpi{min-height:116px}.analyticsKpiValue{font-size:24px}.analyticsCanvasWrap,.analyticsDonutWrap{height:230px}.analyticsPanel{padding:17px}.analyticsFunnelRow{grid-template-columns:82px 1fr 40px}}
 @media(max-width:900px){.analyticsMetricGroupGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.analyticsMetricGroupGrid{grid-template-columns:1fr}.chatBubble{right:16px;bottom:16px}.chatShell{right:16px;bottom:84px}}
 
@@ -3435,10 +3435,10 @@ img{
 
     <div class="analyticsGrid analyticsBottom">
       <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds. Unknown locations stay unknown.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
-      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Campaign pulse</div><div class="analyticsPanelMeta">UTM campaign activity and verified revenue.</div></div></div><div id="analyticsCampaigns" class="analyticsCampaignList"></div></article>
+      <article class="analyticsCard analyticsPanel" hidden style="display:none"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Campaign pulse</div><div class="analyticsPanelMeta">UTM campaign activity and verified revenue.</div></div></div><div id="analyticsCampaigns" class="analyticsCampaignList"></div></article>
     </div>
 
-    <div class="analyticsGrid analyticsKpis" id="analyticsKpis">
+    <div class="analyticsGrid analyticsKpis" id="analyticsKpis" hidden style="display:none">
       <article class="analyticsCard analyticsKpi live"><div class="analyticsKpiLabel">Live now</div><div id="analyticsLiveVisitors" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">active in the last 45 seconds</div></article>
       <article class="analyticsCard analyticsKpi"><div class="analyticsKpiLabel">Product views</div><div id="analyticsViews" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">real product detail views</div></article>
       <article class="analyticsCard analyticsKpi"><div class="analyticsKpiLabel">Add to cart</div><div id="analyticsCart" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">successful cart additions</div></article>
