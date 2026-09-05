@@ -3421,6 +3421,16 @@ img{
       </div>
     </div>
 
+    <article class="analyticsCard analyticsTableCard">
+      <div class="analyticsTableHeader"><div class="analyticsPanelTitle">Top products</div><div class="analyticsPanelMeta">Click any metric to rank the top 10 by that action.</div></div>
+      <div class="analyticsTableScroll"><table class="analyticsTable"><thead><tr><th data-product-sort="name">Product</th><th class="sorted" data-product-sort="views">Views</th><th data-product-sort="favorites">Favorites</th><th data-product-sort="shares">Shares</th><th data-product-sort="addToCart">Add to cart</th><th data-product-sort="checkouts">Checkout</th><th data-product-sort="purchases">Purchase</th></tr></thead><tbody id="analyticsProductRows"></tbody></table></div>
+    </article>
+
+    <div class="analyticsGrid analyticsBottom">
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds. Unknown locations stay unknown.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Campaign pulse</div><div class="analyticsPanelMeta">UTM campaign activity and verified revenue.</div></div></div><div id="analyticsCampaigns" class="analyticsCampaignList"></div></article>
+    </div>
+
     <div class="analyticsGrid analyticsKpis" id="analyticsKpis">
       <article class="analyticsCard analyticsKpi live"><div class="analyticsKpiLabel">Live now</div><div id="analyticsLiveVisitors" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">active in the last 45 seconds</div></article>
       <article class="analyticsCard analyticsKpi"><div class="analyticsKpiLabel">Product views</div><div id="analyticsViews" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">real product detail views</div></article>
@@ -3457,15 +3467,6 @@ img{
       <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Monthly inputs</div><div class="analyticsPanelMeta">Advertising and inventory investment for the selected month.</div></div></div><div class="analyticsSettings"><div class="analyticsSetting"><label for="analyticsSpendWhatsapp">WhatsApp ads</label><input id="analyticsSpendWhatsapp" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsSpendInstagram">Instagram ads</label><input id="analyticsSpendInstagram" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsSpendTiktok">TikTok ads</label><input id="analyticsSpendTiktok" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsInventoryInput">Inventory spend</label><input id="analyticsInventoryInput" type="number" min="0" step="1000"></div><button id="analyticsSaveSettings" class="analyticsSave" type="button">Save Monthly Inputs</button><div id="analyticsBusinessReadout" class="analyticsPanelMeta"></div></div></article>
     </div>
 
-    <article class="analyticsCard analyticsTableCard">
-      <div class="analyticsTableHeader"><div class="analyticsPanelTitle">Top products</div><div class="analyticsPanelMeta">Click any metric to rank the top 10 by that action.</div></div>
-      <div class="analyticsTableScroll"><table class="analyticsTable"><thead><tr><th data-product-sort="name">Product</th><th class="sorted" data-product-sort="views">Views</th><th data-product-sort="favorites">Favorites</th><th data-product-sort="shares">Shares</th><th data-product-sort="addToCart">Add to cart</th><th data-product-sort="checkouts">Checkout</th><th data-product-sort="purchases">Purchase</th></tr></thead><tbody id="analyticsProductRows"></tbody></table></div>
-    </article>
-
-    <div class="analyticsGrid analyticsBottom">
-      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds. Unknown locations stay unknown.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
-      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Campaign pulse</div><div class="analyticsPanelMeta">UTM campaign activity and verified revenue.</div></div></div><div id="analyticsCampaigns" class="analyticsCampaignList"></div></article>
-    </div>
   </div>
 </section>
 
