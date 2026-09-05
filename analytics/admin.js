@@ -252,6 +252,16 @@
     });
   }
 
+  function renderHotProducts(products = []) {
+    const root = $("analyticsHotList");
+    if (!root) return;
+    root.innerHTML = products.length ? products.map((product,index) => '<article class="analyticsHotItem">' +
+      '<span class="analyticsHotRank">' + (index + 1) + '</span>' +
+      '<div><strong>' + escapeHtml(product.name || "Product") + '</strong><span>' + escapeHtml(product.status || "Watch") + ' · ' + escapeHtml(product.reason || "New activity detected.") + '</span></div>' +
+      '<b>' + number(product.signalScore) + '</b>' +
+    '</article>').join("") : '<div class="analyticsHotEmpty">No new-product momentum alerts yet. Alerts appear as real activity arrives.</div>';
+  }
+
   function renderFunnel(rows) {
     const root = $("analyticsFunnel");
     if (!root) return;
@@ -362,6 +372,7 @@
     renderFunnel(data.funnel || []);
     renderChannels(data.channels || []);
     renderProducts();
+    renderHotProducts(data.hotProducts || []);
     renderLive(data.realtime || {});
     renderCampaigns(data.campaigns || []);
     populateSettings(data.settings || {});
@@ -443,6 +454,14 @@
       sortDirection = header.dataset.sortDirection || "desc";
       renderProducts();
     });
+  });
+  $("analyticsMetricFilter")?.addEventListener("change", event => {
+    sortKey = event.target.value || "overall";
+    renderProducts();
+  });
+  $("analyticsOrderFilter")?.addEventListener("change", event => {
+    sortDirection = event.target.value === "asc" ? "asc" : "desc";
+    renderProducts();
   });
   $("analyticsShowAll")?.addEventListener("click", () => {
     showAllProducts = !showAllProducts;
