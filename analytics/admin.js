@@ -368,7 +368,7 @@
     setText("analyticsStatus", "Refreshing live data…");
     try {
       const month = $("analyticsMonth")?.value || new Date().toISOString().slice(0, 7);
-      render(await request("/api/store-owner/analytics?month=" + encodeURIComponent(month)));
+      render(await request("/api/store-owner/analytics?days=" + encodeURIComponent(days) + "&month=" + encodeURIComponent(month)));
     } catch (error) {
       setText("analyticsStatus", error?.message || "Analytics could not be loaded.");
     } finally {
@@ -423,6 +423,13 @@
     $("analyticsMonth").value = new Date().toISOString().slice(0, 7);
     $("analyticsMonth").addEventListener("change", () => load(true));
   }
+  qsa("[data-range-days]").forEach(button => {
+    button.addEventListener("click", () => {
+      days = Number(button.dataset.rangeDays || 30);
+      qsa("[data-range-days]").forEach(candidate => candidate.classList.toggle("active", candidate === button));
+      load(true);
+    });
+  });
   qsa("[data-product-sort]").forEach(header => {
     header.addEventListener("click", () => {
       sortKey = header.dataset.productSort || "views";
