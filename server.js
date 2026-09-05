@@ -74,6 +74,26 @@ const mockProducts = [
   { id:"test-top-003", masterProductId:"test-top-003", source:"test", name:"Top Brisa", productType:"Top", vibeId:"chill", vibes:["chill"], price:69900, media:["https://images.unsplash.com/photo-1564257577054-5f4094b4888c?auto=format&fit=crop&w=1200&q=85"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-top-003-${size}`,productId:"test-top-003",size,color:"Marfil",sku:`P-BRI-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:69900,inStock:true,inventoryQuantity:10-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:27,description:"Top versátil de prueba para looks de día.",reviews:[] }
 ];
 
+const additionalMockProducts = [
+  ["test-dress-004","Vestido Eclipse","Vestido","late",149900,"Negro","NOC"],
+  ["test-set-005","Conjunto Medianoche","Conjunto","late",139900,"Vino","NOC"],
+  ["test-dress-006","Vestido Serena","Vestido","chill",119900,"Azul","DIA"],
+  ["test-set-007","Set Marfil","Conjunto","chill",109900,"Marfil","DIA"],
+  ["test-top-008","Top Express","Top","quick",79900,"Rojo","RAP"],
+  ["test-set-009","Set Urbano","Conjunto","quick",129900,"Gris","RAP"],
+  ["test-dress-010","Vestido Flash","Vestido","quick",139900,"Rosa","RAP"],
+  ["test-set-011","Set Palma","Conjunto","sun",119900,"Verde","SOL"],
+  ["test-dress-012","Vestido Coral","Vestido","sun",134900,"Coral","SOL"]
+].map(([id,name,productType,vibeId,price,color,code],productIndex) => ({
+  id, masterProductId:id, source:"test", name, productType, vibeId, vibes:[vibeId], price,
+  media:[mockProducts[productIndex % mockProducts.length].media[0]], sizes:["S","M","L"],
+  variants:["S","M","L"].map((size,index)=>({id:`${id}-${size}`,productId:id,size,color,sku:`P-${code}-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price,inStock:true,inventoryQuantity:7-index})),
+  deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:18,
+  description:`Producto de prueba ${name} para validar la experiencia CajaModa.`,reviews:[]
+}));
+
+mockProducts.push(...additionalMockProducts);
+
 const mockOrders = [];
 const mockEvents = [];
 
