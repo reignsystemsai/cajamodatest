@@ -3156,6 +3156,7 @@ img{
 }
 .analyticsShell{width:100%;max-width:none;margin:0;gap:30px}
 .analyticsControlColumn{width:min(680px,100%)}.analyticsLiveCompact{margin-top:12px;padding:14px 16px;border:0;border-radius:16px;background:rgba(255,255,255,.58);box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveCompact .analyticsPanelHead{margin-bottom:10px}.analyticsLiveCompact .analyticsLiveList{gap:6px}.analyticsLiveCompact .analyticsLiveRow{padding:8px 10px;box-shadow:none;background:rgba(255,255,255,.5)}
+.analyticsHotAlerts{padding:18px 20px;border:0;border-radius:18px;background:rgba(255,255,255,.64);box-shadow:0 16px 42px rgba(42,37,29,.07);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px)}.analyticsHotHead{display:flex;align-items:center;justify-content:space-between;gap:12px}.analyticsHotTitle{color:#111;font-size:14px;font-weight:820}.analyticsHotTitle span{display:inline-block;width:7px;height:7px;margin-right:9px;border-radius:50%;background:#ff765f;box-shadow:0 0 16px rgba(255,118,95,.52)}.analyticsHotMeta{color:#747880;font-size:10px}.analyticsHotList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 16px;margin-top:13px}.analyticsHotItem{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(17,17,17,.06)}.analyticsHotRank{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:9px;font-weight:800}.analyticsHotItem strong{display:block;color:#111;font-size:10px}.analyticsHotItem span{display:block;margin-top:3px;color:#6f737b;font-size:9px;line-height:1.35}.analyticsHotItem b{color:#111;font-size:11px}.analyticsHotEmpty{grid-column:1/-1;padding:8px 0;color:#777b82;font-size:10px}
 .analyticsEyebrow,.analyticsSub,.analyticsStatus,.analyticsPanelMeta{color:#696b72}
 .analyticsTitle,.analyticsPanelTitle{color:#111}
 .analyticsLiveDot{background:#2cc98b;box-shadow:0 0 0 7px rgba(44,201,139,.1),0 0 20px rgba(44,201,139,.28)}
@@ -3169,7 +3170,7 @@ img{
 .analyticsTableAction,.analyticsFilterSelect{border:0;background:rgba(255,255,255,.72);color:#40434a;box-shadow:0 8px 22px rgba(42,37,29,.06)}.analyticsLiveCount{background:rgba(44,201,139,.13);color:#14724e}
 .analyticsLiveList{max-height:none;overflow:visible}.analyticsLiveRow{border:0;background:rgba(255,255,255,.58);color:#555a62;box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveRow strong{color:#111}.analyticsSessionId{color:#6d727a}.analyticsEmpty{color:#747880}
 @media(max-width:960px){#panel-analytics{width:calc(100% + 36px);margin:-18px;padding:24px 20px}.analyticsTable{table-layout:auto;min-width:760px}.analyticsTableScroll{overflow-x:auto!important;scrollbar-width:none}.analyticsTableScroll::-webkit-scrollbar{display:none}}
-@media(max-width:620px){#panel-analytics{width:calc(100% + 24px);margin:-12px;padding:20px 16px}.analyticsTableHeader{align-items:flex-start;flex-direction:column}.analyticsTableActions{width:100%}}
+@media(max-width:620px){#panel-analytics{width:calc(100% + 24px);margin:-12px;padding:20px 16px}.analyticsTableHeader{align-items:flex-start;flex-direction:column}.analyticsTableActions{width:100%}.analyticsHotList{grid-template-columns:1fr}}
 
 </style>
 
@@ -3440,6 +3441,7 @@ img{
   hidden
 >
   <div class="analyticsShell">
+    <section class="analyticsHotAlerts"><div class="analyticsHotHead"><div class="analyticsHotTitle"><span></span>Hot new products</div><div class="analyticsHotMeta">OpenAI watchlist · first 14 days · top 10 alerts</div></div><div id="analyticsHotList" class="analyticsHotList"></div></section>
     <div class="analyticsTopbar">
       <div>
         <div class="analyticsEyebrow"><span class="analyticsLiveDot"></span>Live commerce signal</div>
@@ -6916,7 +6918,7 @@ if(authToken){
 
 </script>
 
-<script src="/analytics/admin.js?v=live-ranges-4"></script>
+<script src="/analytics/admin.js?v=hot-alerts-1"></script>
 
 </body>
 
