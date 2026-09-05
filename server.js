@@ -153,7 +153,7 @@ function hotProductCandidates(events = []) {
   });
   return [...byProduct.values()].map(product => {
     const ageDays = Math.max(1,Math.ceil((now - new Date(product.firstSeenAt).getTime()) / 86400000));
-    const signalScore = product.views + product.favorites * 4 + product.shares * 5 + product.addToCart * 7 + product.checkouts * 10 + product.purchases * 20;
+    const signalScore = product.views + product.favorites * 4 + product.shares * 5 + product.addToCart * 8 + product.checkouts * 15 + product.purchases * 30;
     return {...product,ageDays,signalScore,velocity:Number((signalScore / ageDays).toFixed(2))};
   }).filter(product => product.ageDays <= 14 && product.signalScore > 0).sort((left,right) => right.velocity - left.velocity || right.signalScore - left.signalScore).slice(0,10);
 }
