@@ -1,5 +1,7 @@
 import http from "node:http";
 import crypto from "node:crypto";
+import net from "node:net";
+import { lookup } from "node:dns/promises";
 import { readFile, stat } from "node:fs/promises";
 import { extname, resolve, sep } from "node:path";
 import Stripe from "stripe";
@@ -122,6 +124,66 @@ async function networkRequest(path, options = {}) {
   return text ? JSON.parse(text) : null;
 }
 
+function isPrivateAddress(address = "") {
+  if (net.isIP(address) === 4) return /^(10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(address);
+  return address === "::1" || address.startsWith("fc") || address.startsWith("fd") || address.startsWith("fe80:");
+}
+
+async function safeSupplierUrl(rawUrl = "") {
+  const url = new URL(String(rawUrl).trim());
+  if (url.protocol !== "https:") throw new Error("Supplier API must use HTTPS.");
+  if (["localhost","0.0.0.0"].includes(url.hostname)) throw new Error("That supplier URL is not allowed.");
+  const addresses = await lookup(url.hostname,{all:true});
+  if (!addresses.length || addresses.some(item=>isPrivateAddress(item.address))) throw new Error("That supplier URL is not allowed.");
+  return url;
+}
+
+function supplierAuthHeaders(connection = {}) {
+  const headers = {Accept:"application/json"};
+  if (connection.auth_type === "bearer" && connection.auth_secret) headers.Authorization=`Bearer ${connection.auth_secret}`;
+  if (connection.auth_type === "api_key_header" && connection.auth_secret) headers[String(connection.auth_header || "X-API-Key").slice(0,80)]=connection.auth_secret;
+  if (connection.auth_type === "basic" && connection.auth_secret) headers.Authorization=`Basic ${Buffer.from(`${connection.auth_username || ""}:${connection.auth_secret}`).toString("base64")}`;
+  return headers;
+}
+
+function supplierItems(payload) {
+  if (Array.isArray(payload)) return payload;
+  for (const key of ["products","items","data","results","catalog"]) if (Array.isArray(payload?.[key])) return payload[key];
+  return [];
+}
+
+const firstValue = (object, keys) => keys.map(key=>object?.[key]).find(value=>value !== undefined && value !== null && value !== "");
+function normalizeSupplierProduct(item = {}, index = 0) {
+  const images = firstValue(item,["images","image_urls","media","photos"]);
+  const image = firstValue(item,["image","image_url","thumbnail","photo","main_image"]);
+  const imageUrls=(Array.isArray(images) ? images.map(value=>typeof value === "string" ? value : value?.url || value?.src) : [image]).filter(Boolean).slice(0,10);
+  const sku=String(firstValue(item,["sku","SKU","product_sku","style_no","styleNumber","id"]) || `AUTO-${index+1}`).slice(0,180);
+  return {supplier_sku:sku,product_name:String(firstValue(item,["name","title","product_name","style_name"]) || sku).slice(0,240),image_urls:imageUrls,wholesale_price:Number(firstValue(item,["wholesale_price","price","cost","unit_price"])) || null,currency:String(firstValue(item,["currency","currency_code"]) || "USD").slice(0,12),stock_quantity:Number.isFinite(Number(firstValue(item,["stock","quantity","inventory","stock_quantity"]))) ? Math.max(0,Math.trunc(Number(firstValue(item,["stock","quantity","inventory","stock_quantity"])))) : null,variants:Array.isArray(item.variants) ? item.variants : [],warehouse_location:String(firstValue(item,["warehouse","warehouse_location","location"]) || "").slice(0,200) || null,processing_days:Number.isFinite(Number(firstValue(item,["processing_days","lead_time_days"]))) ? Math.max(0,Math.trunc(Number(firstValue(item,["processing_days","lead_time_days"])))) : null,source_updated_at:new Date().toISOString(),approval_status:"private_review"};
+}
+
+async function syncSupplierCatalog(supplierId) {
+  const rows=await networkRequest(`cajamoda_supplier_connections?select=*&supplier_id=eq.${encodeURIComponent(supplierId)}&limit=1`);
+  const connection=rows?.[0];
+  if(!connection) return {count:0,status:"not_configured"};
+  try {
+    const base=await safeSupplierUrl(connection.endpoint_url);
+    const endpoint=connection.catalog_path ? new URL(connection.catalog_path,base) : base;
+    await safeSupplierUrl(endpoint.toString());
+    const response=await fetch(endpoint,{headers:supplierAuthHeaders(connection),signal:AbortSignal.timeout(15000)});
+    if(!response.ok) throw new Error(`Supplier API returned ${response.status}.`);
+    const items=supplierItems(await response.json()).slice(0,5000);
+    if(!items.length) throw new Error("No product list was found in the supplier response.");
+    const products=items.map(normalizeSupplierProduct).map(product=>({...product,supplier_id:supplierId}));
+    await networkRequest(`cajamoda_supplier_catalog?supplier_id=eq.${encodeURIComponent(supplierId)}`,{method:"DELETE"});
+    for(let index=0;index<products.length;index+=500) await networkRequest("cajamoda_supplier_catalog",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(products.slice(index,index+500))});
+    await networkRequest(`cajamoda_supplier_connections?supplier_id=eq.${encodeURIComponent(supplierId)}`,{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({connection_status:"connected",last_synced_at:new Date().toISOString(),last_error:null,updated_at:new Date().toISOString()})});
+    return {count:products.length,status:"connected"};
+  } catch(error) {
+    await networkRequest(`cajamoda_supplier_connections?supplier_id=eq.${encodeURIComponent(supplierId)}`,{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({connection_status:"error",last_error:String(error.message || error).slice(0,500),updated_at:new Date().toISOString()})});
+    return {count:0,status:"error",error:error.message};
+  }
+}
+
 async function prepareNetworkPartner(input = "") {
   const message = String(input || "").trim().slice(0,3000);
   const lower = message.toLowerCase();
@@ -150,17 +212,25 @@ async function createNetworkPartner(body = {}, request) {
   const connectionType = ["api","live_catalog","cajamoda_portal"].includes(body.connectionType) ? body.connectionType : "invite";
   const shellType = partnerType === "vendor" ? "vendor" : connectionType === "api" ? "api_supplier" : connectionType === "live_catalog" ? "catalog_supplier" : "portal_supplier";
   const token = crypto.randomBytes(24).toString("hex");
-  const readiness = {shellLoaded:true,permissionsIsolated:true,loginRouteReady:true,productPublishingLocked:true,connectionReady:connectionType === "invite" || connectionType === "cajamoda_portal"};
+  const apiUrl=String(body.apiUrl || "").trim().slice(0,1000);
+  const readiness = {shellLoaded:true,permissionsIsolated:true,loginRouteReady:true,productPublishingLocked:true,connectionReady:connectionType === "invite" || connectionType === "cajamoda_portal" || ((connectionType === "api" || connectionType === "live_catalog") && Boolean(apiUrl))};
   const ready = Boolean(String(body.businessName || "").trim() && String(body.contactChannel || "").trim() && Object.values(readiness).every(Boolean));
   const shippingMethods=(Array.isArray(body.shippingMethods) ? body.shippingMethods : []).filter(value=>["courier_express","air_freight","sea_lcl","sea_fcl","postal_epacket","dropship_fulfillment","ddp_door"].includes(value));
   const tradeTerm=["EXW","FOB","CIF","DAP","DDP"].includes(body.tradeTerm) ? body.tradeTerm : "";
   const row = {partner_type:partnerType,business_name:String(body.businessName || "").trim().slice(0,200),contact_name:String(body.contactName || "").trim().slice(0,160) || null,contact_channel:String(body.contactChannel || "").trim().slice(0,240) || null,shell_type:shellType,connection_type:connectionType,status:ready ? "ready_to_invite" : "needs_attention",readiness,connection_config:{location:String(body.location || "").trim().slice(0,200),notes:String(body.notes || "").trim().slice(0,1000),shippingMethods,tradeTerm},invite_token_hash:crypto.createHash("sha256").update(token).digest("hex")};
   if (!row.business_name) throw new Error("Business name is required.");
   const created = await networkRequest("cajamoda_network_partners",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(row)});
+  let catalogSync={count:0,status:"not_configured"};
+  if(partnerType === "supplier" && ["api","live_catalog"].includes(connectionType) && apiUrl){
+    await safeSupplierUrl(apiUrl);
+    const authType=["none","bearer","api_key_header","basic"].includes(body.apiAuthType) ? body.apiAuthType : "none";
+    await networkRequest("cajamoda_supplier_connections",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({supplier_id:created[0].id,endpoint_url:apiUrl,catalog_path:String(body.catalogPath || "").trim().slice(0,500) || null,auth_type:authType,auth_header:String(body.apiHeader || "").trim().slice(0,80) || null,auth_secret:String(body.apiSecret || "").trim().slice(0,2000) || null,auth_username:String(body.apiUsername || "").trim().slice(0,240) || null})});
+    catalogSync=await syncSupplierCatalog(created[0].id);
+  }
   const host = String(request.headers.host || "cajamodatest.onrender.com");
   const inviteUrl=`${request.headers["x-forwarded-proto"] || "https"}://${host}/partner/?invite=${token}`;
   const confirmationEmailSent=ready ? await sendNetworkConfirmationEmail(created[0],inviteUrl) : false;
-  return {...created[0],inviteUrl,confirmationEmailSent};
+  return {...created[0],inviteUrl,confirmationEmailSent,catalogSync};
 }
 
 function storedEvent(event = {}) {
@@ -336,6 +406,8 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); const data=mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders); data.hotProducts=await interpretHotProducts(hotProductCandidates(stored.events)); return sendJson(response,200,data) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/store-owner/network") { try { const partners=await networkRequest("cajamoda_network_partners?select=*&order=created_at.desc"); return sendJson(response,200,{ok:true,partners}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "GET" && /^\/api\/store-owner\/network\/[0-9a-f-]+\/catalog$/.test(url.pathname)) { try { const supplierId=url.pathname.split("/")[4]; const limit=Math.min(100,Math.max(10,Number(url.searchParams.get("limit")) || 10)); const offset=Math.max(0,Number(url.searchParams.get("offset")) || 0); const products=await networkRequest(`cajamoda_supplier_catalog?select=*&supplier_id=eq.${encodeURIComponent(supplierId)}&order=updated_at.desc&offset=${offset}&limit=${limit}`); return sendJson(response,200,{ok:true,products,limit,offset}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "POST" && /^\/api\/store-owner\/network\/[0-9a-f-]+\/sync$/.test(url.pathname)) { try { const supplierId=url.pathname.split("/")[4]; return sendJson(response,200,{ok:true,sync:await syncSupplierCatalog(supplierId)}) || true; } catch(error) { return sendJson(response,400,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/network/prepare") { const body=await readBody(request); return sendJson(response,200,{ok:true,draft:await prepareNetworkPartner(body?.instruction)}) || true; }
   if (request.method === "POST" && url.pathname === "/api/store-owner/network") { try { const body=await readBody(request); const partner=await createNetworkPartner(body,request); return sendJson(response,201,{ok:true,partner}) || true; } catch(error) { return sendJson(response,400,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/partner/invite") { try { const token=String(url.searchParams.get("token") || ""); const hash=crypto.createHash("sha256").update(token).digest("hex"); const rows=await networkRequest(`cajamoda_network_partners?select=id,partner_type,business_name,shell_type,connection_type,status,readiness&invite_token_hash=eq.${hash}`); if(!rows?.length) return sendJson(response,404,{ok:false,error:"This invitation is invalid or no longer available."}) || true; return sendJson(response,200,{ok:true,partner:rows[0]}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
