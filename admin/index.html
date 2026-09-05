@@ -3473,22 +3473,48 @@ body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderAp
         <div class="onboardDraftHead"><div class="analyticsPanelTitle">Ready to review</div><button id="networkDraftClose" class="onboardDraftClose" type="button" aria-label="Close setup" title="Close setup">×</button></div>
         <div class="onboardForm">
           <label>Business name<input id="networkBusinessName"></label>
-          <label>Contact name<input id="networkContactName"></label>
-          <label>Email or WhatsApp<input id="networkContactChannel"></label>
-          <label>Location<input id="networkLocation"></label>
+          <label>Contact first name<input id="networkContactFirstName" autocomplete="given-name"></label>
+          <label>Contact last name<input id="networkContactLastName" autocomplete="family-name"></label>
+          <label>Business email<input id="networkContactEmail" type="email" autocomplete="email"></label>
+          <label>WhatsApp number<input id="networkContactWhatsapp" type="tel" autocomplete="tel" placeholder="+86 …"></label>
+          <label>Country<input id="networkCountry" autocomplete="country-name"></label>
+          <label>City / region<input id="networkLocation" autocomplete="address-level2"></label>
           <label>Partner<select id="networkPartnerType"><option value="vendor">Vendor</option><option value="supplier">Supplier</option></select></label>
           <label>Connection<select id="networkConnectionType"><option value="invite">Vendor Invitation</option><option value="api">API Supplier</option><option value="live_catalog">Live Catalog Supplier</option><option value="cajamoda_portal">CajaModa Portal Supplier</option></select></label>
         </div>
+        <div id="networkVendorFields" class="onboardApiFields">
+          <div class="onboardApiHead">Vendor operations</div><div class="onboardApiMeta">How this vendor receives orders and fulfills assigned inventory.</div>
+          <div class="onboardForm"><label>Order notification email<input id="networkVendorOrderEmail" type="email"></label><label>Fulfillment capability<select id="networkVendorFulfillment"><option value="pickup_delivery">Pickup + local delivery</option><option value="pickup">Pickup only</option><option value="local_delivery">Local delivery only</option><option value="national_shipping">National shipping</option></select></label></div>
+        </div>
         <div id="networkApiFields" class="onboardApiFields" hidden>
-          <div class="onboardApiHead">Supplier connection</div><div class="onboardApiMeta">Stored privately. Credentials never appear on supplier cards.</div>
+          <div class="onboardApiHead">API Supplier connection</div><div class="onboardApiMeta">Technical API details. Credentials are stored privately and never appear on supplier cards.</div>
           <div class="onboardForm">
-            <label>API or catalog URL<input id="networkApiUrl" type="url" inputmode="url" placeholder="https://supplier.com/api/products"></label>
-            <label>Catalog path (optional)<input id="networkCatalogPath" placeholder="/v1/products"></label>
+            <label>API base URL<input id="networkApiUrl" type="url" inputmode="url" placeholder="https://api.supplier.com"></label>
+            <label>Products endpoint<input id="networkCatalogPath" placeholder="/v1/products"></label>
+            <label>API documentation URL<input id="networkApiDocsUrl" type="url" inputmode="url"></label>
+            <label>API version<input id="networkApiVersion" placeholder="v1"></label>
             <label>Authentication<select id="networkApiAuthType"><option value="none">No authentication</option><option value="bearer">Bearer token</option><option value="api_key_header">API key header</option><option value="basic">Username + password</option></select></label>
+            <label>Automatic sync<select id="networkApiSyncFrequency"><option value="15_minutes">Every 15 minutes</option><option value="hourly">Hourly</option><option value="6_hours">Every 6 hours</option><option value="daily">Daily</option><option value="manual">Manual only</option></select></label>
             <label id="networkApiHeaderLabel" hidden>Header name<input id="networkApiHeader" placeholder="X-API-Key"></label>
             <label id="networkApiUsernameLabel" hidden>API username<input id="networkApiUsername" autocomplete="username"></label>
             <label id="networkApiSecretLabel" hidden>API key / token / password<input id="networkApiSecret" type="password" autocomplete="new-password"></label>
           </div>
+        </div>
+        <div id="networkLiveCatalogFields" class="onboardApiFields" hidden>
+          <div class="onboardApiHead">Live Catalog Supplier connection</div><div class="onboardApiMeta">The direct product-feed details CajaModa will monitor and import.</div>
+          <div class="onboardForm">
+            <label>Live catalog or feed URL<input id="networkLiveCatalogUrl" type="url" inputmode="url" placeholder="https://supplier.com/catalog.json"></label>
+            <label>Feed format<select id="networkLiveCatalogFormat"><option value="auto">Detect automatically</option><option value="json">JSON</option><option value="xml">XML</option><option value="csv">CSV</option></select></label>
+            <label>Access method<select id="networkLiveAuthType"><option value="none">Public link</option><option value="bearer">Bearer token</option><option value="api_key_header">API key header</option><option value="basic">Username + password</option></select></label>
+            <label>Update check<select id="networkLiveSyncFrequency"><option value="15_minutes">Every 15 minutes</option><option value="hourly">Hourly</option><option value="6_hours">Every 6 hours</option><option value="daily">Daily</option><option value="manual">Manual only</option></select></label>
+            <label id="networkLiveHeaderLabel" hidden>Header name<input id="networkLiveHeader" placeholder="X-API-Key"></label>
+            <label id="networkLiveUsernameLabel" hidden>Username<input id="networkLiveUsername" autocomplete="username"></label>
+            <label id="networkLiveSecretLabel" hidden>Access key / token / password<input id="networkLiveSecret" type="password" autocomplete="new-password"></label>
+          </div>
+        </div>
+        <div id="networkPortalFields" class="onboardApiFields" hidden>
+          <div class="onboardApiHead">CajaModa Portal Supplier invitation</div><div class="onboardApiMeta">For suppliers without a usable API or live catalog. They will load products directly into their private shell.</div>
+          <div class="onboardForm"><label>Invitation language<select id="networkPortalLanguage"><option value="en">English</option><option value="zh">Chinese</option><option value="es">Spanish</option></select></label><label>Catalog currency<select id="networkPortalCurrency"><option>USD</option><option>CNY</option><option>COP</option></select></label></div>
         </div>
         <div class="onboardShipping"><strong>Supplier shipping methods</strong><div class="onboardShippingOptions"><label><input type="checkbox" value="courier_express"> Courier express (DHL/UPS/FedEx)</label><label><input type="checkbox" value="air_freight"> Air freight</label><label><input type="checkbox" value="sea_lcl"> Sea freight — LCL</label><label><input type="checkbox" value="sea_fcl"> Sea freight — FCL</label><label><input type="checkbox" value="postal_epacket"> Postal / ePacket</label><label><input type="checkbox" value="dropship_fulfillment"> Direct dropship fulfillment</label><label><input type="checkbox" value="ddp_door"> DDP door-to-door line</label></div><label class="onboardTradeTerm">Trade term<select id="networkTradeTerm"><option value="">Select term</option><option>EXW</option><option>FOB</option><option>CIF</option><option>DAP</option><option>DDP</option></select></label></div>
         <div class="onboardChecks"><span>✓ Shell loaded</span><span>✓ Permissions isolated</span><span>✓ Public publishing locked</span></div>
@@ -7019,21 +7045,28 @@ if(authToken){
   };
   const fill = (id,value) => { if($(id)) $(id).value = value || ""; };
   const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g,character=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character]));
-  function updateApiFields(){
+  function updateConnectionFields(){
     const connection=$("networkConnectionType")?.value;
-    $("networkApiFields").hidden=!["api","live_catalog"].includes(connection);
+    $("networkVendorFields").hidden=connection!=="invite";
+    $("networkApiFields").hidden=connection!=="api";
+    $("networkLiveCatalogFields").hidden=connection!=="live_catalog";
+    $("networkPortalFields").hidden=connection!=="cajamoda_portal";
   }
   function updateAuthFields(){
     const auth=$("networkApiAuthType")?.value;
     $("networkApiHeaderLabel").hidden=auth!=="api_key_header";
     $("networkApiUsernameLabel").hidden=auth!=="basic";
     $("networkApiSecretLabel").hidden=auth==="none";
+    const liveAuth=$("networkLiveAuthType")?.value;
+    $("networkLiveHeaderLabel").hidden=liveAuth!=="api_key_header";
+    $("networkLiveUsernameLabel").hidden=liveAuth!=="basic";
+    $("networkLiveSecretLabel").hidden=liveAuth==="none";
   }
   function showDraft(draft={}){
     prepared=draft; $("networkDraft").hidden=false;
-    fill("networkBusinessName",draft.businessName); fill("networkContactName",draft.contactName); fill("networkContactChannel",draft.contactChannel); fill("networkLocation",draft.location);
+    fill("networkBusinessName",draft.businessName); fill("networkContactFirstName",draft.contactFirstName); fill("networkContactLastName",draft.contactLastName); fill("networkContactEmail",draft.contactEmail); fill("networkContactWhatsapp",draft.contactWhatsapp); fill("networkCountry",draft.country); fill("networkLocation",draft.location);
     fill("networkPartnerType",draft.partnerType || "vendor"); fill("networkConnectionType",draft.connectionType || "invite");
-    updateApiFields(); updateAuthFields();
+    updateConnectionFields(); updateAuthFields();
   }
   function closeDraft(){
     prepared=null;
@@ -7046,7 +7079,7 @@ if(authToken){
     $("networkMessage").textContent="";
   }
   function renderPartners(partners=[]){
-    $("networkPartners").innerHTML=partners.length ? partners.map(partner=>'<button type="button" class="onboardPartner" data-network-partner="'+escapeHtml(partner.id)+'" data-network-name="'+escapeHtml(partner.business_name)+'"><div class="onboardPartnerMain"><strong>'+escapeHtml(partner.business_name)+'</strong><span>'+escapeHtml(String(partner.shell_type||"").replaceAll("_"," "))+' · '+escapeHtml(partner.contact_channel||"No contact")+'</span></div><div class="onboardStatus">'+escapeHtml(String(partner.status||"draft").replaceAll("_"," "))+'</div></button>').join("") : '<div class="analyticsEmpty">No partners added yet.</div>';
+    $("networkPartners").innerHTML=partners.length ? partners.map(partner=>'<button type="button" class="onboardPartner" data-network-partner="'+escapeHtml(partner.id)+'" data-network-name="'+escapeHtml(partner.business_name)+'"><div class="onboardPartnerMain"><strong>'+escapeHtml(partner.business_name)+'</strong><span>'+escapeHtml(String(partner.shell_type||"").replaceAll("_"," "))+' · '+escapeHtml(partner.contact_email||partner.contact_whatsapp||partner.contact_channel||"No contact")+'</span></div><div class="onboardStatus">'+escapeHtml(String(partner.status||"draft").replaceAll("_"," "))+'</div></button>').join("") : '<div class="analyticsEmpty">No partners added yet.</div>';
   }
   function renderCatalog(products=[]){
     const slots=Array.from({length:catalogLimit},(_,index)=>products[index] || null);
@@ -7064,11 +7097,12 @@ if(authToken){
   function openCatalog(id,name){ catalogPartner={id,name}; catalogOffset=0; $("networkCatalog").hidden=false; $("networkCatalogTitle").textContent=`${name} inventory`; loadCatalog(); $("networkCatalog").scrollIntoView({behavior:"smooth",block:"start"}); }
   async function load(){ try { renderPartners((await request("/api/store-owner/network")).partners || []); } catch(error){ $("networkMessage").textContent=error.message; } }
   $("networkPrepare")?.addEventListener("click",async()=>{ const instruction=$("networkInstruction").value.trim(); if(!instruction) return; $("networkMessage").textContent="Preparing the correct shell…"; try { showDraft((await request("/api/store-owner/network/prepare",{method:"POST",body:{instruction}})).draft); $("networkMessage").textContent="Review the prepared setup below."; } catch(error){ $("networkMessage").textContent=error.message; } });
-  $("networkCreate")?.addEventListener("click",async()=>{ const button=$("networkCreate"); button.disabled=true; button.textContent="Connecting and loading inventory…"; try { const body={...prepared,businessName:$("networkBusinessName").value,contactName:$("networkContactName").value,contactChannel:$("networkContactChannel").value,location:$("networkLocation").value,partnerType:$("networkPartnerType").value,connectionType:$("networkConnectionType").value,apiUrl:$("networkApiUrl").value,catalogPath:$("networkCatalogPath").value,apiAuthType:$("networkApiAuthType").value,apiHeader:$("networkApiHeader").value,apiUsername:$("networkApiUsername").value,apiSecret:$("networkApiSecret").value,shippingMethods:[...document.querySelectorAll(".onboardShippingOptions input:checked")].map(input=>input.value),tradeTerm:$("networkTradeTerm").value}; const partner=(await request("/api/store-owner/network",{method:"POST",body})).partner; $("networkMessage").textContent=partner.catalogSync?.status === "connected" ? `Connected. ${partner.catalogSync.count} products loaded.` : partner.catalogSync?.error ? `Shell saved. Inventory connection needs attention: ${partner.catalogSync.error}` : partner.status === "ready_to_invite" ? "Shell verified. Private invitation created." : "Shell saved, but it needs attention before invitation."; if(partner.inviteUrl){ const invite=document.createElement("div"); invite.className="onboardInvite"; invite.textContent=partner.inviteUrl; $("networkDraft").appendChild(invite); } await load(); if(partner.id) openCatalog(partner.id,partner.business_name); } catch(error){ $("networkMessage").textContent=error.message; } finally { button.disabled=false; button.textContent="Create shell & invitation"; } });
+  $("networkCreate")?.addEventListener("click",async()=>{ const button=$("networkCreate"); button.disabled=true; button.textContent="Connecting and loading inventory…"; try { const connectionType=$("networkConnectionType").value; const live=connectionType==="live_catalog"; const body={...prepared,businessName:$("networkBusinessName").value,contactFirstName:$("networkContactFirstName").value,contactLastName:$("networkContactLastName").value,contactEmail:$("networkContactEmail").value,contactWhatsapp:$("networkContactWhatsapp").value,country:$("networkCountry").value,location:$("networkLocation").value,partnerType:$("networkPartnerType").value,connectionType,apiUrl:live?$("networkLiveCatalogUrl").value:$("networkApiUrl").value,catalogPath:live?"":$("networkCatalogPath").value,apiDocsUrl:$("networkApiDocsUrl").value,apiVersion:$("networkApiVersion").value,feedFormat:$("networkLiveCatalogFormat").value,syncFrequency:live?$("networkLiveSyncFrequency").value:$("networkApiSyncFrequency").value,apiAuthType:live?$("networkLiveAuthType").value:$("networkApiAuthType").value,apiHeader:live?$("networkLiveHeader").value:$("networkApiHeader").value,apiUsername:live?$("networkLiveUsername").value:$("networkApiUsername").value,apiSecret:live?$("networkLiveSecret").value:$("networkApiSecret").value,vendorOrderEmail:$("networkVendorOrderEmail").value,vendorFulfillment:$("networkVendorFulfillment").value,portalLanguage:$("networkPortalLanguage").value,portalCurrency:$("networkPortalCurrency").value,shippingMethods:[...document.querySelectorAll(".onboardShippingOptions input:checked")].map(input=>input.value),tradeTerm:$("networkTradeTerm").value}; const partner=(await request("/api/store-owner/network",{method:"POST",body})).partner; $("networkMessage").textContent=partner.catalogSync?.status === "connected" ? `Connected. ${partner.catalogSync.count} products loaded.` : partner.catalogSync?.error ? `Shell saved. Inventory connection needs attention: ${partner.catalogSync.error}` : partner.status === "ready_to_invite" ? "Shell verified. Private invitation created." : "Shell saved, but it needs attention before invitation."; if(partner.inviteUrl){ const invite=document.createElement("div"); invite.className="onboardInvite"; invite.textContent=partner.inviteUrl; $("networkDraft").appendChild(invite); } await load(); if(partner.id) openCatalog(partner.id,partner.business_name); } catch(error){ $("networkMessage").textContent=error.message; } finally { button.disabled=false; button.textContent="Create shell & invitation"; } });
   document.querySelectorAll("[data-manual-shell]").forEach(button=>button.addEventListener("click",()=>{ const connectionType=button.dataset.manualShell; showDraft({partnerType:connectionType==="vendor"?"vendor":"supplier",connectionType:connectionType==="vendor"?"invite":connectionType,businessName:"",contactName:"",contactChannel:"",location:"",notes:"Manual setup"}); $("networkMessage").textContent="Manual shell opened. Complete the required fields."; }));
   $("networkDraftClose")?.addEventListener("click",closeDraft);
-  $("networkConnectionType")?.addEventListener("change",updateApiFields);
+  $("networkConnectionType")?.addEventListener("change",updateConnectionFields);
   $("networkApiAuthType")?.addEventListener("change",updateAuthFields);
+  $("networkLiveAuthType")?.addEventListener("change",updateAuthFields);
   $("networkPartners")?.addEventListener("click",event=>{ const button=event.target.closest("[data-network-partner]"); if(button) openCatalog(button.dataset.networkPartner,button.dataset.networkName); });
   $("networkCatalogClose")?.addEventListener("click",()=>{ $("networkCatalog").hidden=true; catalogPartner=null; });
   $("networkCatalogSync")?.addEventListener("click",async()=>{ if(!catalogPartner)return; $("networkCatalogMeta").textContent="Syncing live supplier inventory…"; try { const data=await request(`/api/store-owner/network/${encodeURIComponent(catalogPartner.id)}/sync`,{method:"POST",body:{}}); $("networkCatalogMeta").textContent=data.sync.status==="connected" ? `${data.sync.count} products synchronized.` : data.sync.error || "Connection is not configured."; await loadCatalog(); } catch(error){ $("networkCatalogMeta").textContent=error.message; } });
