@@ -3414,6 +3414,13 @@ img{
       </div>
       <div>
         <div class="analyticsControls">
+          <div class="analyticsRange" aria-label="Analytics date range">
+            <button class="analyticsRangeButton" data-range-days="1" type="button">Day</button>
+            <button class="analyticsRangeButton" data-range-days="7" type="button">Week</button>
+            <button class="analyticsRangeButton active" data-range-days="30" type="button">Month</button>
+            <button class="analyticsRangeButton" data-range-days="90" type="button">Quarter</button>
+            <button class="analyticsRangeButton" data-range-days="365" type="button">Year</button>
+          </div>
           <input id="analyticsMonth" type="month" aria-label="Dashboard month" style="height:36px;border:1px solid rgba(255,255,255,.11);border-radius:10px;background:rgba(255,255,255,.055);color:#fff;padding:0 12px">
           <button id="analyticsRefresh" class="analyticsRefresh" type="button"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2 5"/><path d="M20 4v7h-7"/></svg>Refresh</button>
         </div>
@@ -3957,6 +3964,8 @@ img{
      ============================================================ */
 
   let authToken = TEST_MODE ? "cajamoda-test" : readToken();
+
+  if(TEST_MODE) saveToken(authToken);
 
   let ownerProfile = null;
   let ownerSummary = null;

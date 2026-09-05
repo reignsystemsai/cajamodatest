@@ -105,18 +105,43 @@ function mockInventory() {
   })));
 }
 
-function mockAnalytics() {
-  const counts = type => mockEvents.filter(event => event.eventType === type).length;
-  const purchases = mockOrders.length;
-  const revenue = mockOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-  const sessions = Math.max(1, new Set(mockEvents.map(event => event.sessionId).filter(Boolean)).size);
+function mockAnalytics(daysInput = 30) {
+  const days = [1,7,30,90,365].includes(Number(daysInput)) ? Number(daysInput) : 30;
+  const rangeCutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  const rangeEvents = mockEvents.filter(event => new Date(event.occurredAt || Date.now()).getTime() >= rangeCutoff);
+  const rangeOrders = mockOrders.filter(order => new Date(order.date || Date.now()).getTime() >= rangeCutoff);
+  const counts = type => rangeEvents.filter(event => event.eventType === type).length;
+  const purchases = rangeOrders.length;
+  const revenue = rangeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const sessions = Math.max(1, new Set(rangeEvents.map(event => event.sessionId).filter(Boolean)).size);
+  const activeCutoff = Date.now() - 45000;
+  const liveBySession = new Map();
+  rangeEvents.forEach(event => {
+    const sessionId = String(event?.sessionId || "");
+    if (!sessionId) return;
+    if (event.eventType === "page_leave") {
+      liveBySession.delete(sessionId);
+      return;
+    }
+    const occurredAt = new Date(event.occurredAt || Date.now()).getTime();
+    if (occurredAt < activeCutoff) return;
+    liveBySession.set(sessionId, {
+      sessionId,
+      page:event.page || "home",
+      action:event.eventType || "Browsing",
+      productName:event.productName || "",
+      city:event.location?.city || "Unknown",
+      timeOnSiteSeconds:Number(event.properties?.durationSeconds || 0)
+    });
+  });
+  const liveSessions = [...liveBySession.values()];
   return {
-    generatedAt:new Date().toISOString(), storage:{eventCount:mockEvents.length},
-    overview:{liveVisitors:1,sessions,productViews:counts("product_view"),favorites:counts("favorite"),shares:counts("share"),addToCart:counts("add_to_cart"),checkouts:counts("checkout"),purchases,revenue,cardRevenue:0,nequiRevenue:revenue,conversionRate:purchases/sessions,averageOrderValue:purchases?revenue/purchases:0,abandonedCarts:Math.max(0,counts("checkout")-purchases),monthlyGrowth:0,inventorySpend:0,costOfGoodsSold:0,remainingInventoryValue:0,grossProfit:revenue,grossMarginPercent:100,adSpend:0,customerAcquisitionCost:0},
+    generatedAt:new Date().toISOString(), rangeDays:days, storage:{eventCount:rangeEvents.length},
+    overview:{liveVisitors:liveSessions.length,sessions,productViews:counts("product_view"),favorites:counts("favorite"),shares:counts("share"),addToCart:counts("add_to_cart"),checkouts:counts("checkout"),purchases,revenue,cardRevenue:0,nequiRevenue:revenue,conversionRate:purchases/sessions,averageOrderValue:purchases?revenue/purchases:0,abandonedCarts:Math.max(0,counts("checkout")-purchases),monthlyGrowth:0,inventorySpend:0,costOfGoodsSold:0,remainingInventoryValue:0,grossProfit:revenue,grossMarginPercent:100,adSpend:0,customerAcquisitionCost:0},
     timeseries:[], channels:[{channel:"direct",sessions,purchases,revenue}],
     funnel:[{key:"view",label:"Product views",value:counts("product_view")},{key:"cart",label:"Added to bag",value:counts("add_to_cart")},{key:"checkout",label:"Checkout",value:counts("checkout")},{key:"purchase",label:"Purchase",value:purchases}],
-    topProducts:mockProducts.map(product=>({productId:product.id,name:product.name,image:product.media[0],views:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="product_view").length,favorites:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="favorite").length,shares:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="share").length,addToCart:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="add_to_cart").length,checkouts:0,purchases:0})),
-    realtime:{visitors:[{sessionId:"test-session",page:"storefront",action:"Testing",city:"Cartagena",timeOnSiteSeconds:90}]}, campaigns:[], settings:{month:new Date().toISOString().slice(0,7),adSpendWhatsapp:0,adSpendInstagram:0,adSpendTiktok:0,inventorySpend:0}
+    topProducts:mockProducts.map(product=>({productId:product.id,name:product.name,image:product.media[0],views:rangeEvents.filter(event=>event.productId===product.id&&event.eventType==="product_view").length,favorites:rangeEvents.filter(event=>event.productId===product.id&&event.eventType==="favorite").length,shares:rangeEvents.filter(event=>event.productId===product.id&&event.eventType==="share").length,addToCart:rangeEvents.filter(event=>event.productId===product.id&&event.eventType==="add_to_cart").length,checkouts:rangeEvents.filter(event=>event.eventType==="checkout"&&event.properties?.items?.some?.(item=>item.productId===product.id)).length,purchases:rangeOrders.reduce((total,order)=>total+(order.items||[]).filter(item=>item.productId===product.id).reduce((sum,item)=>sum+Number(item.quantity||1),0),0)})),
+    realtime:{activeVisitors:liveSessions.length,sessions:liveSessions}, campaigns:[], settings:{month:new Date().toISOString().slice(0,7),adSpendWhatsapp:0,adSpendInstagram:0,adSpendTiktok:0,inventorySpend:0}
   };
 }
 
@@ -129,7 +154,7 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/store-owner/summary") return sendJson(response,200,{ok:true,summary:{products:mockProducts.length,orders:mockOrders.length,inventory:mockInventory().length}}) || true;
   if (request.method === "GET" && url.pathname === "/api/inventory") return sendJson(response,200,{ok:true,inventory:mockInventory(),showcases:{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
-  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") return sendJson(response,200,mockAnalytics()) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") return sendJson(response,200,mockAnalytics(url.searchParams.get("days"))) || true;
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
   if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); mockEvents.push(...(Array.isArray(body?.events)?body.events:[])); return sendJson(response,202,{ok:true,accepted:Array.isArray(body?.events)?body.events.length:0}) || true; }
   if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
