@@ -68,6 +68,81 @@ const DIST_ROOT =
 
 const TEST_MODE = !process.env.WIX_API_KEY && !process.env.WIX_SITE_ID;
 
+const TEST_SUPABASE_URL = process.env.TEST_SUPABASE_URL || "https://ycubkfktdqcanbunhzhl.supabase.co";
+const TEST_SUPABASE_KEY = process.env.TEST_SUPABASE_PUBLISHABLE_KEY || "";
+const TEST_ANALYTICS_ACCESS_KEY = process.env.TEST_ANALYTICS_ACCESS_KEY || "";
+
+function testSupabaseHeaders(extra = {}) {
+  if (!TEST_SUPABASE_KEY || !TEST_ANALYTICS_ACCESS_KEY) {
+    throw new Error("Test analytics storage is not configured.");
+  }
+  return {
+    apikey:TEST_SUPABASE_KEY,
+    Authorization:`Bearer ${TEST_SUPABASE_KEY}`,
+    "x-cajamoda-test-key":TEST_ANALYTICS_ACCESS_KEY,
+    "Content-Type":"application/json",
+    ...extra
+  };
+}
+
+async function readAllTestRows(table, query = "") {
+  const rows = [];
+  const pageSize = 1000;
+  for (let start = 0; ; start += pageSize) {
+    const response = await fetch(`${TEST_SUPABASE_URL}/rest/v1/${table}?${query}`, {
+      headers:testSupabaseHeaders({ Range:`${start}-${start + pageSize - 1}` })
+    });
+    if (!response.ok) throw new Error(`Test analytics storage read failed (${response.status}).`);
+    const page = await response.json();
+    rows.push(...page);
+    if (page.length < pageSize) return rows;
+  }
+}
+
+async function writeTestRows(table, rows) {
+  if (!rows.length) return;
+  const response = await fetch(`${TEST_SUPABASE_URL}/rest/v1/${table}`, {
+    method:"POST",
+    headers:testSupabaseHeaders({ Prefer:"resolution=ignore-duplicates,return=minimal" }),
+    body:JSON.stringify(rows)
+  });
+  if (!response.ok) throw new Error(`Test analytics storage write failed (${response.status}).`);
+}
+
+function storedEvent(event = {}) {
+  return {
+    event_id:String(event.eventId || event.id || crypto.randomUUID()).slice(0,160),
+    event_type:String(event.eventType || "unknown").slice(0,80),
+    session_id:String(event.sessionId || "").slice(0,100) || null,
+    visitor_id:String(event.visitorId || "").slice(0,100) || null,
+    page:String(event.page || "").slice(0,120) || null,
+    product_id:String(event.productId || "").slice(0,160) || null,
+    product_name:String(event.productName || "").slice(0,240) || null,
+    properties:event.properties && typeof event.properties === "object" ? event.properties : {},
+    location:event.location && typeof event.location === "object" ? event.location : {},
+    value:Number.isFinite(Number(event.value)) ? Number(event.value) : 0,
+    occurred_at:new Date(event.occurredAt || Date.now()).toISOString()
+  };
+}
+
+function restoredEvent(row = {}) {
+  return {
+    eventId:row.event_id,eventType:row.event_type,sessionId:row.session_id,visitorId:row.visitor_id,
+    page:row.page,productId:row.product_id,productName:row.product_name,properties:row.properties || {},
+    location:row.location || {},value:Number(row.value || 0),occurredAt:row.occurred_at
+  };
+}
+
+async function loadStoredMockAnalytics(daysInput = 30) {
+  const days = [1,7,30,90,365].includes(Number(daysInput)) ? Number(daysInput) : 30;
+  const cutoff = new Date(Date.now() - days * 86400000).toISOString();
+  const [eventRows, orderRows] = await Promise.all([
+    readAllTestRows("cajamoda_test_analytics_events", `select=*&occurred_at=gte.${encodeURIComponent(cutoff)}&order=occurred_at.asc`),
+    readAllTestRows("cajamoda_test_orders", `select=*&created_at=gte.${encodeURIComponent(cutoff)}&order=created_at.desc`)
+  ]);
+  return { events:eventRows.map(restoredEvent), orders:orderRows.map(row => row.order_data || {}) };
+}
+
 const mockProducts = [
   { id:"test-dress-001", masterProductId:"test-dress-001", source:"test", name:"Vestido Aurora", productType:"Vestido", vibeId:"sun", vibes:["sun"], price:129900, media:["https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=1200&q=85"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-dress-001-${size}`,productId:"test-dress-001",size,color:"Coral",sku:`P-AUR-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:129900,inStock:true,inventoryQuantity:8-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:21,description:"Vestido ligero de prueba para validar la experiencia CajaModa.",reviews:[] },
   { id:"test-set-002", masterProductId:"test-set-002", source:"test", name:"Set Noche", productType:"Conjunto", vibeId:"late", vibes:["late"], price:159900, media:["https://images.unsplash.com/photo-1566206091558-7f218b696731?auto=format&fit=crop&w=1200&q=85"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-set-002-${size}`,productId:"test-set-002",size,color:"Negro",sku:`P-NOC-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:159900,inStock:true,inventoryQuantity:5-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:12,description:"Conjunto elegante de prueba para noches especiales.",reviews:[] },
@@ -105,11 +180,11 @@ function mockInventory() {
   })));
 }
 
-function mockAnalytics(daysInput = 30) {
+function mockAnalytics(daysInput = 30, analyticsEvents = mockEvents, analyticsOrders = mockOrders) {
   const days = [1,7,30,90,365].includes(Number(daysInput)) ? Number(daysInput) : 30;
   const rangeCutoff = Date.now() - days * 24 * 60 * 60 * 1000;
-  const rangeEvents = mockEvents.filter(event => new Date(event.occurredAt || Date.now()).getTime() >= rangeCutoff);
-  const rangeOrders = mockOrders.filter(order => new Date(order.date || Date.now()).getTime() >= rangeCutoff);
+  const rangeEvents = analyticsEvents.filter(event => new Date(event.occurredAt || Date.now()).getTime() >= rangeCutoff);
+  const rangeOrders = analyticsOrders.filter(order => new Date(order.date || Date.now()).getTime() >= rangeCutoff);
   const counts = type => rangeEvents.filter(event => event.eventType === type).length;
   const purchases = rangeOrders.length;
   const revenue = rangeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
@@ -154,15 +229,15 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/store-owner/summary") return sendJson(response,200,{ok:true,summary:{products:mockProducts.length,orders:mockOrders.length,inventory:mockInventory().length}}) || true;
   if (request.method === "GET" && url.pathname === "/api/inventory") return sendJson(response,200,{ok:true,inventory:mockInventory(),showcases:{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
-  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") return sendJson(response,200,mockAnalytics(url.searchParams.get("days"))) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); return sendJson(response,200,mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders)) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
-  if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); mockEvents.push(...(Array.isArray(body?.events)?body.events:[])); return sendJson(response,202,{ok:true,accepted:Array.isArray(body?.events)?body.events.length:0}) || true; }
+  if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); const events=Array.isArray(body?.events)?body.events:[]; try { await writeTestRows("cajamoda_test_analytics_events",events.map(storedEvent)); return sendJson(response,202,{ok:true,accepted:events.length,persistent:true}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
   if (request.method === "GET" && url.pathname === "/api/delivery/departments") return sendJson(response,200,{ok:true,departments:[{code:"BOL",name:"Bolívar"}]}) || true;
   if (request.method === "GET" && url.pathname === "/api/delivery/cities") return sendJson(response,200,{ok:true,state:"BOL",cities:[{name:"Cartagena de Indias",daneCode:"13001"}]}) || true;
   if (request.method === "POST" && url.pathname === "/api/checkout/validate") return sendJson(response,200,{ok:true,valid:true}) || true;
   if (request.method === "POST" && url.pathname === "/api/delivery/quote") return sendJson(response,200,{ok:true,quoteToken:"test-quote",quote:{method:"pickup",fee:0,title:"Prueba: recoger en punto"}}) || true;
-  if (request.method === "POST" && ["/api/test/checkout","/api/nequi/orders"].includes(url.pathname)) { const body=await readBody(request); const number=`TEST-${String(mockOrders.length+1).padStart(4,"0")}`; const order={id:number,orderNumber:number,date:new Date().toISOString(),status:"paid-test",paymentMethod:"test",total:Number(body?.cart?.total||0),items:body?.cart?.items||[],customer:body?.customer||{},source:"test",canConfirmPayment:false}; mockOrders.unshift(order); mockEvents.push({eventType:"purchase",sessionId:body?.analytics?.sessionId||"test-session",value:order.total}); return sendJson(response,201,{ok:true,orderNumber:number,url:`/order-confirmation/?nequiOrder=${encodeURIComponent(number)}`,testMode:true}) || true; }
+  if (request.method === "POST" && ["/api/test/checkout","/api/nequi/orders"].includes(url.pathname)) { const body=await readBody(request); const number=`TEST-${Date.now()}`; const order={id:number,orderNumber:number,date:new Date().toISOString(),status:"paid-test",paymentMethod:"test",total:Number(body?.cart?.total||0),items:body?.cart?.items||[],customer:body?.customer||{},source:"test",canConfirmPayment:false}; const purchase={eventType:"purchase",sessionId:body?.analytics?.sessionId||"test-session",value:order.total,occurredAt:order.date,properties:{items:order.items}}; try { await Promise.all([writeTestRows("cajamoda_test_orders",[{id:number,order_data:order,created_at:order.date}]),writeTestRows("cajamoda_test_analytics_events",[storedEvent(purchase)])]); return sendJson(response,201,{ok:true,orderNumber:number,url:`/order-confirmation/?nequiOrder=${encodeURIComponent(number)}`,testMode:true,persistent:true}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   return false;
 }
 
