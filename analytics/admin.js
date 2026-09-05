@@ -219,8 +219,13 @@
     });
     const allProducts = [...(currentData.topProducts || [])]
       .sort((left, right) => {
-        const score = product => ["views", "favorites", "shares", "addToCart", "checkouts", "purchases"]
-          .reduce((total, key) => total + Number(product[key] || 0), 0);
+        const score = product =>
+          Number(product.views || 0) +
+          Number(product.favorites || 0) * 4 +
+          Number(product.shares || 0) * 5 +
+          Number(product.addToCart || 0) * 8 +
+          Number(product.checkouts || 0) * 15 +
+          Number(product.purchases || 0) * 30;
         const leftValue = sortKey === "overall" ? score(left) : Number(left[sortKey] || 0);
         const rightValue = sortKey === "overall" ? score(right) : Number(right[sortKey] || 0);
         const result = sortDirection === "asc" ? leftValue - rightValue : rightValue - leftValue;
@@ -265,9 +270,9 @@
     const root = $("analyticsHotList");
     if (!root) return;
     root.innerHTML = products.length ? products.map((product,index) => '<article class="analyticsHotItem">' +
-      '<span class="analyticsHotRank">' + (index + 1) + '</span>' +
       '<div><strong>' + escapeHtml(product.name || "Product") + '</strong><span>' + escapeHtml(product.status || "Watch") + ' · ' + escapeHtml(product.reason || "New activity detected.") + '</span></div>' +
-      '<b>' + number(product.signalScore) + '</b>' +
+      '<b class="analyticsHotScore">' + number(product.signalScore) + ' pts</b>' +
+      '<span class="analyticsHotRank" aria-label="Rank ' + (index + 1) + '">' + (index + 1) + '</span>' +
     '</article>').join("") : '<div class="analyticsHotEmpty">No new-product momentum alerts yet. Alerts appear as real activity arrives.</div>';
   }
 
