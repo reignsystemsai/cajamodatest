@@ -3516,7 +3516,7 @@ body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderAp
           <div class="onboardApiHead">CajaModa Portal Supplier invitation</div><div class="onboardApiMeta">For suppliers without a usable API or live catalog. They will load products directly into their private shell.</div>
           <div class="onboardForm"><label>Invitation language<select id="networkPortalLanguage"><option value="en">English</option><option value="zh">Chinese</option><option value="es">Spanish</option></select></label><label>Catalog currency<select id="networkPortalCurrency"><option>USD</option><option>CNY</option><option>COP</option></select></label></div>
         </div>
-        <div class="onboardShipping"><strong>Supplier shipping methods</strong><div class="onboardShippingOptions"><label><input type="checkbox" value="courier_express"> Courier express (DHL/UPS/FedEx)</label><label><input type="checkbox" value="air_freight"> Air freight</label><label><input type="checkbox" value="sea_lcl"> Sea freight — LCL</label><label><input type="checkbox" value="sea_fcl"> Sea freight — FCL</label><label><input type="checkbox" value="postal_epacket"> Postal / ePacket</label><label><input type="checkbox" value="dropship_fulfillment"> Direct dropship fulfillment</label><label><input type="checkbox" value="ddp_door"> DDP door-to-door line</label></div><label class="onboardTradeTerm">Trade term<select id="networkTradeTerm"><option value="">Select term</option><option>EXW</option><option>FOB</option><option>CIF</option><option>DAP</option><option>DDP</option></select></label></div>
+        <div id="networkShippingFields" class="onboardShipping" hidden><strong>Supplier shipping methods</strong><div class="onboardShippingOptions"><label><input type="checkbox" value="courier_express"> Courier express (DHL/UPS/FedEx)</label><label><input type="checkbox" value="air_freight"> Air freight</label><label><input type="checkbox" value="sea_lcl"> Sea freight — LCL</label><label><input type="checkbox" value="sea_fcl"> Sea freight — FCL</label><label><input type="checkbox" value="postal_epacket"> Postal / ePacket</label><label><input type="checkbox" value="dropship_fulfillment"> Direct dropship fulfillment</label><label><input type="checkbox" value="ddp_door"> DDP door-to-door line</label></div><label class="onboardTradeTerm">Trade term<select id="networkTradeTerm"><option value="">Select term</option><option>EXW</option><option>FOB</option><option>CIF</option><option>DAP</option><option>DDP</option></select></label></div>
         <div class="onboardChecks"><span>✓ Shell loaded</span><span>✓ Permissions isolated</span><span>✓ Public publishing locked</span></div>
         <button id="networkCreate" class="primaryButton" type="button">Create shell & invitation</button>
       </article>
@@ -7051,6 +7051,7 @@ if(authToken){
     $("networkApiFields").hidden=connection!=="api";
     $("networkLiveCatalogFields").hidden=connection!=="live_catalog";
     $("networkPortalFields").hidden=connection!=="cajamoda_portal";
+    $("networkShippingFields").hidden=connection==="invite";
   }
   function updateAuthFields(){
     const auth=$("networkApiAuthType")?.value;
