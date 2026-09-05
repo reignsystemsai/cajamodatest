@@ -3170,6 +3170,7 @@ img{
 body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderApp:has(#panel-analytics.active),.loaderApp:has(#panel-intelligence.active){background:#fff!important}
 .loaderMain:has(#panel-analytics.active),.loaderMain:has(#panel-intelligence.active){max-width:none!important;padding:0!important}
 #panel-intelligence{width:100%!important;margin:0!important;padding:42px 34px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at 88% 7%,rgba(225,229,246,.72),transparent 34%),linear-gradient(110deg,#fff 0%,#fbfaf7 58%,#f7f8fc 100%)!important}
+.tabButton[data-tab="onboarding"]{font-size:13px!important;letter-spacing:-.02em!important;gap:10px!important}.loaderMain:has(#panel-onboarding.active){max-width:none!important;padding:0!important}.onboardGrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(340px,.95fr);gap:20px;margin-top:30px}.onboardConversation,.onboardDraft,.onboardTemplates article,.onboardPartner{padding:22px;border:1px solid rgba(255,255,255,.76);border-radius:20px;background:rgba(255,255,255,.62);box-shadow:0 18px 46px rgba(42,37,29,.07);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px)}.onboardConversation textarea{width:100%;min-height:145px;margin-top:16px;padding:16px;border:1px solid rgba(0,0,0,.09);border-radius:15px;background:rgba(255,255,255,.78);resize:vertical;font-size:14px;line-height:1.5}.onboardActions{display:flex;justify-content:space-between;gap:10px;margin-top:12px}.onboardForm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.onboardForm label{display:grid;gap:6px;color:#6f737b;font-size:9px;font-weight:750}.onboardForm input,.onboardForm select{width:100%;height:42px;padding:0 11px;border:1px solid rgba(0,0,0,.1);border-radius:11px;background:rgba(255,255,255,.8);font-size:11px}.onboardChecks{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0;color:#277b55;font-size:9px}.onboardChecks span{padding:7px 9px;border-radius:999px;background:rgba(44,201,139,.1)}.onboardTemplates{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:24px}.onboardTemplates strong,.onboardTemplates span{display:block}.onboardTemplates strong{font-size:11px}.onboardTemplates span{margin-top:7px;color:#73777e;font-size:9px;line-height:1.45}.onboardPartners{display:grid;gap:10px;margin-top:12px}.onboardPartner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px;padding:15px 18px}.onboardPartner strong,.onboardPartner span{display:block}.onboardPartner strong{font-size:11px}.onboardPartner span{margin-top:4px;color:#777b82;font-size:9px}.onboardStatus{padding:7px 10px;border-radius:999px;background:rgba(44,201,139,.11);color:#277b55;font-size:9px;font-weight:800}.onboardInvite{grid-column:1/-1;padding:10px;border-radius:10px;background:rgba(255,255,255,.72);font-size:9px;word-break:break-all}@media(max-width:960px){.onboardGrid{grid-template-columns:1fr}.onboardTemplates{grid-template-columns:1fr 1fr}}@media(max-width:560px){#panel-onboarding{padding:24px 16px!important}.onboardForm,.onboardTemplates{grid-template-columns:1fr}}
 @media(max-width:960px){#panel-analytics{width:100%!important;margin:0!important;padding:24px 20px}.analyticsTable{table-layout:auto;min-width:760px}.analyticsTableScroll{overflow-x:auto!important;scrollbar-width:none}.analyticsTableScroll::-webkit-scrollbar{display:none}}
 @media(max-width:620px){#panel-analytics{width:100%!important;margin:0!important;padding:20px 16px}.analyticsTableHeader{align-items:flex-start;flex-direction:column}.analyticsTableActions{width:100%}.analyticsHotList{grid-template-columns:1fr}}
 
@@ -3312,6 +3313,11 @@ body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderAp
       Product Intelligence
     </button>
 
+    <button class="tabButton" data-tab="onboarding" data-admin-only hidden>
+      <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/></svg></span>
+      Network Onboarding
+    </button>
+
   </nav>
 
   <div class="sidebarAccountControls">
@@ -3444,6 +3450,38 @@ body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderAp
 <!-- ==========================================================
      OWNER EVENT ANALYTICS
      ========================================================== -->
+
+<section id="panel-onboarding" class="panel" data-admin-only hidden style="min-height:100vh;padding:42px 34px;background:#fff">
+  <div class="analyticsShell">
+    <div class="analyticsEyebrow"><span class="analyticsLiveDot"></span>Prepared network launchpad</div>
+    <h1 class="analyticsTitle" style="margin-top:12px">Network Onboarding</h1>
+    <p class="analyticsSub">Speak or type who you want to add. CajaModa prepares the correct tested shell before an invitation can be used.</p>
+    <div class="onboardGrid">
+      <article class="onboardConversation">
+        <div class="analyticsPanelTitle">Who are we adding today?</div>
+        <textarea id="networkInstruction" placeholder="Example: Add Maria's boutique as a vendor in Cartagena, or add Guangzhou Moda as an API supplier."></textarea>
+        <div class="onboardActions"><button id="networkMic" class="secondaryButton" type="button">🎙 Speak</button><button id="networkPrepare" class="primaryButton" type="button">Prepare setup</button></div>
+        <div id="networkMessage" class="analyticsPanelMeta"></div>
+      </article>
+      <article id="networkDraft" class="onboardDraft" hidden>
+        <div class="analyticsPanelTitle">Ready to review</div>
+        <div class="onboardForm">
+          <label>Business name<input id="networkBusinessName"></label>
+          <label>Contact name<input id="networkContactName"></label>
+          <label>Email or WhatsApp<input id="networkContactChannel"></label>
+          <label>Location<input id="networkLocation"></label>
+          <label>Partner<select id="networkPartnerType"><option value="vendor">Vendor</option><option value="supplier">Supplier</option></select></label>
+          <label>Connection<select id="networkConnectionType"><option value="invite">Vendor invitation</option><option value="api">Connect API</option><option value="live_catalog">Live catalog</option><option value="cajamoda_portal">CajaModa supplier portal</option></select></label>
+        </div>
+        <div class="onboardChecks"><span>✓ Shell loaded</span><span>✓ Permissions isolated</span><span>✓ Public publishing locked</span></div>
+        <button id="networkCreate" class="primaryButton" type="button">Create shell & invitation</button>
+      </article>
+    </div>
+    <div class="onboardTemplates"><article><strong>Vendor Shell</strong><span>Products, assigned inventory, orders and fulfillment.</span></article><article><strong>API Supplier Shell</strong><span>Connection health, synchronization and exceptions.</span></article><article><strong>Live Catalog Shell</strong><span>Feed status, mapped products and update history.</span></article><article><strong>Supplier Portal Shell</strong><span>Photos, SKUs, variants, prices and inventory.</span></article></div>
+    <div class="analyticsPanelTitle" style="margin-top:30px">Connected network</div>
+    <div id="networkPartners" class="onboardPartners"><div class="analyticsEmpty">No partners added yet.</div></div>
+  </div>
+</section>
 
 <section id="panel-intelligence" class="panel" data-admin-only hidden style="min-height:100vh;padding:30px;background:#fff">
   <div class="analyticsShell">
@@ -4610,7 +4648,7 @@ function displayOrderNumber(order){
     name
   ){
 
-    if((name === "analytics" || name === "intelligence") && ownerProfile?.role !== "admin"){
+    if((name === "analytics" || name === "intelligence" || name === "onboarding") && ownerProfile?.role !== "admin"){
       return;
     }
 
@@ -4652,6 +4690,9 @@ function displayOrderNumber(order){
     if(name === "analytics" || name === "intelligence"){
       loadAnalytics();
       startAnalyticsPolling();
+    }else if(name === "onboarding"){
+      window.CajaModaNetworkOnboarding?.load();
+      window.CajaModaAdminAnalytics?.stop();
     }else{
       window.CajaModaAdminAnalytics?.stop();
     }
@@ -6944,6 +6985,32 @@ if(authToken){
 
 </script>
 
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let prepared = null;
+  const request = async (path,options={}) => {
+    const response = await fetch(path,{method:options.method || "GET",headers:{"Content-Type":"application/json"},body:options.body ? JSON.stringify(options.body) : undefined});
+    const data = await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(data.error || "Network onboarding request failed.");
+    return data;
+  };
+  const fill = (id,value) => { if($(id)) $(id).value = value || ""; };
+  function showDraft(draft={}){
+    prepared=draft; $("networkDraft").hidden=false;
+    fill("networkBusinessName",draft.businessName); fill("networkContactName",draft.contactName); fill("networkContactChannel",draft.contactChannel); fill("networkLocation",draft.location);
+    fill("networkPartnerType",draft.partnerType || "vendor"); fill("networkConnectionType",draft.connectionType || "invite");
+  }
+  function renderPartners(partners=[]){
+    $("networkPartners").innerHTML=partners.length ? partners.map(partner=>'<article class="onboardPartner"><div><strong>'+String(partner.business_name||"").replace(/[<>&]/g,"")+'</strong><span>'+String(partner.shell_type||"").replaceAll("_"," ")+' · '+String(partner.contact_channel||"No contact")+'</span></div><div class="onboardStatus">'+String(partner.status||"draft").replaceAll("_"," ")+'</div></article>').join("") : '<div class="analyticsEmpty">No partners added yet.</div>';
+  }
+  async function load(){ try { renderPartners((await request("/api/store-owner/network")).partners || []); } catch(error){ $("networkMessage").textContent=error.message; } }
+  $("networkPrepare")?.addEventListener("click",async()=>{ const instruction=$("networkInstruction").value.trim(); if(!instruction) return; $("networkMessage").textContent="Preparing the correct shell…"; try { showDraft((await request("/api/store-owner/network/prepare",{method:"POST",body:{instruction}})).draft); $("networkMessage").textContent="Review the prepared setup below."; } catch(error){ $("networkMessage").textContent=error.message; } });
+  $("networkCreate")?.addEventListener("click",async()=>{ const button=$("networkCreate"); button.disabled=true; button.textContent="Running readiness checks…"; try { const body={...prepared,businessName:$("networkBusinessName").value,contactName:$("networkContactName").value,contactChannel:$("networkContactChannel").value,location:$("networkLocation").value,partnerType:$("networkPartnerType").value,connectionType:$("networkConnectionType").value}; const partner=(await request("/api/store-owner/network",{method:"POST",body})).partner; $("networkMessage").textContent=partner.status === "ready_to_invite" ? "Shell verified. Private invitation created." : "Shell saved, but it needs attention before invitation."; if(partner.inviteUrl){ const invite=document.createElement("div"); invite.className="onboardInvite"; invite.textContent=partner.inviteUrl; $("networkDraft").appendChild(invite); } await load(); } catch(error){ $("networkMessage").textContent=error.message; } finally { button.disabled=false; button.textContent="Create shell & invitation"; } });
+  $("networkMic")?.addEventListener("click",()=>{ const SpeechRecognition=window.SpeechRecognition || window.webkitSpeechRecognition; if(!SpeechRecognition){ $("networkMessage").textContent="Voice input is not available in this browser. You can type the instruction."; return; } const recognition=new SpeechRecognition(); recognition.lang="en-US"; recognition.interimResults=false; recognition.onresult=event=>{ $("networkInstruction").value=event.results[0][0].transcript; }; recognition.onerror=()=>{ $("networkMessage").textContent="I could not hear that. Tap Speak and try again."; }; recognition.start(); $("networkMessage").textContent="Listening…"; });
+  window.CajaModaNetworkOnboarding={load};
+})();
+</script>
 <script src="/analytics/admin.js?v=ranked-products-4"></script>
 
 </body>
