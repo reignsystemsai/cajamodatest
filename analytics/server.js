@@ -895,8 +895,7 @@ export function createAnalyticsService({ wix, getOrders }) {
         right.views - left.views ||
         right.addToCart - left.addToCart ||
         right.purchases - left.purchases
-      )
-      .slice(0, 100);
+      );
     const liveSessions = getLiveSessions();
 
     return {
