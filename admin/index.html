@@ -1,3 +1,9 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+<script src="/analytics/client.js"> in "/order-confirmation/index.html" can't be bundled without type="module" attribute
+<script src="/analytics/admin.js?v=live-ranges-4"> in "/admin/index.html" can't be bundled without type="module" attribute
+<script src="/analytics/client.js"> in "/index.html" can't be bundled without type="module" attribute
+<script src="/analytics/client.js"> in "/checkout/index.html" can't be bundled without type="module" attribute
+<script src="/analytics/client.js"> in "/product/index.html" can't be bundled without type="module" attribute
 <!doctype html>
 <html lang="es">
 
@@ -3120,7 +3126,7 @@ img{
 .analyticsSetting input:focus{border-color:rgba(109,130,255,.75);box-shadow:0 0 0 3px rgba(109,130,255,.13)}
 .analyticsSave{margin-top:4px;background:#fff;color:#080809;width:100%}
 .analyticsTableCard{padding:0}.analyticsTableHeader{padding:22px 22px 15px}.analyticsTableScroll{position:relative;overflow-x:auto;overflow-y:visible;max-height:none}
-.analyticsTableHeader{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}.analyticsTableActions{display:flex;gap:8px;flex-wrap:wrap}.analyticsTableAction,.analyticsSortButton{border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.05);color:#9ea2ac;font-size:9px;font-weight:760;cursor:pointer}.analyticsTableAction{height:32px;padding:0 11px}.analyticsSortPair{display:flex;justify-content:flex-end;gap:4px;margin-top:6px}.analyticsSortButton{padding:4px 6px}.analyticsSortButton.sorted{background:#fff;color:#080809;border-color:#fff}
+.analyticsTableHeader{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}.analyticsTableActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.analyticsFilterLabel{color:#72767e;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.analyticsFilterSelect,.analyticsTableAction{height:32px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:rgba(255,255,255,.05);color:#9ea2ac;padding:0 10px;font-size:9px;font-weight:760;cursor:pointer}
 .analyticsTable{width:100%;border-collapse:collapse;min-width:900px}.analyticsTable th{position:sticky;top:0;z-index:2;background:rgba(10,10,12,.94);backdrop-filter:blur(20px);color:#747985;font-size:10px;font-weight:740;text-transform:uppercase;letter-spacing:.07em;text-align:right;padding:12px 13px;border-top:1px solid rgba(255,255,255,.065);border-bottom:1px solid rgba(255,255,255,.075);cursor:pointer;white-space:nowrap}
 .analyticsTable th:first-child{text-align:left;padding-left:22px}.analyticsTable th.sorted{color:#fff}.analyticsTable td{padding:13px;border-bottom:1px solid rgba(255,255,255,.055);color:#afb3bc;font-size:11px;text-align:right;white-space:nowrap}.analyticsTable td:first-child{text-align:left;padding-left:22px}
 .analyticsProduct{display:flex;align-items:center;gap:11px;min-width:260px}.analyticsProduct img,.analyticsProductFallback{width:40px;height:49px;border-radius:10px;object-fit:cover;background:linear-gradient(145deg,#272a32,#101115);border:1px solid rgba(255,255,255,.09)}.analyticsProductFallback{display:grid;place-items:center;color:#7c818c;font-size:10px;font-weight:800}.analyticsProduct strong{display:block;max-width:245px;color:#f2f3f4;font-size:11px;overflow:hidden;text-overflow:ellipsis}.analyticsProduct span{display:block;margin-top:4px;color:#676c76;font-size:9px}
@@ -3137,6 +3143,39 @@ img{
 @media(max-width:960px){#panel-analytics{margin:-18px;padding:20px;border-radius:0}.analyticsTopbar{flex-direction:column}.analyticsControls{justify-content:flex-start}.analyticsTwoCol,.analyticsBottom,.analyticsThreeCol{grid-template-columns:1fr}.analyticsThreeCol>.analyticsCard:last-child{grid-column:auto}.analyticsLiveRow{grid-template-columns:100px 72px minmax(100px,1fr)}.analyticsLiveRow>:nth-child(4),.analyticsLiveRow>:nth-child(5){display:none}}
 @media(max-width:620px){#panel-analytics{margin:-12px;padding:16px}.analyticsKpis{grid-template-columns:1fr 1fr}.analyticsKpi{min-height:116px}.analyticsKpiValue{font-size:24px}.analyticsCanvasWrap,.analyticsDonutWrap{height:230px}.analyticsPanel{padding:17px}.analyticsFunnelRow{grid-template-columns:82px 1fr 40px}}
 @media(max-width:900px){.analyticsMetricGroupGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.analyticsMetricGroupGrid{grid-template-columns:1fr}.chatBubble{right:16px;bottom:16px}.chatShell{right:16px;bottom:84px}}
+
+/* Network Management — borderless CajaModa frost */
+#panel-analytics{
+  margin:-28px;
+  padding:clamp(24px,3vw,46px);
+  width:calc(100% + 56px);
+  min-height:calc(100vh - 42px);
+  border:0;
+  border-radius:0;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(255,255,255,.98),transparent 34%),
+    radial-gradient(circle at 92% 12%,rgba(208,217,255,.52),transparent 28%),
+    linear-gradient(145deg,#fbfaf7 0%,#f2f0ec 54%,#fafafa 100%);
+  color:#111;
+  box-shadow:none;
+  overflow:visible;
+}
+.analyticsShell{width:100%;max-width:none;margin:0;gap:30px}
+.analyticsControlColumn{width:min(680px,100%)}.analyticsLiveCompact{margin-top:12px;padding:14px 16px;border:0;border-radius:16px;background:rgba(255,255,255,.58);box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveCompact .analyticsPanelHead{margin-bottom:10px}.analyticsLiveCompact .analyticsLiveList{gap:6px}.analyticsLiveCompact .analyticsLiveRow{padding:8px 10px;box-shadow:none;background:rgba(255,255,255,.5)}
+.analyticsEyebrow,.analyticsSub,.analyticsStatus,.analyticsPanelMeta{color:#696b72}
+.analyticsTitle,.analyticsPanelTitle{color:#111}
+.analyticsLiveDot{background:#2cc98b;box-shadow:0 0 0 7px rgba(44,201,139,.1),0 0 20px rgba(44,201,139,.28)}
+.analyticsRange{border:0;background:rgba(255,255,255,.62);box-shadow:0 12px 34px rgba(42,37,29,.07);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.analyticsRangeButton,.analyticsRefresh{color:#60636a}.analyticsRangeButton.active{background:#111;color:#fff}.analyticsRefresh{border:0;background:rgba(255,255,255,.62);color:#111;box-shadow:0 12px 34px rgba(42,37,29,.07)}
+#analyticsMonth{border:0!important;background:rgba(255,255,255,.62)!important;color:#111!important;box-shadow:0 12px 34px rgba(42,37,29,.07)!important}
+.analyticsTableCard,.analyticsBottom .analyticsPanel{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:visible!important;transform:none!important}
+.analyticsCard::before{display:none}.analyticsTableHeader{padding:4px 0 18px}.analyticsTableScroll{overflow:visible!important;max-height:none!important}
+.analyticsTable{min-width:0;table-layout:fixed}.analyticsTable th{position:static;background:rgba(255,255,255,.48);color:#666a72;border:0;border-bottom:1px solid rgba(17,17,17,.08);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}.analyticsTable th:first-child{border-radius:16px 0 0 0}.analyticsTable th:last-child{border-radius:0 16px 0 0}.analyticsTable th.sorted{color:#111}
+.analyticsTable td{color:#4f535b;border-bottom:1px solid rgba(17,17,17,.065);white-space:normal}.analyticsProduct strong{color:#111}.analyticsProduct span{color:#777b82}.analyticsTable tbody tr{background:rgba(255,255,255,.42);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.analyticsTable tbody tr:hover{background:rgba(255,255,255,.72)}
+.analyticsTableAction,.analyticsFilterSelect{border:0;background:rgba(255,255,255,.72);color:#40434a;box-shadow:0 8px 22px rgba(42,37,29,.06)}.analyticsLiveCount{background:rgba(44,201,139,.13);color:#14724e}
+.analyticsLiveList{max-height:none;overflow:visible}.analyticsLiveRow{border:0;background:rgba(255,255,255,.58);color:#555a62;box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveRow strong{color:#111}.analyticsSessionId{color:#6d727a}.analyticsEmpty{color:#747880}
+@media(max-width:960px){#panel-analytics{width:calc(100% + 36px);margin:-18px;padding:24px 20px}.analyticsTable{table-layout:auto;min-width:760px}.analyticsTableScroll{overflow-x:auto!important;scrollbar-width:none}.analyticsTableScroll::-webkit-scrollbar{display:none}}
+@media(max-width:620px){#panel-analytics{width:calc(100% + 24px);margin:-12px;padding:20px 16px}.analyticsTableHeader{align-items:flex-start;flex-direction:column}.analyticsTableActions{width:100%}}
 
 </style>
 
@@ -3413,7 +3452,7 @@ img{
         <h1 class="analyticsTitle">Network Management</h1>
         <p class="analyticsSub">Storefront behavior, verified orders, and paid-social attribution in one live view.</p>
       </div>
-      <div>
+      <div class="analyticsControlColumn">
         <div class="analyticsControls">
           <div class="analyticsRange" aria-label="Analytics date range">
             <button class="analyticsRangeButton" data-range-days="1" type="button">Day</button>
@@ -3426,18 +3465,14 @@ img{
           <button id="analyticsRefresh" class="analyticsRefresh" type="button"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2 5"/><path d="M20 4v7h-7"/></svg>Refresh</button>
         </div>
         <div id="analyticsStatus" class="analyticsStatus">Waiting for live data…</div>
+        <article class="analyticsLiveCompact"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
       </div>
     </div>
 
     <article class="analyticsCard analyticsTableCard">
-      <div class="analyticsTableHeader"><div><div class="analyticsPanelTitle">Live product views</div><div class="analyticsPanelMeta">Overall automatically ranks the 10 strongest products. Filter any action by most or least.</div></div><div class="analyticsTableActions"><button class="analyticsSortButton sorted" data-product-sort="overall" data-sort-direction="desc" type="button">Overall most</button><button class="analyticsSortButton" data-product-sort="overall" data-sort-direction="asc" type="button">Overall least</button><button id="analyticsShowAll" class="analyticsTableAction" type="button">Show all products</button></div></div>
-      <div class="analyticsTableScroll"><table class="analyticsTable"><thead><tr><th>Product</th><th>Views<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="views" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="views" data-sort-direction="asc" type="button">Least</button></div></th><th>Favorites<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="favorites" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="favorites" data-sort-direction="asc" type="button">Least</button></div></th><th>Shares<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="shares" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="shares" data-sort-direction="asc" type="button">Least</button></div></th><th>Add to cart<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="addToCart" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="addToCart" data-sort-direction="asc" type="button">Least</button></div></th><th>Checkout<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="checkouts" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="checkouts" data-sort-direction="asc" type="button">Least</button></div></th><th>Purchase<div class="analyticsSortPair"><button class="analyticsSortButton" data-product-sort="purchases" data-sort-direction="desc" type="button">Most</button><button class="analyticsSortButton" data-product-sort="purchases" data-sort-direction="asc" type="button">Least</button></div></th></tr></thead><tbody id="analyticsProductRows"></tbody></table></div>
+      <div class="analyticsTableHeader"><div><div class="analyticsPanelTitle">Live product views</div><div class="analyticsPanelMeta">Overall automatically ranks the 10 strongest products.</div></div><div class="analyticsTableActions"><span class="analyticsFilterLabel">Filter by</span><select id="analyticsMetricFilter" class="analyticsFilterSelect" aria-label="Filter products by metric"><option value="overall">Overall</option><option value="views">Views</option><option value="favorites">Favorites</option><option value="shares">Shares</option><option value="addToCart">Add to cart</option><option value="checkouts">Checkout</option><option value="purchases">Purchases</option></select><select id="analyticsOrderFilter" class="analyticsFilterSelect" aria-label="Product ranking order"><option value="desc">Highest</option><option value="asc">Lowest</option></select><button id="analyticsShowAll" class="analyticsTableAction" type="button">Show all products</button></div></div>
+      <div class="analyticsTableScroll"><table class="analyticsTable"><thead><tr><th>Product</th><th>Views</th><th>Favorites</th><th>Shares</th><th>Add to cart</th><th>Checkout</th><th>Purchase</th></tr></thead><tbody id="analyticsProductRows"></tbody></table></div>
     </article>
-
-    <div class="analyticsGrid analyticsBottom">
-      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds. Unknown locations stay unknown.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
-      <article class="analyticsCard analyticsPanel" hidden style="display:none"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Campaign pulse</div><div class="analyticsPanelMeta">UTM campaign activity and verified revenue.</div></div></div><div id="analyticsCampaigns" class="analyticsCampaignList"></div></article>
-    </div>
 
     <div class="analyticsGrid analyticsKpis" id="analyticsKpis" hidden style="display:none">
       <article class="analyticsCard analyticsKpi live"><div class="analyticsKpiLabel">Live now</div><div id="analyticsLiveVisitors" class="analyticsKpiValue">—</div><div class="analyticsKpiMeta">active in the last 45 seconds</div></article>
