@@ -2790,7 +2790,7 @@ window.addEventListener(
         saveLocalCart(localCart);
         send("CART_STATE",localCart);
 
-        if(catalog.length){
+        if(catalog.length && !TEST_MODE){
           queueCartSync(localCart)
             .then(cart=>send("CART_STATE",cart))
             .catch(error=>console.warn("[CajaModa] Cart sync warning:",error));
@@ -2804,7 +2804,7 @@ window.addEventListener(
         );
         send("CART_STATE",localCart);
 
-        if (catalog.length) {
+        if (catalog.length && !TEST_MODE) {
           queueCartSync(localCart)
             .then(cart=>send("CART_STATE",cart))
             .catch(error=>console.warn("[CajaModa] Cart sync warning:",error));
