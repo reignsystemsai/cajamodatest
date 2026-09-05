@@ -140,7 +140,7 @@ function hotProductCandidates(events = []) {
     if (!event.productId) return;
     const product = mockProducts.find(item => String(item.id) === String(event.productId));
     if (!product) return;
-    const current = byProduct.get(product.id) || { productId:product.id,name:product.name,image:product.media?.[0] || "",firstSeenAt:event.occurredAt,views:0,favorites:0,shares:0,addToCart:0,checkouts:0,purchases:0 };
+    const current = byProduct.get(product.id) || { productId:product.id,name:product.name,image:product.media?.[0] || "",sku:(product.variants || []).map(variant => variant.sku).filter(Boolean).join(" · ") || product.id,firstSeenAt:event.occurredAt,views:0,favorites:0,shares:0,addToCart:0,checkouts:0,purchases:0 };
     if (new Date(event.occurredAt).getTime() < new Date(current.firstSeenAt).getTime()) current.firstSeenAt = event.occurredAt;
     if (event.eventType === "product_view") current.views += 1;
     if (event.eventType === "favorite") current.favorites += 1;
