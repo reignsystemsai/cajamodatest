@@ -1892,7 +1892,7 @@ img{
     font-size:16px!important;font-weight:400!important;text-align:left!important;text-transform:none!important;letter-spacing:0!important
   }
   .tabButton.active{background:#090909!important;color:#fff!important;box-shadow:0 10px 24px rgba(0,0,0,.16)!important}
-  .tabButton[data-tab="analytics"]{font-size:13px!important;letter-spacing:-.02em!important;gap:10px!important}
+.tabButton[data-tab="analytics"],.tabButton[data-tab="intelligence"]{font-size:13px!important;letter-spacing:-.02em!important;gap:10px!important}
   .tabButton.active::after{display:none!important}
   .loaderMain{width:auto!important;max-width:1510px!important;margin:0 0 0 240px!important;padding:38px 40px 72px!important}
   .panel{width:100%!important;max-width:1325px!important;margin:0 auto!important}
@@ -3167,8 +3167,9 @@ img{
 .analyticsTable td{color:#4f535b;border-bottom:1px solid rgba(17,17,17,.065);white-space:normal}.analyticsProduct strong{color:#111}.analyticsProduct span{color:#777b82}.analyticsTable tbody tr{background:rgba(255,255,255,.42);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}.analyticsTable tbody tr:hover{background:rgba(255,255,255,.72)}
 .analyticsTableAction,.analyticsFilterSelect{border:0;background:rgba(255,255,255,.72);color:#40434a;box-shadow:0 8px 22px rgba(42,37,29,.06)}.analyticsLiveCount{background:rgba(44,201,139,.13);color:#14724e}
 .analyticsLiveList{max-height:none;overflow:visible}.analyticsLiveRow{border:0;background:rgba(255,255,255,.58);color:#555a62;box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveRow strong{color:#111}.analyticsSessionId{color:#6d727a}.analyticsEmpty{color:#747880}
-body:has(#panel-analytics.active),.loaderApp:has(#panel-analytics.active){background:#fff!important}
-.loaderMain:has(#panel-analytics.active){max-width:none!important;padding:0!important}
+body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderApp:has(#panel-analytics.active),.loaderApp:has(#panel-intelligence.active){background:#fff!important}
+.loaderMain:has(#panel-analytics.active),.loaderMain:has(#panel-intelligence.active){max-width:none!important;padding:0!important}
+#panel-intelligence{width:100%!important;margin:0!important;padding:42px 34px!important;border:0!important;border-radius:0!important;background:radial-gradient(circle at 88% 7%,rgba(225,229,246,.72),transparent 34%),linear-gradient(110deg,#fff 0%,#fbfaf7 58%,#f7f8fc 100%)!important}
 @media(max-width:960px){#panel-analytics{width:100%!important;margin:0!important;padding:24px 20px}.analyticsTable{table-layout:auto;min-width:760px}.analyticsTableScroll{overflow-x:auto!important;scrollbar-width:none}.analyticsTableScroll::-webkit-scrollbar{display:none}}
 @media(max-width:620px){#panel-analytics{width:100%!important;margin:0!important;padding:20px 16px}.analyticsTableHeader{align-items:flex-start;flex-direction:column}.analyticsTableActions{width:100%}.analyticsHotList{grid-template-columns:1fr}}
 
@@ -3299,6 +3300,16 @@ body:has(#panel-analytics.active),.loaderApp:has(#panel-analytics.active){backgr
     >
       <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></svg></span>
       Network Management
+    </button>
+
+    <button
+      class="tabButton"
+      data-tab="intelligence"
+      data-admin-only
+      hidden
+    >
+      <span class="navIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18h16"/><path d="m6 14 4-4 3 3 5-7"/><path d="M18 6h-4"/><path d="M18 6v4"/></svg></span>
+      Product Intelligence
     </button>
 
   </nav>
@@ -3434,6 +3445,21 @@ body:has(#panel-analytics.active),.loaderApp:has(#panel-analytics.active){backgr
      OWNER EVENT ANALYTICS
      ========================================================== -->
 
+<section id="panel-intelligence" class="panel" data-admin-only hidden style="min-height:100vh;padding:30px;background:#fff">
+  <div class="analyticsShell">
+    <div class="analyticsEyebrow"><span class="analyticsHotToggleDot"></span>Decision intelligence</div>
+    <h1 class="analyticsTitle" style="margin-top:12px">Product Intelligence</h1>
+    <p class="analyticsSub">Early signals that help CajaModa move faster on what to promote, retain, restock, or remove.</p>
+    <details class="analyticsHotAlerts" open style="margin-top:28px"><summary class="analyticsHotToggle"><span class="analyticsHotToggleDot"></span>Top 10 emerging products <span class="analyticsHotToggleChevron">⌄</span></summary><div class="analyticsHotDropdown" style="position:relative;top:auto;margin-top:10px"><div class="analyticsHotHead"><div class="analyticsHotTitle">Emerging now</div><div class="analyticsHotMeta">First 14 days</div></div><div id="analyticsHotList" class="analyticsHotList"></div></div></details>
+    <div class="analyticsMetricGroupGrid" style="margin-top:28px">
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelTitle">Engagement velocity</div><div class="analyticsPanelMeta">How quickly views, favorites, shares, and cart adds arrive.</div></article>
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelTitle">Conversion strength</div><div class="analyticsPanelMeta">Favorite-to-cart and cart-to-purchase movement.</div></article>
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelTitle">Operational readiness</div><div class="analyticsPanelMeta">Stock, margin, and vendor restock speed for fast decisions.</div></article>
+      <article class="analyticsCard analyticsPanel"><div class="analyticsPanelTitle">Lifecycle action</div><div class="analyticsPanelMeta">Promote, watch, restock, or recommend removal from real signals.</div></article>
+    </div>
+  </div>
+</section>
+
 <section
   id="panel-analytics"
   class="panel"
@@ -3441,7 +3467,6 @@ body:has(#panel-analytics.active),.loaderApp:has(#panel-analytics.active){backgr
   hidden
 >
   <div class="analyticsShell">
-    <details class="analyticsHotAlerts"><summary class="analyticsHotToggle"><span class="analyticsHotToggleDot"></span>Emerging products <span class="analyticsHotToggleChevron">⌄</span></summary><div class="analyticsHotDropdown"><div class="analyticsHotHead"><div class="analyticsHotTitle">Top 10 emerging products</div><div class="analyticsHotMeta">First 14 days</div></div><div id="analyticsHotList" class="analyticsHotList"></div></div></details>
     <div class="analyticsTopbar">
       <div>
         <div class="analyticsEyebrow"><span class="analyticsLiveDot"></span>Live commerce signal</div>
@@ -4585,7 +4610,7 @@ function displayOrderNumber(order){
     name
   ){
 
-    if(name === "analytics" && ownerProfile?.role !== "admin"){
+    if((name === "analytics" || name === "intelligence") && ownerProfile?.role !== "admin"){
       return;
     }
 
@@ -4624,7 +4649,7 @@ function displayOrderNumber(order){
       behavior:"smooth"
     });
 
-    if(name === "analytics"){
+    if(name === "analytics" || name === "intelligence"){
       loadAnalytics();
       startAnalyticsPolling();
     }else{
