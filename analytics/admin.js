@@ -230,11 +230,11 @@
     productPage = Math.min(productPage,totalPages);
     const start = (productPage - 1) * productPageSize;
     const products = allProducts.slice(start,start + productPageSize);
-    setText("analyticsProductCount",allProducts.length ? `Showing ${start + 1}–${Math.min(start + productPageSize,allProducts.length)} of ${allProducts.length}` : "No products");
+    setText("analyticsProductCount",`${allProducts.length} products loaded · ${productPageSize} slots shown`);
     qsa("[data-page-size]").forEach(button => button.classList.toggle("active",Number(button.dataset.pageSize) === productPageSize));
     if ($("analyticsPreviousPage")) $("analyticsPreviousPage").disabled = productPage <= 1;
     if ($("analyticsNextPage")) $("analyticsNextPage").disabled = productPage >= totalPages;
-    body.innerHTML = products.length ? products.map(product => {
+    const productRows = products.map(product => {
       const image = product.image
         ? '<img src="' + escapeHtml(product.image) + '" alt="" loading="lazy">'
         : '<span class="analyticsProductFallback">CM</span>';
@@ -247,7 +247,10 @@
         '<td>' + number(product.checkouts) + '</td>' +
         '<td>' + number(product.purchases) + '</td>' +
       '</tr>';
-    }).join("") : '<tr><td colspan="7"><div class="analyticsEmpty">No product events have been recorded in this range yet.</div></td></tr>';
+    });
+    const emptySlotCount = Math.max(0,productPageSize - productRows.length);
+    const emptyRows = Array.from({length:emptySlotCount},(_,index) => '<tr class="analyticsEmptyProductSlot"><td><div class="analyticsProduct"><span class="analyticsProductFallback">' + (start + products.length + index + 1) + '</span><div><strong>Available product slot</strong><span>No product loaded</span></div></div></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>');
+    body.innerHTML = [...productRows,...emptyRows].join("");
     body.querySelectorAll("img").forEach(image => {
       image.addEventListener("error", () => {
         const fallback = document.createElement("span");
