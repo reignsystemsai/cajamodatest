@@ -133,6 +133,56 @@ function restoredEvent(row = {}) {
   };
 }
 
+function hotProductCandidates(events = []) {
+  const now = Date.now();
+  const byProduct = new Map();
+  events.forEach(event => {
+    if (!event.productId) return;
+    const product = mockProducts.find(item => String(item.id) === String(event.productId));
+    if (!product) return;
+    const current = byProduct.get(product.id) || { productId:product.id,name:product.name,image:product.media?.[0] || "",firstSeenAt:event.occurredAt,views:0,favorites:0,shares:0,addToCart:0,checkouts:0,purchases:0 };
+    if (new Date(event.occurredAt).getTime() < new Date(current.firstSeenAt).getTime()) current.firstSeenAt = event.occurredAt;
+    if (event.eventType === "product_view") current.views += 1;
+    if (event.eventType === "favorite") current.favorites += 1;
+    if (event.eventType === "unfavorite") current.favorites = Math.max(0,current.favorites - 1);
+    if (event.eventType === "share") current.shares += 1;
+    if (event.eventType === "add_to_cart") current.addToCart += 1;
+    if (event.eventType === "checkout") current.checkouts += 1;
+    if (event.eventType === "purchase") current.purchases += 1;
+    byProduct.set(product.id,current);
+  });
+  return [...byProduct.values()].map(product => {
+    const ageDays = Math.max(1,Math.ceil((now - new Date(product.firstSeenAt).getTime()) / 86400000));
+    const signalScore = product.views + product.favorites * 4 + product.shares * 5 + product.addToCart * 7 + product.checkouts * 10 + product.purchases * 20;
+    return {...product,ageDays,signalScore,velocity:Number((signalScore / ageDays).toFixed(2))};
+  }).filter(product => product.ageDays <= 14 && product.signalScore > 0).sort((left,right) => right.velocity - left.velocity || right.signalScore - left.signalScore).slice(0,10);
+}
+
+async function interpretHotProducts(candidates = []) {
+  if (!candidates.length) return [];
+  const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
+  if (!apiKey) return candidates.map(product => ({...product,status:"Watch",reason:"Early customer activity detected."}));
+  try {
+    const openaiResponse = await fetch("https://api.openai.com/v1/responses", {
+      method:"POST",
+      headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:process.env.OPENAI_ANALYTICS_MODEL || process.env.OPENAI_PRODUCT_MODEL || "gpt-4.1-mini",
+        input:`You manage new-product alerts for CajaModa. Analyze these deterministic 14-day momentum signals. Return only a JSON array with one object per product in the same order using productId, status, and reason. Status must be Promote, Watch, Restock, or Potential Winner. Reason must be a concise plain-English sentence grounded only in the supplied counts. Data: ${JSON.stringify(candidates)}`,
+        max_output_tokens:900
+      })
+    });
+    const result = await openaiResponse.json();
+    if (!openaiResponse.ok) throw new Error(result?.error?.message || "OpenAI analytics failed.");
+    const responseText = result?.output_text || (Array.isArray(result?.output) ? result.output.flatMap(item => Array.isArray(item?.content) ? item.content : []).map(item => item?.text || "").join(" ") : "");
+    const parsed = JSON.parse(String(responseText).replace(/^```json\s*|\s*```$/g,""));
+    const notes = new Map((Array.isArray(parsed) ? parsed : []).map(item => [String(item.productId),item]));
+    return candidates.map(product => ({...product,status:String(notes.get(product.productId)?.status || "Watch"),reason:String(notes.get(product.productId)?.reason || "Early customer activity detected.")}));
+  } catch {
+    return candidates.map(product => ({...product,status:product.purchases ? "Potential Winner" : product.addToCart || product.favorites || product.shares ? "Promote" : "Watch",reason:`${product.views} views, ${product.favorites} favorites, ${product.shares} shares, and ${product.addToCart} cart adds in ${product.ageDays} day${product.ageDays === 1 ? "" : "s"}.`}));
+  }
+}
+
 async function loadStoredMockAnalytics(daysInput = 30) {
   const days = [1,7,30,90,365].includes(Number(daysInput)) ? Number(daysInput) : 30;
   const cutoff = new Date(Date.now() - days * 86400000).toISOString();
@@ -229,7 +279,7 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/store-owner/summary") return sendJson(response,200,{ok:true,summary:{products:mockProducts.length,orders:mockOrders.length,inventory:mockInventory().length}}) || true;
   if (request.method === "GET" && url.pathname === "/api/inventory") return sendJson(response,200,{ok:true,inventory:mockInventory(),showcases:{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
-  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); return sendJson(response,200,mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders)) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); const data=mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders); data.hotProducts=await interpretHotProducts(hotProductCandidates(stored.events)); return sendJson(response,200,data) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
   if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); const events=Array.isArray(body?.events)?body.events:[]; try { await writeTestRows("cajamoda_test_analytics_events",events.map(storedEvent)); return sendJson(response,202,{ok:true,accepted:events.length,persistent:true}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
