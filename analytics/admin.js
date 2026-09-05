@@ -270,10 +270,12 @@
     const root = $("analyticsHotList");
     if (!root) return;
     root.innerHTML = products.length ? products.map((product,index) => '<article class="analyticsHotItem">' +
-      '<div><strong>' + escapeHtml(product.name || "Product") + '</strong><span>' + escapeHtml(product.status || "Watch") + ' · ' + escapeHtml(product.reason || "New activity detected.") + '</span></div>' +
+      (product.image ? '<img class="analyticsHotThumb" src="' + escapeHtml(product.image) + '" alt="" loading="lazy">' : '<span class="analyticsHotThumb analyticsHotThumbFallback">CM</span>') +
+      '<div><strong>' + escapeHtml(product.name || "Product") + '</strong><small>SKU ' + escapeHtml(product.sku || product.productId || "—") + '</small><span>' + escapeHtml(product.status || "Watch") + ' · ' + escapeHtml(product.reason || "New activity detected.") + '</span></div>' +
       '<b class="analyticsHotScore">' + number(product.signalScore) + ' pts</b>' +
       '<span class="analyticsHotRank" aria-label="Rank ' + (index + 1) + '">' + (index + 1) + '</span>' +
     '</article>').join("") : '<div class="analyticsHotEmpty">No new-product momentum alerts yet. Alerts appear as real activity arrives.</div>';
+    root.querySelectorAll("img").forEach(image => image.addEventListener("error",() => { const fallback = document.createElement("span"); fallback.className = "analyticsHotThumb analyticsHotThumbFallback"; fallback.textContent = "CM"; image.replaceWith(fallback); },{once:true}));
   }
 
   function renderFunnel(rows) {
