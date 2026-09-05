@@ -1,5 +1,7 @@
 import http from "node:http";
 import crypto from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
+import { extname, resolve, sep } from "node:path";
 import Stripe from "stripe";
 
 import {
@@ -56,6 +58,12 @@ const PORT =
   Number(
     process.env.PORT ||
     10000
+  );
+
+const DIST_ROOT =
+  resolve(
+    process.cwd(),
+    "dist"
   );
 
 const WIX_API_KEY =
@@ -6747,6 +6755,61 @@ async function handleUpdateInventory(request, response) {
   });
 }
 
+const STATIC_CONTENT_TYPES = {
+  ".css": "text/css; charset=utf-8",
+  ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml; charset=utf-8",
+  ".webp": "image/webp"
+};
+
+async function serveStaticFile(request, response, pathname) {
+  if (!["GET", "HEAD"].includes(request.method)) return false;
+
+  let relativePath;
+  try {
+    relativePath = decodeURIComponent(pathname).replace(/^\/+/, "");
+  } catch {
+    return false;
+  }
+
+  if (!relativePath || relativePath.endsWith("/")) {
+    relativePath += "index.html";
+  }
+
+  const filePath = resolve(DIST_ROOT, relativePath);
+  if (filePath !== DIST_ROOT && !filePath.startsWith(DIST_ROOT + sep)) {
+    return false;
+  }
+
+  try {
+    const file = await stat(filePath);
+    if (!file.isFile()) return false;
+    const content = await readFile(filePath);
+    const extension = extname(filePath).toLowerCase();
+    response.statusCode = 200;
+    response.setHeader(
+      "Content-Type",
+      STATIC_CONTENT_TYPES[extension] || "application/octet-stream"
+    );
+    response.setHeader(
+      "Cache-Control",
+      extension === ".html" ? "no-cache" : "public, max-age=31536000, immutable"
+    );
+    response.setHeader("Content-Length", content.length);
+    response.end(request.method === "HEAD" ? undefined : content);
+    return true;
+  } catch (error) {
+    if (error?.code === "ENOENT" || error?.code === "ENOTDIR") return false;
+    throw error;
+  }
+}
+
 /* ============================================================
    SERVER
    ============================================================ */
@@ -7182,6 +7245,9 @@ if (
 
   return;
 }
+        if (await serveStaticFile(request, response, url.pathname)) {
+          return;
+        }
         /* ------------------------------------------------------
            NOT FOUND
            ------------------------------------------------------ */
