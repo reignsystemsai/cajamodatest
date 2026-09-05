@@ -3457,7 +3457,7 @@ img{
       <article class="analyticsCard analyticsKpi"><div class="analyticsKpiLabel">Gross profit</div><div id="analyticsGrossProfit" class="analyticsKpiValue">—</div><div id="analyticsGrossMargin" class="analyticsKpiMeta">revenue − COGS</div></article>
     </div>
 
-    <div class="analyticsGrid analyticsTwoCol">
+    <div class="analyticsGrid analyticsTwoCol" hidden style="display:none">
       <article class="analyticsCard analyticsPanel">
         <div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Marketing performance</div><div class="analyticsPanelMeta">WhatsApp, Instagram, TikTok, and direct.</div></div></div>
         <div class="analyticsDonutWrap"><canvas id="analyticsDonutCanvas"></canvas><div class="analyticsDonutCenter"><strong id="analyticsSessionTotal">—</strong><span>sessions</span></div></div>
@@ -3468,7 +3468,7 @@ img{
       </article>
     </div>
 
-    <div class="analyticsGrid analyticsThreeCol">
+    <div class="analyticsGrid analyticsThreeCol" hidden style="display:none">
       <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Commerce funnel</div><div class="analyticsPanelMeta">Unique sessions at each step.</div></div></div><div id="analyticsFunnel" class="analyticsFunnel"></div></article>
       <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Channel performance</div><div class="analyticsPanelMeta">Sessions, purchases, revenue, and ROAS.</div></div></div><div id="analyticsChannels" class="analyticsChannelList"></div></article>
       <article class="analyticsCard analyticsPanel"><div class="analyticsPanelHead"><div><div class="analyticsPanelTitle">Monthly inputs</div><div class="analyticsPanelMeta">Advertising and inventory investment for the selected month.</div></div></div><div class="analyticsSettings"><div class="analyticsSetting"><label for="analyticsSpendWhatsapp">WhatsApp ads</label><input id="analyticsSpendWhatsapp" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsSpendInstagram">Instagram ads</label><input id="analyticsSpendInstagram" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsSpendTiktok">TikTok ads</label><input id="analyticsSpendTiktok" type="number" min="0" step="1000"></div><div class="analyticsSetting"><label for="analyticsInventoryInput">Inventory spend</label><input id="analyticsInventoryInput" type="number" min="0" step="1000"></div><button id="analyticsSaveSettings" class="analyticsSave" type="button">Save Monthly Inputs</button><div id="analyticsBusinessReadout" class="analyticsPanelMeta"></div></div></article>
@@ -6886,7 +6886,7 @@ if(authToken){
 
 </script>
 
-<script src="/analytics/admin.js"></script>
+<script src="/analytics/admin.js?v=live-ranges-1"></script>
 
 </body>
 
