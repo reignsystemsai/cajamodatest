@@ -447,6 +447,11 @@
     const groups = [
       ["Sales and Revenue", ["analyticsPurchases", "analyticsRevenue", "analyticsAov", "analyticsGrowth"]]
     ];
+    const visibleMetricIds = new Set(groups.flatMap(([, ids]) => ids));
+    root.querySelectorAll(":scope > .analyticsKpi").forEach(card => {
+      const value = card.querySelector("[id]");
+      if (!value || !visibleMetricIds.has(value.id)) card.style.display = "none";
+    });
     groups.forEach(([label, ids], index) => {
       const details = document.createElement("details");
       details.className = "analyticsMetricGroup";
