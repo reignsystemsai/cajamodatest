@@ -3155,7 +3155,7 @@ img{
   overflow:visible;
 }
 .analyticsShell{width:100%;max-width:none;margin:0;gap:30px}
-.analyticsControlColumn{width:min(680px,100%)}.analyticsLiveCompact{margin-top:12px;padding:14px 16px;border:0;border-radius:16px;background:rgba(255,255,255,.58);box-shadow:0 12px 34px rgba(42,37,29,.06);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveCompact .analyticsPanelHead{margin-bottom:10px}.analyticsLiveCompact .analyticsLiveList{gap:6px}.analyticsLiveCompact .analyticsLiveRow{padding:8px 10px;box-shadow:none;background:rgba(255,255,255,.5)}
+.analyticsControlColumn{width:min(680px,100%)}.analyticsLiveCompact{width:min(430px,100%);margin-top:9px;padding:9px 11px;border:0;border-radius:12px;background:rgba(255,255,255,.58);box-shadow:0 9px 24px rgba(42,37,29,.05);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}.analyticsLiveCompact .analyticsPanelHead{margin:0 0 6px}.analyticsLiveCompact .analyticsPanelTitle{font-size:11px}.analyticsLiveCompact .analyticsPanelMeta{display:none}.analyticsLiveCompact .analyticsLiveCount{min-width:20px;height:20px;font-size:9px}.analyticsLiveCompact .analyticsLiveDot{width:6px;height:6px;box-shadow:0 0 0 4px rgba(44,201,139,.1)}.analyticsLiveCompact .analyticsLiveList{gap:4px}.analyticsLiveCompact .analyticsLiveRow{grid-template-columns:76px 58px minmax(90px,1fr);gap:7px;padding:6px 8px;border-radius:9px;box-shadow:none;background:rgba(255,255,255,.5);font-size:8px}.analyticsLiveCompact .analyticsLiveRow>:nth-child(4),.analyticsLiveCompact .analyticsLiveRow>:nth-child(5){display:none}.analyticsLiveCompact .analyticsEmpty{padding:5px 0;font-size:9px;text-align:left}
 .analyticsHotAlerts{padding:18px 20px;border:0;border-radius:18px;background:rgba(255,255,255,.64);box-shadow:0 16px 42px rgba(42,37,29,.07);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px)}.analyticsHotHead{display:flex;align-items:center;justify-content:space-between;gap:12px}.analyticsHotTitle{color:#111;font-size:14px;font-weight:820}.analyticsHotTitle span{display:inline-block;width:7px;height:7px;margin-right:9px;border-radius:50%;background:#ff765f;box-shadow:0 0 16px rgba(255,118,95,.52)}.analyticsHotMeta{color:#747880;font-size:10px}.analyticsHotList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 16px;margin-top:13px}.analyticsHotItem{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(17,17,17,.06)}.analyticsHotRank{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font-size:9px;font-weight:800}.analyticsHotItem strong{display:block;color:#111;font-size:10px}.analyticsHotItem span{display:block;margin-top:3px;color:#6f737b;font-size:9px;line-height:1.35}.analyticsHotItem b{color:#111;font-size:11px}.analyticsHotEmpty{grid-column:1/-1;padding:8px 0;color:#777b82;font-size:10px}
 .analyticsEyebrow,.analyticsSub,.analyticsStatus,.analyticsPanelMeta{color:#696b72}
 .analyticsTitle,.analyticsPanelTitle{color:#111}
@@ -3447,6 +3447,7 @@ img{
         <div class="analyticsEyebrow"><span class="analyticsLiveDot"></span>Live commerce signal</div>
         <h1 class="analyticsTitle">Network Management</h1>
         <p class="analyticsSub">Storefront behavior, verified orders, and paid-social attribution in one live view.</p>
+        <article class="analyticsLiveCompact"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
       </div>
       <div class="analyticsControlColumn">
         <div class="analyticsControls">
@@ -3461,7 +3462,6 @@ img{
           <button id="analyticsRefresh" class="analyticsRefresh" type="button"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0 2 5"/><path d="M20 4v7h-7"/></svg>Refresh</button>
         </div>
         <div id="analyticsStatus" class="analyticsStatus">Waiting for live data…</div>
-        <article class="analyticsLiveCompact"><div class="analyticsPanelHead"><div><div class="analyticsLiveHead"><span class="analyticsLiveDot"></span><div class="analyticsPanelTitle">Live visitor tracker</div><span id="analyticsLiveCount" class="analyticsLiveCount">0</span></div><div class="analyticsPanelMeta">Refreshes every 8 seconds.</div></div></div><div id="analyticsLiveRows" class="analyticsLiveList"></div></article>
       </div>
     </div>
 
