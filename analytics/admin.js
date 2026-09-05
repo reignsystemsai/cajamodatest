@@ -12,7 +12,8 @@
   let days = 30;
   let sortKey = "overall";
   let sortDirection = "desc";
-  let showAllProducts = false;
+  let productPageSize = 10;
+  let productPage = 1;
   let pollTimer = null;
   let loading = false;
   let drawToken = 0;
@@ -225,9 +226,14 @@
         const result = sortDirection === "asc" ? leftValue - rightValue : rightValue - leftValue;
         return result || Number(right.views || 0) - Number(left.views || 0) || String(left.name).localeCompare(String(right.name));
       });
-    const products = showAllProducts ? allProducts : allProducts.slice(0, 10);
-    const showAllButton = $("analyticsShowAll");
-    if (showAllButton) showAllButton.textContent = showAllProducts ? "Show top 10" : `Show all (${allProducts.length})`;
+    const totalPages = Math.max(1,Math.ceil(allProducts.length / productPageSize));
+    productPage = Math.min(productPage,totalPages);
+    const start = (productPage - 1) * productPageSize;
+    const products = allProducts.slice(start,start + productPageSize);
+    setText("analyticsProductCount",allProducts.length ? `Showing ${start + 1}–${Math.min(start + productPageSize,allProducts.length)} of ${allProducts.length}` : "No products");
+    qsa("[data-page-size]").forEach(button => button.classList.toggle("active",Number(button.dataset.pageSize) === productPageSize));
+    if ($("analyticsPreviousPage")) $("analyticsPreviousPage").disabled = productPage <= 1;
+    if ($("analyticsNextPage")) $("analyticsNextPage").disabled = productPage >= totalPages;
     body.innerHTML = products.length ? products.map(product => {
       const image = product.image
         ? '<img src="' + escapeHtml(product.image) + '" alt="" loading="lazy">'
@@ -464,16 +470,17 @@
   });
   $("analyticsMetricFilter")?.addEventListener("change", event => {
     sortKey = event.target.value || "overall";
+    productPage = 1;
     renderProducts();
   });
   $("analyticsOrderFilter")?.addEventListener("change", event => {
     sortDirection = event.target.value === "asc" ? "asc" : "desc";
+    productPage = 1;
     renderProducts();
   });
-  $("analyticsShowAll")?.addEventListener("click", () => {
-    showAllProducts = !showAllProducts;
-    renderProducts();
-  });
+  qsa("[data-page-size]").forEach(button => button.addEventListener("click", () => { productPageSize = Number(button.dataset.pageSize || 10); productPage = 1; renderProducts(); }));
+  $("analyticsPreviousPage")?.addEventListener("click", () => { if (productPage > 1) { productPage -= 1; renderProducts(); } });
+  $("analyticsNextPage")?.addEventListener("click", () => { productPage += 1; renderProducts(); });
   $("analyticsRefresh")?.addEventListener("click", () => load(true));
   $("analyticsSaveSettings")?.addEventListener("click", saveSettings);
 
