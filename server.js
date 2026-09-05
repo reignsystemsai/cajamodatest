@@ -187,11 +187,11 @@ async function syncSupplierCatalog(supplierId) {
 async function prepareNetworkPartner(input = "") {
   const message = String(input || "").trim().slice(0,3000);
   const lower = message.toLowerCase();
-  const fallback = {partnerType:lower.includes("supplier") ? "supplier" : "vendor",businessName:"",contactName:"",contactChannel:"",connectionType:lower.includes("api") ? "api" : lower.includes("catalog") || lower.includes("feed") ? "live_catalog" : lower.includes("supplier") ? "cajamoda_portal" : "invite",location:"",notes:message};
+  const fallback = {partnerType:lower.includes("supplier") ? "supplier" : "vendor",businessName:"",contactFirstName:"",contactLastName:"",contactEmail:"",contactWhatsapp:"",country:"",connectionType:lower.includes("api") ? "api" : lower.includes("catalog") || lower.includes("feed") ? "live_catalog" : lower.includes("supplier") ? "cajamoda_portal" : "invite",location:"",notes:message};
   const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
   if (!apiKey || !message) return fallback;
   try {
-    const response = await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_ANALYTICS_MODEL || "gpt-4.1-mini",input:`Convert this CajaModa onboarding instruction into one JSON object only. Keys: partnerType (vendor or supplier), businessName, contactName, contactChannel, connectionType (invite, api, live_catalog, or cajamoda_portal), location, notes. Never invent names or contact details. Instruction: ${message}`,max_output_tokens:450})});
+    const response = await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_ANALYTICS_MODEL || "gpt-4.1-mini",input:`Convert this CajaModa onboarding instruction into one JSON object only. Keys: partnerType (vendor or supplier), businessName, contactFirstName, contactLastName, contactEmail, contactWhatsapp, connectionType (invite, api, live_catalog, or cajamoda_portal), country, location, notes. Never invent names or contact details. Instruction: ${message}`,max_output_tokens:450})});
     const result = await response.json();
     const output = result?.output_text || (result?.output || []).flatMap(item=>item?.content || []).map(item=>item?.text || "").join(" ");
     return {...fallback,...JSON.parse(String(output).replace(/^```json\s*|\s*```$/g,""))};
@@ -200,7 +200,7 @@ async function prepareNetworkPartner(input = "") {
 
 async function sendNetworkConfirmationEmail(partner,inviteUrl) {
   const resendKey=String(process.env.RESEND_API_KEY || "").trim();
-  const email=String(partner.contact_channel || "").trim();
+  const email=String(partner.contact_email || partner.contact_channel || "").trim();
   if(!resendKey || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
   const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${resendKey}`,"Content-Type":"application/json"},body:JSON.stringify({from:process.env.NETWORK_FROM_EMAIL || "CajaModa <onboarding@cajamoda.com>",to:[email],subject:"You’re connected to CajaModa",html:`<div style="font-family:Arial,sans-serif;color:#111;max-width:620px;margin:auto;padding:32px"><div style="letter-spacing:4px;font-weight:700">CAJAMODA</div><h1 style="font-size:38px;line-height:1;margin:38px 0 16px">You’re connected.</h1><p>${String(partner.business_name || "Your business").replace(/[<>&]/g,"")} now has a prepared ${String(partner.shell_type || "partner").replaceAll("_"," ")} inside the CajaModa commerce network.</p><p><a href="${inviteUrl}" style="display:inline-block;margin-top:18px;padding:14px 20px;border-radius:12px;background:#111;color:#fff;text-decoration:none;font-weight:700">Open your private CajaModa shell</a></p><p style="margin-top:30px;color:#777;font-size:12px">This private link is intended only for the invited business.</p></div>`})});
   if(!response.ok) throw new Error("The shell was created, but the connection email could not be sent.");
@@ -214,10 +214,14 @@ async function createNetworkPartner(body = {}, request) {
   const token = crypto.randomBytes(24).toString("hex");
   const apiUrl=String(body.apiUrl || "").trim().slice(0,1000);
   const readiness = {shellLoaded:true,permissionsIsolated:true,loginRouteReady:true,productPublishingLocked:true,connectionReady:connectionType === "invite" || connectionType === "cajamoda_portal" || ((connectionType === "api" || connectionType === "live_catalog") && Boolean(apiUrl))};
-  const ready = Boolean(String(body.businessName || "").trim() && String(body.contactChannel || "").trim() && Object.values(readiness).every(Boolean));
+  const contactFirstName=String(body.contactFirstName || "").trim().slice(0,100);
+  const contactLastName=String(body.contactLastName || "").trim().slice(0,100);
+  const contactEmail=String(body.contactEmail || "").trim().slice(0,240);
+  const contactWhatsapp=String(body.contactWhatsapp || "").trim().slice(0,80);
+  const ready = Boolean(String(body.businessName || "").trim() && contactFirstName && contactLastName && contactEmail && Object.values(readiness).every(Boolean));
   const shippingMethods=(Array.isArray(body.shippingMethods) ? body.shippingMethods : []).filter(value=>["courier_express","air_freight","sea_lcl","sea_fcl","postal_epacket","dropship_fulfillment","ddp_door"].includes(value));
   const tradeTerm=["EXW","FOB","CIF","DAP","DDP"].includes(body.tradeTerm) ? body.tradeTerm : "";
-  const row = {partner_type:partnerType,business_name:String(body.businessName || "").trim().slice(0,200),contact_name:String(body.contactName || "").trim().slice(0,160) || null,contact_channel:String(body.contactChannel || "").trim().slice(0,240) || null,shell_type:shellType,connection_type:connectionType,status:ready ? "ready_to_invite" : "needs_attention",readiness,connection_config:{location:String(body.location || "").trim().slice(0,200),notes:String(body.notes || "").trim().slice(0,1000),shippingMethods,tradeTerm},invite_token_hash:crypto.createHash("sha256").update(token).digest("hex")};
+  const row = {partner_type:partnerType,business_name:String(body.businessName || "").trim().slice(0,200),contact_first_name:contactFirstName || null,contact_last_name:contactLastName || null,contact_email:contactEmail || null,contact_whatsapp:contactWhatsapp || null,contact_name:`${contactFirstName} ${contactLastName}`.trim() || null,contact_channel:contactEmail || contactWhatsapp || null,shell_type:shellType,connection_type:connectionType,status:ready ? "ready_to_invite" : "needs_attention",readiness,connection_config:{country:String(body.country || "").trim().slice(0,120),location:String(body.location || "").trim().slice(0,200),notes:String(body.notes || "").trim().slice(0,1000),shippingMethods,tradeTerm,apiDocsUrl:String(body.apiDocsUrl || "").trim().slice(0,1000),apiVersion:String(body.apiVersion || "").trim().slice(0,80),feedFormat:String(body.feedFormat || "").trim().slice(0,30),syncFrequency:String(body.syncFrequency || "").trim().slice(0,30),vendorOrderEmail:String(body.vendorOrderEmail || "").trim().slice(0,240),vendorFulfillment:String(body.vendorFulfillment || "").trim().slice(0,80),portalLanguage:String(body.portalLanguage || "").trim().slice(0,12),portalCurrency:String(body.portalCurrency || "").trim().slice(0,12)},invite_token_hash:crypto.createHash("sha256").update(token).digest("hex")};
   if (!row.business_name) throw new Error("Business name is required.");
   const created = await networkRequest("cajamoda_network_partners",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(row)});
   let catalogSync={count:0,status:"not_configured"};
