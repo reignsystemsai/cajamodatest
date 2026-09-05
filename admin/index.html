@@ -3599,6 +3599,38 @@ body:has(#panel-analytics.active),body:has(#panel-intelligence.active),.loaderAp
   #panel-inventory .inventoryThumb{width:48px;height:58px}
 }
 
+
+/* Clean white Products + Inventory finish */
+#panel-products > .sectionBlock,
+#panel-inventory > .sectionBlock{
+  background:#fff;
+  border-color:rgba(20,20,20,.09);
+  box-shadow:0 18px 48px rgba(20,20,20,.055);
+}
+#panel-products > .sectionBlock::before,
+#panel-inventory > .sectionBlock::before,
+#panel-products .productSummaryCard::after,
+#panel-inventory .inventorySummaryCard::after{
+  display:none;
+}
+#panel-products .productSummaryCard,
+#panel-inventory .inventorySummaryCard,
+#panel-products .productBulkBar,
+#panel-products .productRow,
+#panel-inventory #inventoryList > div:nth-child(2),
+#panel-inventory #inventoryList > .inventoryRow{
+  background:#fff;
+}
+#panel-products .productSummaryCard strong,
+#panel-inventory .inventorySummaryCard strong{
+  color:#171612!important;
+}
+#panel-inventory .inventoryState{
+  border-color:rgba(20,20,20,.08);
+  background:#f3f3f1;
+  color:#272621;
+}
+
 </style>
 
 </head>

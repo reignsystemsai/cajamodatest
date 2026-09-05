@@ -349,6 +349,56 @@ mockProducts.push(...additionalMockProducts);
 
 const mockOrders = [];
 const mockEvents = [];
+const mockLiveSessions = new Map();
+const MOCK_LIVE_WINDOW_MS = 45 * 1000;
+
+function updateMockLiveSessions(events = []) {
+  const receivedAt = Date.now();
+  events.forEach(event => {
+    const sessionId = String(event?.sessionId || "").trim();
+    if (!sessionId) return;
+    if (event.eventType === "page_leave") {
+      mockLiveSessions.delete(sessionId);
+      return;
+    }
+    const current = mockLiveSessions.get(sessionId) || {
+      sessionId,
+      firstSeenAt:receivedAt
+    };
+    mockLiveSessions.set(sessionId, {
+      ...current,
+      sessionId,
+      visitorId:event.visitorId || current.visitorId || "",
+      page:event.page || current.page || "home",
+      action:event.eventType || current.action || "Browsing",
+      productName:event.productName || current.productName || "",
+      city:event.location?.city || current.city || "Unknown",
+      timeOnSiteSeconds:Number(event.properties?.durationSeconds || current.timeOnSiteSeconds || 0),
+      lastSeenAt:receivedAt
+    });
+  });
+}
+
+function currentMockLiveSessions() {
+  const now = Date.now();
+  for (const [sessionId, session] of mockLiveSessions) {
+    if (Number(session.lastSeenAt || 0) < now - MOCK_LIVE_WINDOW_MS) {
+      mockLiveSessions.delete(sessionId);
+    }
+  }
+  return [...mockLiveSessions.values()].map(session => ({
+    sessionId:session.sessionId,
+    visitorId:session.visitorId,
+    page:session.page || "home",
+    action:session.action || "Browsing",
+    productName:session.productName || "",
+    city:session.city || "Unknown",
+    timeOnSiteSeconds:Math.max(
+      Number(session.timeOnSiteSeconds || 0),
+      Math.round((now - Number(session.firstSeenAt || now)) / 1000)
+    )
+  }));
+}
 
 function mockInventory() {
   return mockProducts.flatMap(product => product.variants.map(variant => ({
@@ -367,27 +417,7 @@ function mockAnalytics(daysInput = 30, analyticsEvents = mockEvents, analyticsOr
   const purchases = rangeOrders.length;
   const revenue = rangeOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
   const sessions = Math.max(1, new Set(rangeEvents.map(event => event.sessionId).filter(Boolean)).size);
-  const activeCutoff = Date.now() - 45000;
-  const liveBySession = new Map();
-  rangeEvents.forEach(event => {
-    const sessionId = String(event?.sessionId || "");
-    if (!sessionId) return;
-    if (event.eventType === "page_leave") {
-      liveBySession.delete(sessionId);
-      return;
-    }
-    const occurredAt = new Date(event.occurredAt || Date.now()).getTime();
-    if (occurredAt < activeCutoff) return;
-    liveBySession.set(sessionId, {
-      sessionId,
-      page:event.page || "home",
-      action:event.eventType || "Browsing",
-      productName:event.productName || "",
-      city:event.location?.city || "Unknown",
-      timeOnSiteSeconds:Number(event.properties?.durationSeconds || 0)
-    });
-  });
-  const liveSessions = [...liveBySession.values()];
+  const liveSessions = currentMockLiveSessions();
   return {
     generatedAt:new Date().toISOString(), rangeDays:days, storage:{eventCount:rangeEvents.length},
     overview:{liveVisitors:liveSessions.length,sessions,productViews:counts("product_view"),favorites:counts("favorite"),shares:counts("share"),addToCart:counts("add_to_cart"),checkouts:counts("checkout"),purchases,revenue,cardRevenue:0,nequiRevenue:revenue,conversionRate:purchases/sessions,averageOrderValue:purchases?revenue/purchases:0,abandonedCarts:Math.max(0,counts("checkout")-purchases),monthlyGrowth:0,inventorySpend:0,costOfGoodsSold:0,remainingInventoryValue:0,grossProfit:revenue,grossMarginPercent:100,adSpend:0,customerAcquisitionCost:0},
@@ -407,7 +437,7 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/store-owner/summary") return sendJson(response,200,{ok:true,summary:{products:mockProducts.length,orders:mockOrders.length,inventory:mockInventory().length}}) || true;
   if (request.method === "GET" && url.pathname === "/api/inventory") return sendJson(response,200,{ok:true,inventory:mockInventory(),showcases:{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
-  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); const data=mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders); data.hotProducts=await interpretHotProducts(hotProductCandidates(stored.events)); return sendJson(response,200,data) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); const data=mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders); data.hotProducts=await interpretHotProducts(hotProductCandidates(stored.events)); return sendJson(response,200,data) || true; } catch(error) { const data=mockAnalytics(url.searchParams.get("days"),mockEvents,mockOrders); data.hotProducts=await interpretHotProducts(hotProductCandidates(mockEvents)); data.storage={...data.storage,persistent:false}; return sendJson(response,200,data) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
   if (request.method === "GET" && url.pathname === "/api/store-owner/network") { try { const partners=await networkRequest("cajamoda_network_partners?select=*&order=created_at.desc"); return sendJson(response,200,{ok:true,partners}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && /^\/api\/store-owner\/network\/[0-9a-f-]+\/catalog$/.test(url.pathname)) { try { const supplierId=url.pathname.split("/")[4]; const limit=Math.min(100,Math.max(10,Number(url.searchParams.get("limit")) || 10)); const offset=Math.max(0,Number(url.searchParams.get("offset")) || 0); const products=await networkRequest(`cajamoda_supplier_catalog?select=*&supplier_id=eq.${encodeURIComponent(supplierId)}&order=updated_at.desc&offset=${offset}&limit=${limit}`); return sendJson(response,200,{ok:true,products,limit,offset}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
@@ -415,7 +445,7 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "POST" && url.pathname === "/api/store-owner/network/prepare") { const body=await readBody(request); return sendJson(response,200,{ok:true,draft:await prepareNetworkPartner(body?.instruction)}) || true; }
   if (request.method === "POST" && url.pathname === "/api/store-owner/network") { try { const body=await readBody(request); const partner=await createNetworkPartner(body,request); return sendJson(response,201,{ok:true,partner}) || true; } catch(error) { return sendJson(response,400,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/partner/invite") { try { const token=String(url.searchParams.get("token") || ""); const hash=crypto.createHash("sha256").update(token).digest("hex"); const rows=await networkRequest(`cajamoda_network_partners?select=id,partner_type,business_name,shell_type,connection_type,status,readiness&invite_token_hash=eq.${hash}`); if(!rows?.length) return sendJson(response,404,{ok:false,error:"This invitation is invalid or no longer available."}) || true; return sendJson(response,200,{ok:true,partner:rows[0]}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
-  if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); const events=Array.isArray(body?.events)?body.events:[]; try { await writeTestRows("cajamoda_test_analytics_events",events.map(storedEvent)); return sendJson(response,202,{ok:true,accepted:events.length,persistent:true}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); const events=Array.isArray(body?.events)?body.events:[]; mockEvents.push(...events); if(mockEvents.length>5000) mockEvents.splice(0,mockEvents.length-5000); updateMockLiveSessions(events); try { await writeTestRows("cajamoda_test_analytics_events",events.map(storedEvent)); return sendJson(response,202,{ok:true,accepted:events.length,persistent:true}) || true; } catch(error) { return sendJson(response,202,{ok:true,accepted:events.length,persistent:false}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
   if (request.method === "GET" && url.pathname === "/api/delivery/departments") return sendJson(response,200,{ok:true,departments:[{code:"BOL",name:"Bolívar"}]}) || true;
   if (request.method === "GET" && url.pathname === "/api/delivery/cities") return sendJson(response,200,{ok:true,state:"BOL",cities:[{name:"Cartagena de Indias",daneCode:"13001"}]}) || true;
