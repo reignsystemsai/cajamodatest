@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const API_BASE = "https://cajamoda-storeload-api.onrender.com";
+  const API_BASE = "";
   const TOKEN_KEY = "cajamoda-store-loader-token";
   const colors = {
     views: "#7f8dff",

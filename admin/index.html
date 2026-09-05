@@ -3732,8 +3732,9 @@ img{
 
   "use strict";
 
-  const API_BASE =
-    "https://cajamoda-storeload-api.onrender.com";
+  const API_BASE = "";
+
+  const TEST_MODE = true;
 
   const AUTH_STORAGE_KEY =
     "cajamoda-store-loader-token";
@@ -3954,8 +3955,7 @@ img{
      API
      ============================================================ */
 
-  let authToken =
-    readToken();
+  let authToken = TEST_MODE ? "cajamoda-test" : readToken();
 
   let ownerProfile = null;
   let ownerSummary = null;
@@ -6859,9 +6859,7 @@ function renderInventory(){
 
   renderAll();
 
-if(
-  authToken
-){
+if(authToken){
 
   hideLogin();
 

@@ -12,22 +12,18 @@ import { redirects } from "@wix/redirects";
 const CLIENT_ID =
   import.meta.env.VITE_WIX_CLIENT_ID;
 
+const TEST_MODE = !CLIENT_ID;
+
 const WIX_STORES_APP_ID =
   "215238eb-22a5-4c36-9e7b-e7c08025e04e";
 
 const CATEGORY_ROUTER_URL =
   import.meta.env
     .VITE_CATEGORY_ROUTER_URL ||
-  "https://cajamoda-storeload-api.onrender.com/api/category-routes";
+  "/api/category-routes";
 
 const SESSION_KEY =
   "wixSession";
-
-if (!CLIENT_ID) {
-  throw new Error(
-    "VITE_WIX_CLIENT_ID is missing."
-  );
-}
 
 /* ============================================================
    STORAGE
@@ -100,7 +96,7 @@ const storedTokens =
    WIX CLIENT
    ============================================================ */
 
-const wix =
+const wix = TEST_MODE ? null :
   createClient({
     modules: {
       products,
@@ -2124,6 +2120,13 @@ async function loadReviewData(products) {
 }
 
 async function loadCatalog() {
+  if (TEST_MODE) {
+    const result = await fetch("/api/test/catalog").then(response => response.json());
+    catalog = Array.isArray(result?.products) ? result.products : [];
+    lastCart = readBestLocalCart();
+    sendInit();
+    return;
+  }
   const [
     productResult,
     collectionResult,
@@ -2386,6 +2389,18 @@ async function createPaymentCheckout(
   payload
 ) {
   try {
+    if (TEST_MODE) {
+      const cart = normalizeLocalCart(payload?.cart || readBestLocalCart());
+      const response = await fetch("/api/test/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cart, customer: payload?.customer || {} })
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result?.error || "No pudimos crear el pedido de prueba.");
+      send("CHECKOUT_URL", { url: result.url, checkoutId: result.orderNumber });
+      return;
+    }
     const suppliedCart =
       normalizeLocalCart(
         payload?.cart
@@ -2859,7 +2874,7 @@ async function start() {
     across Home, Product and Checkout.
   */
 
-  await prepareVisitorSession();
+  if (!TEST_MODE) await prepareVisitorSession();
 
   await loadCatalog();
 }

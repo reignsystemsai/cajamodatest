@@ -66,6 +66,59 @@ const DIST_ROOT =
     "dist"
   );
 
+const TEST_MODE = !process.env.WIX_API_KEY && !process.env.WIX_SITE_ID;
+
+const mockProducts = [
+  { id:"test-dress-001", masterProductId:"test-dress-001", source:"test", name:"Vestido Aurora", productType:"Vestido", vibeId:"sun", vibes:["sun"], price:129900, media:["/assets/category-sol.svg"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-dress-001-${size}`,productId:"test-dress-001",size,color:"Coral",sku:`P-AUR-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:129900,inStock:true,inventoryQuantity:8-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:21,description:"Vestido ligero de prueba para validar la experiencia CajaModa.",reviews:[] },
+  { id:"test-set-002", masterProductId:"test-set-002", source:"test", name:"Set Noche", productType:"Conjunto", vibeId:"late", vibes:["late"], price:159900, media:["/assets/category-noches.svg"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-set-002-${size}`,productId:"test-set-002",size,color:"Negro",sku:`P-NOC-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:159900,inStock:true,inventoryQuantity:5-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:12,description:"Conjunto elegante de prueba para noches especiales.",reviews:[] },
+  { id:"test-top-003", masterProductId:"test-top-003", source:"test", name:"Top Brisa", productType:"Top", vibeId:"chill", vibes:["chill"], price:69900, media:["/assets/category-dias.svg"], sizes:["S","M","L"], variants:["S","M","L"].map((size,index)=>({id:`test-top-003-${size}`,productId:"test-top-003",size,color:"Marfil",sku:`P-BRI-${size}`,deliveryMode:"pickup",deliveryModes:["pickup"],price:69900,inStock:true,inventoryQuantity:10-index})), deliveryMode:"pickup",deliveryModes:["pickup"],inventoryMode:"STOCKED",inventoryStatus:"AVAILABLE",inventoryQuantity:27,description:"Top versátil de prueba para looks de día.",reviews:[] }
+];
+
+const mockOrders = [];
+const mockEvents = [];
+
+function mockInventory() {
+  return mockProducts.flatMap(product => product.variants.map(variant => ({
+    id:variant.id, productId:product.id, productName:product.name, variantId:variant.id,
+    variantName:variant.size, sku:variant.sku, quantity:variant.inventoryQuantity,
+    price:product.price, image:product.media[0], category:product.vibeId, visible:true
+  })));
+}
+
+function mockAnalytics() {
+  const counts = type => mockEvents.filter(event => event.eventType === type).length;
+  const purchases = mockOrders.length;
+  const revenue = mockOrders.reduce((sum, order) => sum + Number(order.total || 0), 0);
+  const sessions = Math.max(1, new Set(mockEvents.map(event => event.sessionId).filter(Boolean)).size);
+  return {
+    generatedAt:new Date().toISOString(), storage:{eventCount:mockEvents.length},
+    overview:{liveVisitors:1,sessions,productViews:counts("product_view"),favorites:counts("favorite"),shares:counts("share"),addToCart:counts("add_to_cart"),checkouts:counts("checkout"),purchases,revenue,cardRevenue:0,nequiRevenue:revenue,conversionRate:purchases/sessions,averageOrderValue:purchases?revenue/purchases:0,abandonedCarts:Math.max(0,counts("checkout")-purchases),monthlyGrowth:0,inventorySpend:0,costOfGoodsSold:0,remainingInventoryValue:0,grossProfit:revenue,grossMarginPercent:100,adSpend:0,customerAcquisitionCost:0},
+    timeseries:[], channels:[{channel:"direct",sessions,purchases,revenue}],
+    funnel:[{key:"view",label:"Product views",value:counts("product_view")},{key:"cart",label:"Added to bag",value:counts("add_to_cart")},{key:"checkout",label:"Checkout",value:counts("checkout")},{key:"purchase",label:"Purchase",value:purchases}],
+    topProducts:mockProducts.map(product=>({productId:product.id,name:product.name,image:product.media[0],views:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="product_view").length,favorites:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="favorite").length,shares:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="share").length,addToCart:mockEvents.filter(event=>event.productId===product.id&&event.eventType==="add_to_cart").length,checkouts:0,purchases:0})),
+    realtime:{visitors:[{sessionId:"test-session",page:"storefront",action:"Testing",city:"Cartagena",timeOnSiteSeconds:90}]}, campaigns:[], settings:{month:new Date().toISOString().slice(0,7),adSpendWhatsapp:0,adSpendInstagram:0,adSpendTiktok:0,inventorySpend:0}
+  };
+}
+
+async function handleMockRequest(request,response,url) {
+  if (!TEST_MODE) return false;
+  if (request.method === "GET" && url.pathname === "/api/test/catalog") return sendJson(response,200,{ok:true,testMode:true,products:mockProducts}) || true;
+  if (request.method === "GET" && url.pathname === "/api/category-routes") return sendJson(response,200,{ok:true,routes:{},showcaseSlots:{}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/reviews") return sendJson(response,200,{ok:true,reviews:{},summaries:{}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/profile") return sendJson(response,200,{ok:true,profile:{role:"admin",storeId:"cajamodatest",storeName:"CajaModa Test",ownerName:"Test Workspace",commissionPercent:0,entryPath:"/admin/"}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/summary") return sendJson(response,200,{ok:true,summary:{products:mockProducts.length,orders:mockOrders.length,inventory:mockInventory().length}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/inventory") return sendJson(response,200,{ok:true,inventory:mockInventory(),showcases:{}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") return sendJson(response,200,mockAnalytics()) || true;
+  if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
+  if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); mockEvents.push(...(Array.isArray(body?.events)?body.events:[])); return sendJson(response,202,{ok:true,accepted:Array.isArray(body?.events)?body.events.length:0}) || true; }
+  if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
+  if (request.method === "POST" && url.pathname === "/api/checkout/validate") return sendJson(response,200,{ok:true,valid:true}) || true;
+  if (request.method === "POST" && url.pathname === "/api/delivery/quote") return sendJson(response,200,{ok:true,quoteToken:"test-quote",quote:{method:"pickup",fee:0,title:"Prueba: recoger en punto"}}) || true;
+  if (request.method === "POST" && ["/api/test/checkout","/api/nequi/orders"].includes(url.pathname)) { const body=await readBody(request); const number=`TEST-${String(mockOrders.length+1).padStart(4,"0")}`; const order={id:number,orderNumber:number,date:new Date().toISOString(),status:"paid-test",paymentMethod:"test",total:Number(body?.cart?.total||0),items:body?.cart?.items||[],customer:body?.customer||{},source:"test",canConfirmPayment:false}; mockOrders.unshift(order); mockEvents.push({eventType:"purchase",sessionId:body?.analytics?.sessionId||"test-session",value:order.total}); return sendJson(response,201,{ok:true,orderNumber:number,url:`/order-confirmation/?nequiOrder=${encodeURIComponent(number)}`,testMode:true}) || true; }
+  return false;
+}
+
 const WIX_API_KEY =
   process.env.WIX_API_KEY;
 
@@ -6846,6 +6899,10 @@ const server =
         );
 
       try {
+
+        if (await handleMockRequest(request, response, url)) {
+          return;
+        }
 
         /* ------------------------------------------------------
            HEALTH
