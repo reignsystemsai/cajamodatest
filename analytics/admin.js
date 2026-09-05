@@ -10,7 +10,9 @@
   };
   let currentData = null;
   let days = 30;
-  let sortKey = "views";
+  let sortKey = "overall";
+  let sortDirection = "desc";
+  let showAllProducts = false;
   let pollTimer = null;
   let loading = false;
   let drawToken = 0;
@@ -212,15 +214,20 @@
     const body = $("analyticsProductRows");
     if (!body || !currentData) return;
     qsa("[data-product-sort]").forEach(header => {
-      header.classList.toggle("sorted", header.dataset.productSort === sortKey);
+      header.classList.toggle("sorted", header.dataset.productSort === sortKey && header.dataset.sortDirection === sortDirection);
     });
-    const products = [...(currentData.topProducts || [])]
+    const allProducts = [...(currentData.topProducts || [])]
       .sort((left, right) => {
-        if (sortKey === "name") return String(left.name).localeCompare(String(right.name));
-        return Number(right[sortKey] || 0) - Number(left[sortKey] || 0) ||
-          Number(right.views || 0) - Number(left.views || 0);
-      })
-      .slice(0, 10);
+        const score = product => ["views", "favorites", "shares", "addToCart", "checkouts", "purchases"]
+          .reduce((total, key) => total + Number(product[key] || 0), 0);
+        const leftValue = sortKey === "overall" ? score(left) : Number(left[sortKey] || 0);
+        const rightValue = sortKey === "overall" ? score(right) : Number(right[sortKey] || 0);
+        const result = sortDirection === "asc" ? leftValue - rightValue : rightValue - leftValue;
+        return result || Number(right.views || 0) - Number(left.views || 0) || String(left.name).localeCompare(String(right.name));
+      });
+    const products = showAllProducts ? allProducts : allProducts.slice(0, 10);
+    const showAllButton = $("analyticsShowAll");
+    if (showAllButton) showAllButton.textContent = showAllProducts ? "Show top 10" : `Show all (${allProducts.length})`;
     body.innerHTML = products.length ? products.map(product => {
       const image = product.image
         ? '<img src="' + escapeHtml(product.image) + '" alt="" loading="lazy">'
@@ -432,9 +439,14 @@
   });
   qsa("[data-product-sort]").forEach(header => {
     header.addEventListener("click", () => {
-      sortKey = header.dataset.productSort || "views";
+      sortKey = header.dataset.productSort || "overall";
+      sortDirection = header.dataset.sortDirection || "desc";
       renderProducts();
     });
+  });
+  $("analyticsShowAll")?.addEventListener("click", () => {
+    showAllProducts = !showAllProducts;
+    renderProducts();
   });
   $("analyticsRefresh")?.addEventListener("click", () => load(true));
   $("analyticsSaveSettings")?.addEventListener("click", saveSettings);
