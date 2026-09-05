@@ -445,12 +445,7 @@
     root.dataset.organized = "true";
     root.className = "analyticsMetricGroups";
     const groups = [
-      ["Marketing", ["analyticsShares"]],
-      ["Sales and Revenue", ["analyticsPurchases", "analyticsRevenue", "analyticsAov", "analyticsGrowth"]],
-      ["Customers and Conversion", ["analyticsCheckouts", "analyticsConversion", "analyticsAbandoned"]],
-      ["Inventory and Profit", ["analyticsInventorySpend", "analyticsCogs", "analyticsInventoryValue", "analyticsGrossProfit"]],
-      ["Product Performance", ["analyticsViews", "analyticsFavorites", "analyticsCart"]],
-      ["Live Activity", ["analyticsLiveVisitors"]]
+      ["Sales and Revenue", ["analyticsPurchases", "analyticsRevenue", "analyticsAov", "analyticsGrowth"]]
     ];
     groups.forEach(([label, ids], index) => {
       const details = document.createElement("details");
