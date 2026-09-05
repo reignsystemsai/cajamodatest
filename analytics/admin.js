@@ -409,6 +409,13 @@
     pollTimer = null;
   }
 
+  function refreshWhenVisible() {
+    if ($("panel-analytics")?.classList.contains("active") && document.visibilityState === "visible") load(true);
+  }
+
+  window.addEventListener("focus", refreshWhenVisible);
+  document.addEventListener("visibilitychange", refreshWhenVisible);
+
   async function saveSettings() {
     const button = $("analyticsSaveSettings");
     if (button) {
