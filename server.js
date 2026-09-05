@@ -70,6 +70,7 @@ const TEST_MODE = !process.env.WIX_API_KEY && !process.env.WIX_SITE_ID;
 
 const TEST_SUPABASE_URL = process.env.TEST_SUPABASE_URL || "https://ycubkfktdqcanbunhzhl.supabase.co";
 const TEST_SUPABASE_KEY = process.env.TEST_SUPABASE_PUBLISHABLE_KEY || "";
+const TEST_SUPABASE_SECRET_KEY = process.env.TEST_SUPABASE_SECRET_KEY || "";
 const TEST_ANALYTICS_ACCESS_KEY = process.env.TEST_ANALYTICS_ACCESS_KEY || "";
 
 function testSupabaseHeaders(extra = {}) {
@@ -107,6 +108,57 @@ async function writeTestRows(table, rows) {
     body:JSON.stringify(rows)
   });
   if (!response.ok) throw new Error(`Test analytics storage write failed (${response.status}).`);
+}
+
+function networkSupabaseHeaders(extra = {}) {
+  if (!TEST_SUPABASE_SECRET_KEY) throw new Error("Network onboarding storage is not configured.");
+  return {apikey:TEST_SUPABASE_SECRET_KEY,Authorization:`Bearer ${TEST_SUPABASE_SECRET_KEY}`,"Content-Type":"application/json",...extra};
+}
+
+async function networkRequest(path, options = {}) {
+  const response = await fetch(`${TEST_SUPABASE_URL}/rest/v1/${path}`,{...options,headers:networkSupabaseHeaders(options.headers || {})});
+  const text = await response.text();
+  if (!response.ok) throw new Error(`Network onboarding storage failed (${response.status}).`);
+  return text ? JSON.parse(text) : null;
+}
+
+async function prepareNetworkPartner(input = "") {
+  const message = String(input || "").trim().slice(0,3000);
+  const lower = message.toLowerCase();
+  const fallback = {partnerType:lower.includes("supplier") ? "supplier" : "vendor",businessName:"",contactName:"",contactChannel:"",connectionType:lower.includes("api") ? "api" : lower.includes("catalog") || lower.includes("feed") ? "live_catalog" : lower.includes("supplier") ? "cajamoda_portal" : "invite",location:"",notes:message};
+  const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
+  if (!apiKey || !message) return fallback;
+  try {
+    const response = await fetch("https://api.openai.com/v1/responses",{method:"POST",headers:{Authorization:`Bearer ${apiKey}`,"Content-Type":"application/json"},body:JSON.stringify({model:process.env.OPENAI_ANALYTICS_MODEL || "gpt-4.1-mini",input:`Convert this CajaModa onboarding instruction into one JSON object only. Keys: partnerType (vendor or supplier), businessName, contactName, contactChannel, connectionType (invite, api, live_catalog, or cajamoda_portal), location, notes. Never invent names or contact details. Instruction: ${message}`,max_output_tokens:450})});
+    const result = await response.json();
+    const output = result?.output_text || (result?.output || []).flatMap(item=>item?.content || []).map(item=>item?.text || "").join(" ");
+    return {...fallback,...JSON.parse(String(output).replace(/^```json\s*|\s*```$/g,""))};
+  } catch { return fallback; }
+}
+
+async function sendNetworkConfirmationEmail(partner,inviteUrl) {
+  const resendKey=String(process.env.RESEND_API_KEY || "").trim();
+  const email=String(partner.contact_channel || "").trim();
+  if(!resendKey || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+  const response=await fetch("https://api.resend.com/emails",{method:"POST",headers:{Authorization:`Bearer ${resendKey}`,"Content-Type":"application/json"},body:JSON.stringify({from:process.env.NETWORK_FROM_EMAIL || "CajaModa <onboarding@cajamoda.com>",to:[email],subject:"You’re connected to CajaModa",html:`<div style="font-family:Arial,sans-serif;color:#111;max-width:620px;margin:auto;padding:32px"><div style="letter-spacing:4px;font-weight:700">CAJAMODA</div><h1 style="font-size:38px;line-height:1;margin:38px 0 16px">You’re connected.</h1><p>${String(partner.business_name || "Your business").replace(/[<>&]/g,"")} now has a prepared ${String(partner.shell_type || "partner").replaceAll("_"," ")} inside the CajaModa commerce network.</p><p><a href="${inviteUrl}" style="display:inline-block;margin-top:18px;padding:14px 20px;border-radius:12px;background:#111;color:#fff;text-decoration:none;font-weight:700">Open your private CajaModa shell</a></p><p style="margin-top:30px;color:#777;font-size:12px">This private link is intended only for the invited business.</p></div>`})});
+  if(!response.ok) throw new Error("The shell was created, but the connection email could not be sent.");
+  return true;
+}
+
+async function createNetworkPartner(body = {}, request) {
+  const partnerType = body.partnerType === "supplier" ? "supplier" : "vendor";
+  const connectionType = ["api","live_catalog","cajamoda_portal"].includes(body.connectionType) ? body.connectionType : "invite";
+  const shellType = partnerType === "vendor" ? "vendor" : connectionType === "api" ? "api_supplier" : connectionType === "live_catalog" ? "catalog_supplier" : "portal_supplier";
+  const token = crypto.randomBytes(24).toString("hex");
+  const readiness = {shellLoaded:true,permissionsIsolated:true,loginRouteReady:true,productPublishingLocked:true,connectionReady:connectionType === "invite" || connectionType === "cajamoda_portal"};
+  const ready = Boolean(String(body.businessName || "").trim() && String(body.contactChannel || "").trim() && Object.values(readiness).every(Boolean));
+  const row = {partner_type:partnerType,business_name:String(body.businessName || "").trim().slice(0,200),contact_name:String(body.contactName || "").trim().slice(0,160) || null,contact_channel:String(body.contactChannel || "").trim().slice(0,240) || null,shell_type:shellType,connection_type:connectionType,status:ready ? "ready_to_invite" : "needs_attention",readiness,connection_config:{location:String(body.location || "").trim().slice(0,200),notes:String(body.notes || "").trim().slice(0,1000)},invite_token_hash:crypto.createHash("sha256").update(token).digest("hex")};
+  if (!row.business_name) throw new Error("Business name is required.");
+  const created = await networkRequest("cajamoda_network_partners",{method:"POST",headers:{Prefer:"return=representation"},body:JSON.stringify(row)});
+  const host = String(request.headers.host || "cajamodatest.onrender.com");
+  const inviteUrl=`${request.headers["x-forwarded-proto"] || "https"}://${host}/partner/?invite=${token}`;
+  const confirmationEmailSent=ready ? await sendNetworkConfirmationEmail(created[0],inviteUrl) : false;
+  return {...created[0],inviteUrl,confirmationEmailSent};
 }
 
 function storedEvent(event = {}) {
@@ -281,6 +333,10 @@ async function handleMockRequest(request,response,url) {
   if (request.method === "GET" && url.pathname === "/api/orders") return sendJson(response,200,{ok:true,orders:mockOrders}) || true;
   if (request.method === "GET" && url.pathname === "/api/store-owner/analytics") { try { const stored=await loadStoredMockAnalytics(url.searchParams.get("days")); const data=mockAnalytics(url.searchParams.get("days"),stored.events,stored.orders); data.hotProducts=await interpretHotProducts(hotProductCandidates(stored.events)); return sendJson(response,200,data) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/store-owner/analytics/settings") return sendJson(response,200,{ok:true,settings:(await readBody(request))||{}}) || true;
+  if (request.method === "GET" && url.pathname === "/api/store-owner/network") { try { const partners=await networkRequest("cajamoda_network_partners?select=*&order=created_at.desc"); return sendJson(response,200,{ok:true,partners}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
+  if (request.method === "POST" && url.pathname === "/api/store-owner/network/prepare") { const body=await readBody(request); return sendJson(response,200,{ok:true,draft:await prepareNetworkPartner(body?.instruction)}) || true; }
+  if (request.method === "POST" && url.pathname === "/api/store-owner/network") { try { const body=await readBody(request); const partner=await createNetworkPartner(body,request); return sendJson(response,201,{ok:true,partner}) || true; } catch(error) { return sendJson(response,400,{ok:false,error:error.message}) || true; } }
+  if (request.method === "GET" && url.pathname === "/api/partner/invite") { try { const token=String(url.searchParams.get("token") || ""); const hash=crypto.createHash("sha256").update(token).digest("hex"); const rows=await networkRequest(`cajamoda_network_partners?select=id,partner_type,business_name,shell_type,connection_type,status,readiness&invite_token_hash=eq.${hash}`); if(!rows?.length) return sendJson(response,404,{ok:false,error:"This invitation is invalid or no longer available."}) || true; return sendJson(response,200,{ok:true,partner:rows[0]}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "POST" && url.pathname === "/api/analytics/events") { const body=await readBody(request); const events=Array.isArray(body?.events)?body.events:[]; try { await writeTestRows("cajamoda_test_analytics_events",events.map(storedEvent)); return sendJson(response,202,{ok:true,accepted:events.length,persistent:true}) || true; } catch(error) { return sendJson(response,503,{ok:false,error:error.message}) || true; } }
   if (request.method === "GET" && url.pathname === "/api/checkout/config") return sendJson(response,200,{ok:true,testMode:true,stripe:{publishableKey:""},nequi:{phone:"3000000000",masked:"300 000 0000 (PRUEBA)"}}) || true;
   if (request.method === "GET" && url.pathname === "/api/delivery/departments") return sendJson(response,200,{ok:true,departments:[{code:"BOL",name:"Bolívar"}]}) || true;

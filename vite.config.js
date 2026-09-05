@@ -33,6 +33,7 @@ export default defineConfig({
         checkout: resolve(import.meta.dirname, "checkout/index.html"),
         orderConfirmation: resolve(import.meta.dirname, "order-confirmation/index.html"),
         admin: resolve(import.meta.dirname, "admin/index.html"),
+        partner: resolve(import.meta.dirname, "partner/index.html"),
       },
     },
   },
